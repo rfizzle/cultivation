@@ -22,7 +22,7 @@ The motif object is a **bound wheat sheaf with crossed farm tools** — a scythe
 
 **Full logo (`art/logo.png`, 3172×1344):** Pixel art per the Concord stone-frame formula. A dark moss-green stone brickwork frame, its lower course breaking into tilled-earth furrows with small green sprouts. Centered, a golden wheat sheaf bound with twine, glowing warm amber, with two wooden-handled farm tools crossed behind it — the upper blade a curved scythe. Scattered grains and a leaf sprig catch the glow. Below the frame, "CULTIVATION" in blocky pixel type in the amber gradient with "MINECRAFT AGRICULTURE OVERHAUL" as the subtitle. The frame sits in a wide pixel farmstead panorama under a sunset-amber sky: striped carrot, potato, and wheat fields, composters, grazing farm animals, a farmhouse with silo, trees and mountains — background scenery only, no second motif.
 
-**Icon (`art/icon-128.png`):** The bound wheat sheaf isolated — golden stalks, twine band, two small leaf sprigs at the base — with a warm amber glow against a dark/transparent background. Reads cleanly at 128×128.
+**Icon (`art/icon-128.png`, from `art/icon-128.glyph`):** The bound wheat sheaf isolated — three fanned wheat heads over a twine band, stalks flaring to a flat-cut base, a small leaf sprig at each foot — with a faint warm glow, on a transparent background. Authored at 32px native and integer-laddered to the 128 and 512 masters.
 
 **Glyph (`art/glyphs/sheaf-16.glyph`):** A 16×16 pixel wheat sheaf — three golden wheat heads fanned above a pale twine band, a small leaf sprig at the base, `ink` outline — for Jade/WTHIT and recipe-viewer contexts. Cultivation has no HUD slot (§2 below), so this glyph never renders as a HUD element.
 
@@ -75,9 +75,7 @@ Asset-family judgments (the suite stance: custom where it earns its place, vanil
 
 > Pixel art logo for a Minecraft mod named "CULTIVATION". A dark stone brickwork frame in near-black mossy greens (#101a0a, #1c2e10), the bottom course of bricks breaking into tilled soil furrows (#3E2A18) with small green sprouts (#7CB342, #A5D66A). Centered inside the frame: a bound sheaf of golden wheat (#D9A441) tied with twine, glowing warm amber (#EDC35C), with a scythe and a hoe crossed diagonally behind it on wooden handles, the scythe's curved blade at the upper right. A few floating grains and a leaf sprig catch the glow. Below the frame, "CULTIVATION" in a chunky blocky pixel font with a gold-to-amber gradient (#D9A441 → #EDC35C), and beneath it "MINECRAFT AGRICULTURE OVERHAUL" in small pixel type. Behind and around the frame, a wide pixel farmstead panorama under a sunset-amber sky: striped carrot, potato, and wheat fields, composters, a few grazing farm animals, a farmhouse with a silo, trees and distant mountains. Crisp pixel-art style, limited palette, no anti-aliasing.
 
-**Icon 128×128 (Gemini):**
-
-> Pixel art icon, 128×128, for a Minecraft mod: a bound sheaf of golden wheat (#D9A441) tied with a twine band, two small green leaf sprigs (#7CB342) at its base, glowing warm amber (#EDC35C) against a dark background (#0a0a0a). Centered, chunky pixels, limited palette, no anti-aliasing, no text.
+**Icon:** not Gemini-generated — the mod icon is a glyph-pipeline master (`art/icon-128.glyph`, 32px native, integer-laddered to the 128 and 512 masters), so its source of truth is the committed spec, not a prompt.
 
 Pixel-art sources (glyph, item sprites, effect icons, soil overlays) are `.glyph` files under `art/` — authored through the glyph pipeline, referenced from `ASSETS.md`, never duplicated here.
 
@@ -85,7 +83,7 @@ Pixel-art sources (glyph, item sprites, effect icons, soil overlays) are `.glyph
 
 ## 5. Image References
 
-Exploration renders, rejected variants, and reference shots live in `art/exploration/`. None committed yet; the first logo-generation round seeds it.
+Exploration renders, rejected variants, and generation prompts live in `art/exploration/` (currently `logo-prompt.md`, mirroring the §4 logo prompt).
 
 ---
 

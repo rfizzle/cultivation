@@ -60,3 +60,8 @@ art/audio/**/*.ogg
 art/audio/**/*.wav
 art/audio/**/*.report.png
 # concord:gitignore:end
+
+# Repo-specific: glyph preview renders beside art/-root masters (the masters
+# themselves — icon-128.png, icon-512.png, logo.png — are committed).
+art/*@*x.png
+art/*@*x-anim.png

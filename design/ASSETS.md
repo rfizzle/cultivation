@@ -12,8 +12,10 @@
 
 | Asset | Source | Final / derived copies |
 |---|---|---|
-| Full logo | Gemini (prompt in `DESIGN.md` §4) | `art/logo.png` (master, 3172×1344) → `site/assets/logo.png` (1600w web copy), README embed |
+| Full logo | Gemini (prompt in `DESIGN.md` §4, mirrored in `art/exploration/logo-prompt.md`) | `art/logo.png` (master, 3172×1344) → `site/assets/logo.png` (1600w web copy), README embed |
 | OG image | derived from `art/logo.png` (1200×630, centered on Ink) | `site/assets/og-image.png` |
+| Mod icon | `art/icon-128.glyph` (32px native, ×4 ladder) | `art/icon-128.png` (128 master; `fabric.mod.json` icon when the jar exists) |
+| Mod icon 512 | derived from `art/icon-128.glyph` (×16 ladder) | `art/icon-512.png` → `site/assets/icon.png` (512), `site/assets/apple-touch-icon.png` (180) |
 
 ## In-game pixel art
 
@@ -37,6 +39,4 @@ implementation (no `src/main/resources/` tree exists yet).
 
 | Asset | Intended source | Destination |
 |---|---|---|
-| Mod icon 128×128 | Gemini (prompt in `DESIGN.md` §4) or `/glyph` size ladder | `art/icon-128.png` → `site/assets/icon.png`, `fabric.mod.json` icon — (planned, branding) |
-| Favicon set | derived from icon-128 | `site/assets/favicon.ico`, `favicon-32.png`, `apple-touch-icon.png` — (planned, branding) |
 | Sheaf glyph web copy | rendered from `art/glyphs/sheaf-16.glyph` | `site/assets/glyph-16.png` — (planned, with site assets) |
