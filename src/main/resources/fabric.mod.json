@@ -1,0 +1,40 @@
+{
+    "schemaVersion": 1,
+    "id": "cultivation",
+    "version": "${version}",
+    "name": "Cultivation",
+    "description": "An agriculture overhaul for Minecraft. Living soil that tires under harvest and recovers when rested, rotation and polyculture bonuses, dietary variety, meal buffs, high-tier hoe tilling, composter Fertilizer, and a 3x3 scythe.",
+    "authors": ["rfizzle"],
+    "contact": {
+        "homepage": "https://cultivation.rfizzle.com",
+        "sources": "https://github.com/rfizzle/cultivation",
+        "issues": "https://github.com/rfizzle/cultivation/issues"
+    },
+    "license": "MIT",
+    "icon": "assets/cultivation/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": ["com.rfizzle.cultivation.Cultivation"],
+        "client": ["com.rfizzle.cultivation.client.CultivationClient"],
+        "fabric-gametest": [
+            "com.rfizzle.cultivation.gametest.SmokeGameTest"
+        ]
+    },
+    "suggests": {
+        "modmenu": "*",
+        "jade": "*",
+        "wthit": "*",
+        "emi": "*",
+        "roughlyenoughitems": "*",
+        "jei": "*"
+    },
+    "mixins": [
+        "cultivation.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=0.16.10",
+        "minecraft": "~1.21.1",
+        "java": ">=21",
+        "fabric-api": "*"
+    }
+}
