@@ -1,0 +1,64 @@
+{
+  "type": "home",
+  "nav": "Home",
+  "metaTitle": "Cultivation — Agriculture Overhaul for Minecraft",
+  "metaDescription": "Cultivation is a Minecraft 1.21.1 Fabric mod that makes farming a practice instead of a chore: living soil that tires and recovers, a polyculture growth bonus, dietary variety, meal buffs, and a 3×3 scythe.",
+  "ogTitle": "Cultivation — Agriculture Overhaul for Minecraft",
+  "ogDescription": "An agriculture overhaul for Minecraft 1.21.1 Fabric. Living soil, crop rotation, dietary variety, meal buffs, high-tier hoes, Fertilizer, and the Scythe.",
+  "hero": {
+    "lede": "Worth growing.",
+    "sub": "Cultivation makes farming a practice instead of a chore — soil that lives and tires, fields worth planning, food worth varying. Everything grows from vanilla crops and vanilla blocks.",
+    "buttons": [
+      { "label": "GitHub", "href": "https://github.com/rfizzle/cultivation", "primary": true, "external": true }
+    ]
+  },
+  "sections": [
+    {
+      "title": "In Development",
+      "band": true,
+      "lede": "Cultivation is fully designed and specced — implementation is underway. Nothing is released yet; everything below describes the design.",
+      "blocks": [
+        {
+          "type": "cards",
+          "mdColumns": 2,
+          "lgColumns": 4,
+          "hoverAccent": true,
+          "items": [
+            {
+              "icon": "&#127806;",
+              "title": "Living Soil",
+              "html": ["Every farmland block carries its own fertility — draining under harvest, halved by rotation, recovering over three days of fallow. Tired soil turns visibly pale and cracked."]
+            },
+            {
+              "icon": "&#127859;",
+              "title": "A Varied Table",
+              "html": ["Eating the same food again and again dulls it, down to half effect. Three different foods reset the fatigue — and the crafted stews finally repay the bowl with 2-minute buffs."]
+            },
+            {
+              "icon": "&#129689;",
+              "title": "Invested Farmland",
+              "html": ["Diamond and netherite hoes till farmland with a permanent bonus-drop chance, and the composter produces Fertilizer — one dose, +1 yield on every harvest, forever."]
+            },
+            {
+              "icon": "&#9986;&#65039;",
+              "title": "The Scythe",
+              "html": ["Iron, diamond, and netherite. One swing harvests and replants a full 3×3 — large-scale manual farming as rhythm instead of tedium."]
+            }
+          ]
+        },
+        {
+          "type": "note",
+          "html": "Also in the design: a 20% polyculture growth bonus for alternating-row fields, and villager farmers that rotate crops and rest tired ground. Read the full promise in <a href='https://github.com/rfizzle/cultivation/blob/master/design/VISION.md' class='text-accent hover:text-accent2 underline'>design/VISION.md</a>.",
+          "center": true
+        }
+      ]
+    },
+    {
+      "title": "Part of Concord",
+      "width": "4xl",
+      "lede": "Cultivation is a member of Concord — a modular collection of system overhauls. Install any, combine all: every mod stands entirely on its own, and siblings light up together without ever being required.",
+      "ledeNarrow": true,
+      "blocks": []
+    }
+  ]
+}

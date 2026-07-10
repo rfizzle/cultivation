@@ -1,0 +1,22 @@
+{
+  "id": "cultivation",
+  "name": "Cultivation",
+  "domain": "cultivation.rfizzle.com",
+  "url": "https://cultivation.rfizzle.com",
+  "description": "An agriculture overhaul for Minecraft 1.21.1 (Fabric).",
+  "metaKeywords": "Minecraft, Fabric mod, farming mod, agriculture, soil fertility, crop rotation, scythe, dietary variety, 1.21.1",
+  "github": "https://github.com/rfizzle/cultivation",
+  "defaultBranch": "master",
+  "copyright": "© 2026 rfizzle. Cultivation is not affiliated with Mojang Studios or Microsoft.",
+  "footerMeta": "Minecraft 1.21.1 · Fabric",
+  "nav": [
+    "index"
+  ],
+  "theme": {
+    "accent": "#D9A441",
+    "accentDark": "#8A6524",
+    "accent2": "#7CB342",
+    "accent2Bright": "#A5D66A",
+    "glowRgb": "217, 164, 65"
+  }
+}
