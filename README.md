@@ -1,4 +1,6 @@
-<p align="center"><h1 align="center">Cultivation</h1></p>
+<p align="center">
+  <img src="art/logo.png" alt="Cultivation" width="800">
+</p>
 
 <p align="center"><strong>Worth growing.</strong></p>
 

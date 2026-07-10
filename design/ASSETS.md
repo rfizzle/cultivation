@@ -8,6 +8,13 @@
 > `src/main/resources/` unless noted. Rendered previews under `art/glyphs/` are
 > gitignored review artifacts, not entries.
 
+## Branding masters
+
+| Asset | Source | Final / derived copies |
+|---|---|---|
+| Full logo | Gemini (prompt in `DESIGN.md` §4) | `art/logo.png` (master, 3172×1344) → `site/assets/logo.png` (1600w web copy), README embed |
+| OG image | derived from `art/logo.png` (1200×630, centered on Ink) | `site/assets/og-image.png` |
+
 ## In-game pixel art
 
 `.glyph` sources are authored and committed; the final assets ship with the
@@ -30,8 +37,6 @@ implementation (no `src/main/resources/` tree exists yet).
 
 | Asset | Intended source | Destination |
 |---|---|---|
-| Full logo | Gemini (prompt in `DESIGN.md` §4) | `art/logo.png` → `site/assets/logo.png` — (planned, branding) |
 | Mod icon 128×128 | Gemini (prompt in `DESIGN.md` §4) or `/glyph` size ladder | `art/icon-128.png` → `site/assets/icon.png`, `fabric.mod.json` icon — (planned, branding) |
-| OG image 1200×630 | composed from full logo on Ink | `site/assets/og-image.png` — (planned, branding) |
 | Favicon set | derived from icon-128 | `site/assets/favicon.ico`, `favicon-32.png`, `apple-touch-icon.png` — (planned, branding) |
 | Sheaf glyph web copy | rendered from `art/glyphs/sheaf-16.glyph` | `site/assets/glyph-16.png` — (planned, with site assets) |
