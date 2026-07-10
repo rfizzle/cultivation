@@ -25,7 +25,7 @@ Every farmland block can carry a **SoilData** record in its chunk's soil attachm
 | `fertility` | float | 100.0 | 0–100, clamped |
 | `lastCrop` | block id, optional | empty | the crop most recently harvested here (rotation memory) |
 | `enrichedChance` | int | 0 | §5 bonus-drop chance in percent (0, 10, or 15) |
-| `fertilized` | bool | false | §6 permanent +1 product |
+| `fertilizerRemaining` | int | 0 | §6 harvests left on the current Fertilizer dose (0 – `fertilizerDoseHarvests`) |
 | `lastRecoveryCheck` | long | — | game time of the last recovery accrual (lazy-recovery bookkeeping) |
 
 An **absent entry means pristine defaults** (fertility 100, no memory, no bonuses) — a world where nobody farms carries zero Cultivation data. An entry is created on first write (harvest, high-tier till, fertilize) and evicted when it returns to all-default values.
@@ -55,10 +55,10 @@ At default values, a monoculture block sustains 33 harvests from full to exhaust
 
 A block is **fallow** when it holds no crop above it. Fallow ground recovers by two equivalent paths:
 
-- **Live path:** farmland receives vanilla random ticks; each random tick on fallow farmland adds `fallowRecoveryPerRandomTick` fertility (default **2.0**). At default `randomTickSpeed` 3, a block expects ~17.6 random ticks per in-game day ≈ **35 fertility/day** — full recovery from 0 in **just under 3 in-game days**.
+- **Live path:** farmland receives vanilla random ticks; each random tick on fallow farmland adds `fallowRecoveryPerRandomTick` fertility (default **2.0**). At default `randomTickSpeed` 3, a block expects ~17.6 random ticks per in-game day ≈ **35 fertility/day** — full recovery from 0 in **just under 3 in-game days**. While rain falls on the block (raining and sky-exposed at the position above it), each random tick's gain is multiplied by `rainRecoveryMultiplier` (default **2.0**) — a rained-on fallow block recovers from 0 in about **1.5 in-game days**.
 - **Lazy path:** ground that is not currently farmland receives no random ticks, so when a tracked position is next touched (re-tilled, inspected, harvested), accrued fallow time is settled first: `fertility += fallowRecoveryPerRandomTick × elapsedTicks × randomTickSpeed / 4096`, where `elapsedTicks` counts from `lastRecoveryCheck`, only over the span the position was crop-free. `lastRecoveryCheck` advances on every settle, drain, and live-path tick.
 
-The two paths use the same formula, so reverting farmland to dirt and re-tilling recovers **exactly as fast** as leaving farmland fallow — re-tilling is never a shortcut around resting the soil.
+The two paths use the same base formula, so reverting farmland to dirt and re-tilling recovers **exactly as fast** as leaving farmland fallow — re-tilling is never a shortcut around resting the soil. The lazy path never applies the rain multiplier: weather history is not replayed, only live random ticks see rain.
 
 - **Bone meal amendment:** using bone meal on a fallow farmland block (the block itself, not a crop) restores **+25** fertility, consumes the item, and plays the vanilla bone-meal particles and sound. At fertility 100 the use fails: no effect, item not consumed. Bone meal used on a crop is untouched vanilla growth behavior.
 
@@ -83,12 +83,13 @@ Melon and pumpkin **stems** are affected by the growth-speed modifiers (fertilit
 ### Visual Feedback
 
 - **Tired** blocks render a faint pale-crack overlay on the farmland top face; **Exhausted** blocks render a heavier version. Rich and Fair farmland renders no overlay — healthy hydrated farmland is already visibly dark in vanilla.
+- **Investment overlays:** a block with an active Fertilizer dose (`fertilizerRemaining` > 0) renders a sparse dark compost-fleck overlay; an enriched block (`enrichedChance` > 0) renders a sparser warm loam fleck (no visual distinction between 10% and 15% — Jade and the command carry the number). Investment overlays compose with the crack overlays — a Tired, fertilized block shows both.
 - Overlays are flat textured quads 1 pixel above the top face, rendered client-side via `WorldRenderEvents.LAST` within `soilOverlayRenderDistance` (default **24** blocks), depth-tested (no through-wall rendering).
-- **Sync:** the client requests soil-band data per chunk on chunk load; the server responds with only the Tired/Exhausted positions (packed in-chunk pos + 1-bit band). The server pushes a delta when a tracked block crosses a band boundary or its farmland is removed. Non-deviating blocks are never synced.
+- **Sync:** the client requests soil overlay data per chunk on chunk load; the server responds with only the visually deviating positions (packed in-chunk pos + 4 flag bits: 2-bit band, 1-bit dose-active, 1-bit enriched). The server pushes a delta when a tracked block's flags change — band boundary crossed, dose started or ran out, enrichment set or cleared, farmland removed. Non-deviating blocks are never synced.
 
 ### Edge Cases
 
-- **Farmland reversion** (trampling, shoveling, breaking, block replaced): `enrichedChance` and `fertilized` reset to defaults immediately; `fertility`, `lastCrop`, and recovery bookkeeping persist at the position, so soil memory survives the block and applies to whatever farmland is tilled there later.
+- **Farmland reversion** (trampling, shoveling, breaking, block replaced): `enrichedChance` and `fertilizerRemaining` reset to defaults immediately; `fertility`, `lastCrop`, and recovery bookkeeping persist at the position, so soil memory survives the block and applies to whatever farmland is tilled there later.
 - **Pistons:** soil state is positional and never moves with a pushed block. The state at a vacated position remains and governs future farmland there. Accepted: the soil is the ground, not the block.
 - **Multiplayer:** soil is shared world state, server-authoritative — every player sees and works the same fertility, exactly like vanilla hydration. No per-player soil.
 - **Chunk lifecycle:** the attachment persists with the chunk. A corrupted or unreadable soil entry is dropped and logged; the block silently returns to pristine defaults.
@@ -102,6 +103,7 @@ Melon and pumpkin **stems** are affected by the growth-speed modifiers (fertilit
 | `harvestDrain` | float | 3.0 | 0–100 |
 | `rotationDrainMultiplier` | float | 0.5 | 0–1 |
 | `fallowRecoveryPerRandomTick` | float | 2.0 | 0–100 |
+| `rainRecoveryMultiplier` | float | 2.0 | 1–10 |
 | `boneMealFertilityRestore` | float | 25.0 | 0–100 |
 | `tiredThreshold` | float | 25.0 | 0–100 |
 | `tiredGrowthMultiplier` | float | 0.75 | 0–1 |
@@ -232,7 +234,7 @@ Three new status effects, all beneficial, with custom 18×18 icons (see `design/
 | **Diligent** | `cultivation:diligent` | +10% block breaking speed | `player.block_break_speed` attribute modifier, multiply-total |
 | **Sated** | `cultivation:sated` | −10% hunger drain | exhaustion accrual scaled by `1 − 0.10 × (amplifier + 1)` |
 
-Granted on consumption, duration `mealBuffDurationTicks` (default **2400** = 2 minutes):
+Granted on consumption, duration `mealBuffDurationTicks` (default **2400** = 2 minutes) for the stews and `cakeBuffDurationTicks` (default **1200** = 1 minute) for cake:
 
 | Food | Buff |
 |---|---|
@@ -240,13 +242,15 @@ Granted on consumption, duration `mealBuffDurationTicks` (default **2400** = 2 m
 | Beetroot Soup | Diligent I (+10% break speed) |
 | Mushroom Stew | Sated I (−10% hunger drain) |
 | Suspicious Stew | one of the three, uniformly random, at level II (double strength) — in addition to its vanilla rolled effect, which is untouched |
+| Cake (each slice) | all three — Nimble I + Diligent I + Sated I — the celebration meal; placed, sliced, shared |
 
-**One bowl at a time:** consuming any of these four foods first removes all three Cultivation effects, then applies the new one. Buffs replace; they never stack or extend.
+**One meal at a time:** consuming any of these five foods first removes all three Cultivation effects, then applies the new grant (cake applies its trio together). Buffs replace; they never stack or extend.
 
 ### Edge Cases
 
 - **Milk** clears the effects (vanilla behavior, accepted).
-- **Dietary fatigue** (§3) reduces the stew's hunger/saturation but never the buff.
+- **Cake** is eaten by the slice from the placed block; each slice grants the full trio to whoever ate it. Candle-cake variants count as cake. The slice-eat path and §3's cake-fatigue handling share one seam.
+- **Dietary fatigue** (§3) reduces the meal's hunger/saturation but never the buff.
 - **Multiplayer:** per-player vanilla status effects; nothing shared.
 - **Totem/respawn:** effects are lost on death like any vanilla effect.
 
@@ -256,11 +260,12 @@ Granted on consumption, duration `mealBuffDurationTicks` (default **2400** = 2 m
 |---|---|---|---|
 | `enableMealBuffs` | bool | true | — |
 | `mealBuffDurationTicks` | int | 2400 | 200–72000 |
+| `cakeBuffDurationTicks` | int | 1200 | 200–72000 |
 
 ### Implementation Notes
 
 - Three `MobEffect` registrations (attribute-backed for Nimble/Diligent; Sated hooks `FoodData#addExhaustion` via a small mixin checking the effect).
-- Grant hook rides §3's consumption seam (same mixin, after fatigue application), keyed by item id — no food-component data manipulation, so datapack changes to the stews' nutrition don't interact.
+- Grant hook rides §3's consumption seam (same mixin, after fatigue application), keyed by item id — no food-component data manipulation, so datapack changes to the stews' nutrition don't interact. The cake-block slice path routes through the same helper (it already must, for §3), so cake grants ride the identical seam.
 
 ---
 
@@ -324,16 +329,16 @@ The composter converts surplus crops into bone meal — a growth *accelerant*, w
 **New item: `cultivation:fertilizer`** (stack size 64, no crafting recipe — the composter is its source).
 
 - **Composter output:** when a composter at level 8 is emptied — by player use or by hopper extraction — it yields **1 Fertilizer** instead of 1 bone meal (while `composterProducesFertilizer` is true). Bone meal remains available from skeletons, fishing, and bone blocks; nothing else about the composter changes.
-- **Application:** using Fertilizer on a farmland block (or on a crop — it applies to the farmland beneath) sets `fertilized = true`, consumes the item, and plays vanilla bone-meal particles + use sound. On already-fertilized farmland the use fails silently: no effect, item not consumed. Fertilizer is not usable on any other block and is **not** a growth accelerant — it never advances crop age.
-- **Effect:** every mature harvest of a fertilized block appends **+1 of the crop's primary product** to the drops, guaranteed. The bonus is permanent until the block reverts to dirt, suppressed at fertility 0, and independent of (stacks with) §5.
+- **Application:** using Fertilizer on a farmland block (or on a crop — it applies to the farmland beneath) sets `fertilizerRemaining = fertilizerDoseHarvests` (default **15**), consumes the item, and plays vanilla bone-meal particles + use sound. A partial dose can be topped up at any time — the counter resets to full and the item is consumed. At an already-full dose the use fails silently: no effect, item not consumed. Fertilizer is not usable on any other block and is **not** a growth accelerant — it never advances crop age.
+- **Effect:** every mature harvest of a block with `fertilizerRemaining > 0` appends **+1 of the crop's primary product** to the drops, guaranteed, and decrements the counter by 1; at 0 the bonus stops until the next dose. At fertility 0 the bonus is suppressed and the counter is **not** decremented — exhausted ground never spends a dose it doesn't pay out. Independent of (stacks with) §5. An active dose renders the compost-fleck overlay (§1 Visual Feedback).
 
-A block with netherite tilling and Fertilizer on healthy soil yields `base + 1 (+1 at 15%)` per harvest, forever — the long-term-investment ceiling.
+A block with netherite tilling and an active dose on healthy soil yields `base + 1 (+1 at 15%)` per harvest — the investment ceiling, sustained by re-dosing every 15 harvests. At default drain a monoculture block consumes about two doses per full-to-exhausted cycle, so a working farm keeps its composter busy forever.
 
 ### Edge Cases
 
 - **Dispensers** have no behavior for Fertilizer in v1 (the item is ejected as an item).
-- **`composterProducesFertilizer=false`** restores vanilla bone-meal output; already-applied `fertilized` flags keep working (governed by `enableFertilizer`).
-- **`enableFertilizer=false`** disables application and the +1 bonus; the item stays registered (inventories never break) and the composter reverts to bone meal regardless of the other flag.
+- **`composterProducesFertilizer=false`** restores vanilla bone-meal output; already-applied doses keep working (governed by `enableFertilizer`).
+- **`enableFertilizer=false`** disables application and the +1 bonus; stored dose counters are retained untouched but inert, the item stays registered (inventories never break), and the composter reverts to bone meal regardless of the other flag.
 - **Multiplayer:** shared block state; one dose serves all players.
 
 ### Config
@@ -342,11 +347,12 @@ A block with netherite tilling and Fertilizer on healthy soil yields `base + 1 (
 |---|---|---|---|
 | `enableFertilizer` | bool | true | — |
 | `composterProducesFertilizer` | bool | true | — |
+| `fertilizerDoseHarvests` | int | 15 | 1–1000 |
 
 ### Implementation Notes
 
 - Composter seam: `ComposterBlock` produces its output in two places — the player-extraction path and the `WorldlyContainer` output slot hoppers pull from; one mixin per path swaps the `ItemStack` (both check the config live).
-- Application: item class with `useOn` writing to `SoilStore`; harvest-side bonus in §1's choke point.
+- Application: item class with `useOn` writing to `SoilStore`; harvest-side bonus and dose decrement in §1's choke point.
 
 ---
 
@@ -423,11 +429,12 @@ The vanilla farmer work task harvests and replants the same blocks forever. Agai
 
 ### Behavior
 
-Three changes to the farmer's existing farmland work task — nothing else about villagers is touched:
+Four changes to the farmer's existing farmland work task — nothing else about villagers is touched:
 
 1. **Drain applies automatically.** Villager harvests destroy mature crops with drops, so they flow through §1's actor-agnostic choke point. No villager-specific drain code.
 2. **Rotation preference.** When replanting a block, the farmer prefers the first seed in its inventory whose crop differs from the block's `lastCrop`; if it has none, it plants what it has. (A farmer holding only wheat seeds farms wheat — accepted.)
 3. **Fallow discipline.** Farmland below `villagerFallowThreshold` fertility (default **25** — the Tired band) is excluded from the farmer's *replant* targets; it becomes eligible again at `villagerReplantThreshold` (default **50**). The gap is hysteresis so farmers don't churn at the boundary. Harvesting an existing mature crop is always allowed regardless of fertility.
+4. **Fertilizer upkeep.** Fertilizer joins the farmer's wanted-item list, so farmers pick it up like seeds — and the vanilla composting habit already hands it to them, since village composters emit Fertilizer while `composterProducesFertilizer` is true. During fieldwork, a farmer holding Fertilizer applies one dose to a workable farmland block whose `fertilizerRemaining` is 0 — never topping up a partial dose — following §6's application rules (particles, sound, counter to full). Villages consequently run the whole loop unaided: grow, compost, dose, repeat. The trade is honest: farmers no longer bone-meal crops (their composters no longer produce bone meal); they sustain their fields instead. Gated by `enableVillagerFertilizing`, and inert unless `enableFertilizer` is also true.
 
 Village fields consequently settle into rotating patchworks with resting strips — visibly tended ground — and their long-run output obeys the same rules a player's fields do.
 
@@ -442,12 +449,14 @@ Village fields consequently settle into rotating patchworks with resting strips 
 | Key | Type | Default | Range |
 |---|---|---|---|
 | `enableVillagerStewardship` | bool | true | — |
+| `enableVillagerFertilizing` | bool | true | — |
 | `villagerFallowThreshold` | float | 25.0 | 0–100 |
 | `villagerReplantThreshold` | float | 50.0 | 0–100 (≥ fallow threshold, clamped up) |
 
 ### Implementation Notes
 
-- Mixin into the farmer work behavior (`HarvestFarmland`): filter candidate positions for the replant case against `SoilStore` fertility; reorder the inventory seed scan for rotation preference. Two injection points, no behavior-tree restructuring.
+- Mixin into the farmer work behavior (`HarvestFarmland`): filter candidate positions for the replant case against `SoilStore` fertility; reorder the inventory seed scan for rotation preference; add a dose-application step when the farmer holds Fertilizer and the target block's dose is spent. Three injection points, no behavior-tree restructuring.
+- Fertilizer joins the villager wanted-items set (Fabric API where it suffices, else a small mixin) so farmers pick it up.
 
 ---
 
@@ -457,7 +466,7 @@ Village fields consequently settle into rotating patchworks with resting strips 
 
 | Command | Permission | Behavior |
 |---|---|---|
-| `/cultivation soil` | 0 | Reports the farmland block the player is looking at (≤ 10 blocks): fertility % and band, last crop, enriched %, fertilized — e.g. `Fertility 62% (Fair) — last crop: Wheat. Enriched +15%, fertilized.` Error if not looking at farmland. |
+| `/cultivation soil` | 0 | Reports the farmland block the player is looking at (≤ 10 blocks): fertility % and band, last crop, enriched %, remaining Fertilizer dose — e.g. `Fertility 62% (Fair) — last crop: Wheat. Enriched +15%, fertilizer 7/15.` Error if not looking at farmland. |
 | `/cultivation soil set <0..100>` | 2 | Sets the targeted farmland's fertility. |
 | `/cultivation diet` | 0 | Lists the caller's fatigue entries (`Bread −30%`) and last three foods. |
 | `/cultivation diet reset [player]` | 2 | Clears DietData for the target (default: caller). |
@@ -476,7 +485,7 @@ Four entries, parented into the **vanilla Husbandry tab** (vanilla-deferential: 
 | `balanced_table` | A Balanced Table | trigger a §3 fatigue reset by eating 3 distinct foods |
 | `long_term_investment` | Long-Term Investment | apply Fertilizer to farmland |
 | `reap_what_you_sow` | Reap What You Sow | harvest 9 mature crops in a single scythe sweep |
-| `old_growth` | Old Growth | harvest a crop from a block that is both enriched and fertilized |
+| `old_growth` | Old Growth | harvest a crop from a block that is both enriched and carrying an active Fertilizer dose |
 
 Custom criterion triggers fired from the §1 choke point, §3 reset check, §6 application, and §7 sweep. Icons reuse the mod's item sprites.
 
@@ -494,6 +503,7 @@ All features are independently toggleable via a ModMenu / Cloth Config screen an
 | `harvestDrain` | float | 3.0 | Fertility lost per same-crop harvest |
 | `rotationDrainMultiplier` | float | 0.5 | Drain multiplier when the crop differs from the last harvest |
 | `fallowRecoveryPerRandomTick` | float | 2.0 | Fertility regained per random tick while fallow |
+| `rainRecoveryMultiplier` | float | 2.0 | Live-path recovery multiplier while rain falls on the block |
 | `boneMealFertilityRestore` | float | 25.0 | Fertility restored by bone meal on fallow farmland |
 | `tiredThreshold` | float | 25.0 | Fertility below which soil is Tired |
 | `tiredGrowthMultiplier` | float | 0.75 | Growth speed multiplier while Tired |
@@ -506,14 +516,17 @@ All features are independently toggleable via a ModMenu / Cloth Config screen an
 | `fatigueFloor` | float | 0.5 | Minimum effectiveness |
 | `fatigueResetDistinctFoods` | int | 3 | Distinct recent foods that clear all fatigue |
 | `enableMealBuffs` | bool | true | Toggle meal buffs (§4) |
-| `mealBuffDurationTicks` | int | 2400 | Buff duration in ticks |
+| `mealBuffDurationTicks` | int | 2400 | Stew buff duration in ticks |
+| `cakeBuffDurationTicks` | int | 1200 | Cake trio-buff duration in ticks |
 | `enableEnrichedTilling` | bool | true | Toggle high-tier hoe tilling (§5) |
 | `diamondHoeEnrichChance` | int | 10 | Bonus-drop chance (%) for diamond-tilled farmland |
 | `netheriteHoeEnrichChance` | int | 15 | Bonus-drop chance (%) for netherite-tilled farmland |
 | `enableFertilizer` | bool | true | Toggle Fertilizer application and bonus (§6) |
 | `composterProducesFertilizer` | bool | true | Composter yields Fertilizer instead of bone meal |
+| `fertilizerDoseHarvests` | int | 15 | Harvests granted +1 product per Fertilizer dose |
 | `enableScytheHarvest` | bool | true | Toggle the scythe 3×3 sweep (§7) |
 | `enableVillagerStewardship` | bool | true | Toggle farmer rotation/fallow behavior (§8) |
+| `enableVillagerFertilizing` | bool | true | Farmers apply Fertilizer to spent field blocks (§8) |
 | `villagerFallowThreshold` | float | 25.0 | Fertility below which farmers stop replanting |
 | `villagerReplantThreshold` | float | 50.0 | Fertility at which farmers resume replanting |
 
@@ -534,7 +547,7 @@ Per concord [`API-STANDARD.md`](../../concord/API-STANDARD.md): the only stable 
 ### Surface
 
 - `CultivationAPI.getFertility(ServerLevel, BlockPos): float` — 0–100; `100` for untracked farmland; `-1` if the block is not farmland.
-- `CultivationAPI.getSoilInfo(ServerLevel, BlockPos): Optional<SoilInfo>` — `SoilInfo(float fertility, int enrichedChance, boolean fertilized, Optional<ResourceLocation> lastCrop)`; empty if not farmland.
+- `CultivationAPI.getSoilInfo(ServerLevel, BlockPos): Optional<SoilInfo>` — `SoilInfo(float fertility, int enrichedChance, int fertilizerRemaining, Optional<ResourceLocation> lastCrop)`; empty if not farmland.
 - `CultivationAPI.getFoodEffectiveness(ServerPlayer, ItemStack): float` — 0.5–1.0, the multiplier the player's next eat of this item would receive.
 - **`CultivationHarvestCallback`** — Fabric event fired server-side from the harvest choke point after Cultivation's own drain/bonuses: `(ServerLevel, BlockPos, BlockState crop, List<ItemStack> drops, @Nullable Entity harvester)`. The drops list is mutable — the sanctioned mutation point for siblings/third parties (e.g. quality-produce injection). A listener that throws is caught, logged, and skipped.
 - **`CultivationFoodCallback`** — Fabric event fired server-side after a food is consumed and fatigue applied: `(ServerPlayer, ItemStack, float effectivenessApplied)`. Observation only.
@@ -555,7 +568,7 @@ Per concord [`API-STANDARD.md`](../../concord/API-STANDARD.md): the only stable 
 ### Optional Integrations
 
 - **ModMenu + Cloth Config** — config screen.
-- **Jade / WTHIT** — farmland tooltip: fertility % + band, enriched %, fertilized, last crop; crop tooltip: polyculture bonus active and the combined growth modifier.
+- **Jade / WTHIT** — farmland tooltip: fertility % + band, enriched %, Fertilizer dose remaining, last crop; crop tooltip: polyculture bonus active and the combined growth modifier.
 - **EMI / REI / JEI** — scythe recipes (shaped + smithing) and a Fertilizer info entry naming the composter as its source.
 
 ### Sibling & Mod Compatibility
@@ -610,7 +623,8 @@ Cultivation ships **no HUD element**. The slot decision and reasoning live in `d
 
 ### Unit Tests (JUnit + `fabric-loader-junit`)
 
-- Fertility math: drain with/without rotation, clamping, band boundaries (25.0 is Fair; 0 exactly is Exhausted), lazy-recovery formula against the live-path expectation
+- Fertility math: drain with/without rotation, clamping, band boundaries (25.0 is Fair; 0 exactly is Exhausted), lazy-recovery formula against the live-path expectation, rain multiplier on the live path only
+- Fertilizer dose bookkeeping: decrement rides the bonus, no decrement at fertility 0, top-up resets to full, application at a full dose fails
 - Dietary fatigue algorithm: single-food decay to floor, two-food alternation grinding both to floor, three-food rotation resetting every eat, history bookkeeping, death clear
 - Polyculture neighbor counting: alternating rows, checkerboard, monoculture, field edges/corners, stem ids
 - Exhausted yield clamp and bonus-suppression ordering; primary product/seed mapping for all six crops
@@ -620,20 +634,20 @@ Cultivation ships **no HUD element**. The slot decision and reasoning live in `d
 ### Gametests (Fabric Gametest API)
 
 - Harvest drains 3.0 same-crop / 1.5 rotated; immature break drains nothing; creative break drains nothing
-- Fallow farmland recovers via random ticks; reverted-to-dirt position settles lazy recovery on re-till; bone meal restores +25 and fails at 100
+- Fallow farmland recovers via random ticks, twice as fast under rain; reverted-to-dirt position settles lazy recovery on re-till (rain-blind); bone meal restores +25 and fails at 100
 - Tired/exhausted growth multipliers applied (assert on computed growth speed, not statistics)
 - Polyculture multiplier applied for a qualifying layout, absent for monoculture
 - Enriched tilling: diamond/netherite set 10/15; forced 100% chance yields +1 product; reversion clears
-- Fertilizer: composter level 8 yields Fertilizer (player and hopper paths); application sets flag and consumes; second application fails without consuming; +1 product on harvest; exhausted soil suppresses bonuses
+- Fertilizer: composter level 8 yields Fertilizer (player and hopper paths); application sets a full 15-harvest dose and consumes; application at a full dose fails without consuming; topping up a partial dose resets it to full; +1 product per harvest with the counter decrementing to 0, then no bonus; exhausted soil suppresses the bonus without decrementing
 - Scythe: 3×3 harvest + replant at age 0, seed withdrawn per block, immature skipped, durability −1 per crop, no-seed roll leaves block empty, mixed-crop field handled per block
-- Villager: farmer skips replanting below 25, resumes at 50, prefers a rotated seed when inventory allows
+- Villager: farmer skips replanting below 25, resumes at 50, prefers a rotated seed when inventory allows; farmer picks up Fertilizer and doses a spent block, never a partial one
 - Fatigue: consecutive eats restore stepped-down hunger; three distinct foods reset; effects (golden apple) unaffected
-- Meal buffs: each stew grants its effect for 2400 ticks; a second stew replaces; suspicious stew grants a level-II roll plus its vanilla effect
+- Meal buffs: each stew grants its effect for 2400 ticks; a second stew replaces; suspicious stew grants a level-II roll plus its vanilla effect; a cake slice grants the trio for 1200 ticks and replaces a stew buff
 - Commands: `soil`, `soil set`, `diet`, `diet reset` behave and permission-gate as specced
 
 ### Manual Testing
 
-- Soil overlay rendering: band textures, render distance, depth testing, Sodium/EBE/Iris
+- Soil overlay rendering: band textures, fleck overlays (fertilized/enriched) composing with cracks, render distance, depth testing, Sodium/EBE/Iris
 - Food tooltips (fatigue lines) and Jade/WTHIT soil/crop lines
 - Effect icons in the vanilla HUD; config screen labels/tooltips
 - Village farms over long observation: rotation patchwork and fallow strips emerging
