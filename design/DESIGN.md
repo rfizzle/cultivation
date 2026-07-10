@@ -41,7 +41,7 @@ The motif object is a **bound wheat sheaf with crossed farm tools** — a scythe
 
 Shared neutrals (text and surfaces) follow the standard tokens as-is — `--color-bone`, `--color-ash`, `--color-smoke`, `--color-ink`, `--color-card`, `--color-elevated` — see concord [`design/DESIGN-SYSTEM.md`](../../concord/design/DESIGN-SYSTEM.md) §1.
 
-**Pairing-rule check (DESIGN-SYSTEM §2, all rows including reserved):** amber-with-leaf shares at most one accent with any member — Wheat Amber sits in the gold family beside Meridian's and Prosperity's gold, but gold-with-violet reads Meridian, gold-with-cyan reads Prosperity, and amber-with-leaf reads Cultivation. Leaf Green (yellow-green) is distinct from Mercantile's Emerald (blue-green), and the pair shares nothing with the reserved Apothecary (magenta/copper), Tempest (blue/white), or Stratum (grey/orange) rows. Surfaces are a dark tint of the mod's own green-amber hue, per §7 admission.
+**Pairing-rule check (DESIGN-SYSTEM §2, all rows including reserved):** amber-with-leaf shares at most one accent with any member — Wheat Amber sits in the warm-gold family beside Meridian's and Prosperity's gold and Respite's Candleglow, but gold-with-violet reads Meridian, gold-with-cyan reads Prosperity, candle-with-indigo reads Respite, and amber-with-leaf reads Cultivation. Leaf Green (yellow-green) is distinct from Mercantile's Emerald (blue-green), and the pair shares nothing with Distillation's magenta-with-copper or the reserved Tempest (blue/white) and Stratum (grey/orange) rows. Surfaces are a dark tint of the mod's own green-amber hue, per §7 admission.
 
 ### Typography
 
@@ -100,8 +100,5 @@ Content lives elsewhere — page copy in `site/` (rendered by the shared Concord
 
 ## 7. Concord Context
 
-Cultivation owns the **agriculture silo**: crops, soil, food values, and cooking payoffs — beside Meridian (enchanting, violet/gold, compass rose), Mercantile (villagers & trade, emerald/emerald, market stall), Tribulation (difficulty, crimson/ember, hourglass), and Prosperity (loot, gold/cyan, treasure chest). Its amber-with-leaf signature is the pair concord's DESIGN-SYSTEM §2 reserves for this domain, and reads distinct from every sibling under the pairing rule: the only shared hue (gold-family amber) is disambiguated by its green partner. Suite standards this document defers to: concord [`VISION.md`](../../concord/VISION.md), [`design/DESIGN-SYSTEM.md`](../../concord/design/DESIGN-SYSTEM.md), [`HUD-STANDARD.md`](../../concord/HUD-STANDARD.md), [`API-STANDARD.md`](../../concord/API-STANDARD.md).
+Cultivation owns the **agriculture silo**: crops, soil, food values, and cooking payoffs — beside Meridian (enchanting, violet/gold, compass rose), Mercantile (villagers & trade, emerald/emerald, market stall), Tribulation (difficulty, crimson/ember, hourglass), Prosperity (loot, gold/cyan, treasure chest), Respite (vitality, indigo/candleglow, lantern), and Distillation (alchemy, magenta/copper, still). Its amber-with-leaf signature holds the member row concord's DESIGN-SYSTEM §2 records for this domain, and reads distinct from every sibling under the pairing rule: the only shared hue family (warm gold) is disambiguated by its green partner. Suite standards this document defers to: concord [`VISION.md`](../../concord/VISION.md), [`design/DESIGN-SYSTEM.md`](../../concord/design/DESIGN-SYSTEM.md), [`HUD-STANDARD.md`](../../concord/HUD-STANDARD.md), [`API-STANDARD.md`](../../concord/API-STANDARD.md).
 
-## Open Decisions
-
-- Concord's DESIGN-SYSTEM §2 reserved row and `VISION.md` §9 profile carry this domain under the working name *Husbandry*; on admission to `members.json`, the reserved row renames to Cultivation (a concord-side edit, made deliberately with admission).

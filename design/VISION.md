@@ -57,6 +57,7 @@ Every system above can be switched off on its own: turn off living soil and farm
 - **Mercantile** — farmer villagers who remember you deal in the good stuff: high-reputation trades offer Fertilizer and buy your surplus at its worth. Never required.
 - **Tribulation** — when the world pushes back, a stocked and varied pantry is armor you can eat; the food you grow is the difference on a bad night. Never required.
 - **Prosperity** — chests far from home can hold caches of Fertilizer and rare seeds worth carrying back to your fields. Never required.
+- **Distillation** — the still drinks from your fields: crops you grow turn up among its brews' ingredients. Never required.
 
 With no siblings installed, nothing is missing — every promise on this page stands alone.
 
