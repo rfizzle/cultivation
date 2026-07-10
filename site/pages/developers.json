@@ -1,0 +1,53 @@
+{
+  "nav": "Developers",
+  "metaTitle": "Developers — Cultivation",
+  "metaDescription": "Cultivation's public API surface as specced: read-only soil and diet accessors, the CultivationHarvestCallback with its sanctioned mutable drops list, and the CultivationFoodCallback.",
+  "title": "For Developers",
+  "lede": "Cultivation publishes a stable integration surface under <code>com.rfizzle.cultivation.api</code>, per the suite <a href='https://github.com/rfizzle/concord/blob/master/API-STANDARD.md' class='text-accent hover:text-accent2 underline'>API standard</a>: read-only static accessors, array-backed Fabric events, server-authoritative. Specced, pre-implementation — it lands with the first release.",
+  "width": "5xl",
+  "sections": [
+    {
+      "title": "Accessors",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": ["Accessor", "Returns"],
+          "rows": [
+            ["<code>getFertility(ServerLevel, BlockPos)</code>", "Fertility 0–100; 100 for untracked farmland; −1 if the block is not farmland"],
+            ["<code>getSoilInfo(ServerLevel, BlockPos)</code>", "Optional record of fertility, enriched chance, fertilized flag, and last crop"],
+            ["<code>getFoodEffectiveness(ServerPlayer, ItemStack)</code>", "The 0.5–1.0 multiplier the player's next eat of this item would receive"]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Events",
+      "blocks": [
+        {
+          "type": "list",
+          "items": [
+            "<code>CultivationHarvestCallback</code> — fires server-side from the single harvest choke point after Cultivation's own drain and bonuses. Its drops list is mutable: the sanctioned mutation point for siblings and third parties to inject bonus produce. A listener that throws is caught, logged, and skipped.",
+            "<code>CultivationFoodCallback</code> — fires after a food is consumed and fatigue applied, with the effectiveness that was used. Observation only."
+          ]
+        },
+        {
+          "type": "prose",
+          "html": [
+            "Consumption is the suite pattern: compile against the jar with <code>modCompileOnly</code> and guard every call site with <code>FabricLoader.getInstance().isModLoaded(\"cultivation\")</code>. Cultivation ships no HUD element and therefore no HUD accessors, and exposes no soil mutators — outside mods observe fertility and react; they don't write it."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Item IDs and tags for integrations",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Cultivation is a provider in every current suite integration — sibling mods reference these stable IDs from their own datapacks: <code>cultivation:fertilizer</code>, <code>cultivation:iron_scythe</code>, <code>cultivation:diamond_scythe</code>, <code>cultivation:netherite_scythe</code>. The scythes join <code>#minecraft:enchantable/durability</code> and <code>#minecraft:enchantable/mining</code> plus a <code>#cultivation:scythes</code> tag, so enchantment mods pick them up with zero code."
+          ]
+        }
+      ]
+    }
+  ]
+}

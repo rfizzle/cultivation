@@ -10,7 +10,12 @@
   "copyright": "© 2026 rfizzle. Cultivation is not affiliated with Mojang Studios or Microsoft.",
   "footerMeta": "Minecraft 1.21.1 · Fabric",
   "nav": [
-    "index"
+    "index",
+    "features",
+    "config",
+    "commands",
+    "developers",
+    "faq"
   ],
   "theme": {
     "accent": "#D9A441",

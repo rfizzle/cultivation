@@ -48,7 +48,7 @@
         },
         {
           "type": "note",
-          "html": "Also in the design: a 20% polyculture growth bonus for alternating-row fields, and villager farmers that rotate crops and rest tired ground. Read the full promise in <a href='https://github.com/rfizzle/cultivation/blob/master/design/VISION.md' class='text-accent hover:text-accent2 underline'>design/VISION.md</a>.",
+          "html": "Also in the design: a 20% polyculture growth bonus for alternating-row fields, and villager farmers that rotate crops and rest tired ground. <a href='/features.html' class='text-accent hover:text-accent2 underline'>Full feature list →</a>",
           "center": true
         }
       ]

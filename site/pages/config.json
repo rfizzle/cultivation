@@ -1,0 +1,63 @@
+{
+  "nav": "Config",
+  "metaTitle": "Config — Cultivation",
+  "metaDescription": "Cultivation's full configuration reference as specced: soil fertility, polyculture, dietary fatigue, meal buffs, tilling, Fertilizer, scythe, and villager stewardship options.",
+  "title": "Configuration",
+  "lede": "Every option, as specced in <a href='https://github.com/rfizzle/cultivation/blob/master/design/SPEC.md' class='text-accent hover:text-accent2 underline'>design/SPEC.md</a> — the file is <code>config/cultivation.json</code>, created with defaults on first launch and hot-reloaded with <code>/cultivation reload</code>. Cultivation is in development; this table is the contract the implementation will ship against.",
+  "width": "5xl",
+  "sections": [
+    {
+      "title": "Server config",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": ["Key", "Type", "Default", "Range", "Feature"],
+          "nowrapHeaders": true,
+          "rows": [
+            ["<code>enableSoilFertility</code>", "bool", "<code>true</code>", "—", "Living soil"],
+            ["<code>harvestDrain</code>", "float", "<code>3.0</code>", "0–100", "Living soil"],
+            ["<code>rotationDrainMultiplier</code>", "float", "<code>0.5</code>", "0–1", "Living soil"],
+            ["<code>fallowRecoveryPerRandomTick</code>", "float", "<code>2.0</code>", "0–100", "Living soil"],
+            ["<code>boneMealFertilityRestore</code>", "float", "<code>25.0</code>", "0–100", "Living soil"],
+            ["<code>tiredThreshold</code>", "float", "<code>25.0</code>", "0–100", "Living soil"],
+            ["<code>tiredGrowthMultiplier</code>", "float", "<code>0.75</code>", "0–1", "Living soil"],
+            ["<code>exhaustedGrowthMultiplier</code>", "float", "<code>0.5</code>", "0–1", "Living soil"],
+            ["<code>enablePolyculture</code>", "bool", "<code>true</code>", "—", "Polyculture"],
+            ["<code>polycultureGrowthMultiplier</code>", "float", "<code>1.2</code>", "1–5", "Polyculture"],
+            ["<code>polycultureMinDifferentNeighbors</code>", "int", "<code>2</code>", "1–4", "Polyculture"],
+            ["<code>enableDietaryFatigue</code>", "bool", "<code>true</code>", "—", "Dietary fatigue"],
+            ["<code>fatiguePerRepeat</code>", "float", "<code>0.10</code>", "0–1", "Dietary fatigue"],
+            ["<code>fatigueFloor</code>", "float", "<code>0.5</code>", "0–1", "Dietary fatigue"],
+            ["<code>fatigueResetDistinctFoods</code>", "int", "<code>3</code>", "2–5", "Dietary fatigue"],
+            ["<code>enableMealBuffs</code>", "bool", "<code>true</code>", "—", "Meal buffs"],
+            ["<code>mealBuffDurationTicks</code>", "int", "<code>2400</code>", "200–72000", "Meal buffs"],
+            ["<code>enableEnrichedTilling</code>", "bool", "<code>true</code>", "—", "Enriched tilling"],
+            ["<code>diamondHoeEnrichChance</code>", "int", "<code>10</code>", "0–100", "Enriched tilling"],
+            ["<code>netheriteHoeEnrichChance</code>", "int", "<code>15</code>", "0–100", "Enriched tilling"],
+            ["<code>enableFertilizer</code>", "bool", "<code>true</code>", "—", "Fertilizer"],
+            ["<code>composterProducesFertilizer</code>", "bool", "<code>true</code>", "—", "Fertilizer"],
+            ["<code>enableScytheHarvest</code>", "bool", "<code>true</code>", "—", "Scythe"],
+            ["<code>enableVillagerStewardship</code>", "bool", "<code>true</code>", "—", "Stewardship"],
+            ["<code>villagerFallowThreshold</code>", "float", "<code>25.0</code>", "0–100", "Stewardship"],
+            ["<code>villagerReplantThreshold</code>", "float", "<code>50.0</code>", "0–100", "Stewardship"]
+          ],
+          "note": "Turning <code>enableSoilFertility</code> off freezes the soil system — farmland behaves exactly like vanilla and stored soil data is retained untouched. <code>composterProducesFertilizer=false</code> restores vanilla bone-meal output. <code>enableScytheHarvest=false</code> reduces scythes to ordinary single-block tools."
+        }
+      ]
+    },
+    {
+      "title": "Client config",
+      "blocks": [
+        {
+          "type": "table",
+          "headers": ["Key", "Type", "Default", "Description"],
+          "rows": [
+            ["<code>showSoilOverlays</code>", "bool", "<code>true</code>", "Render the tired/exhausted farmland overlays"],
+            ["<code>soilOverlayRenderDistance</code>", "int", "<code>24</code>", "Max overlay render distance (blocks)"],
+            ["<code>showFatigueTooltips</code>", "bool", "<code>true</code>", "Show fatigue lines on food tooltips"]
+          ]
+        }
+      ]
+    }
+  ]
+}

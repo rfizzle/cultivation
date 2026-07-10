@@ -1,0 +1,120 @@
+# Cultivation — Agriculture Overhaul
+
+**_Worth growing._**
+
+![Cultivation logo](https://raw.githubusercontent.com/rfizzle/cultivation/master/art/logo.png)
+
+**Also on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/cultivation-agriculture-overhaul)
+and [GitHub Releases](https://github.com/rfizzle/cultivation/releases).**
+Visit the [website](https://cultivation.rfizzle.com) for the full feature
+list, config reference, and command guide.
+
+---
+
+Cultivation is an agriculture overhaul for **Minecraft 1.21.1 (Fabric)** —
+soil, harvests, and the food you live on. Vanilla farming is solved minutes
+into a world: a nine-block wheat square and golden carrots forever. Cultivation
+makes farming a practice instead of a chore: soil that tires under harvest and
+rewards rotation, fields worth planning, food worth varying — all on vanilla
+crops and vanilla blocks.
+
+**In development.** The design and full behavioral spec are committed and
+features are being built against them; this page describes the first release.
+
+## At a glance
+
+- Minecraft **1.21.1**, **Fabric** loader (0.16.10+), **Fabric API** required.
+- Install on the **server** and every **client**.
+- Every feature independently tunable through `config/cultivation.json` —
+  hot-reload with `/cultivation reload`.
+- MIT licensed.
+
+## Features
+
+### Living Soil
+
+Every farmland block carries its own fertility. Harvesting drains it about
+**3%** a time — half that when you rotate crops — and a fallow block recovers
+fully in about **three in-game days**. Tired soil (below 25%) grows **25%
+slower** and turns visibly pale and cracked; exhausted soil grows at half speed
+and yields the bare minimum. Bone meal on empty farmland restores a quarter
+instantly, and `/cultivation soil` reads any block exactly.
+
+### Polyculture
+
+A crop bordered by two different crops grows **20% faster**. Alternating rows —
+wheat, carrots, potatoes — beat the monoculture slab, which is never punished,
+just outgrown.
+
+### A Varied Table
+
+Eating the same food repeatedly restores **10% less** per repeat, down to a
+**50% floor**; three different foods reset it entirely. Golden carrots stay
+excellent — they just stop being the only answer. Food effects are never
+touched, and the tooltip tells you plainly when a food is losing its appeal.
+
+### Worth the Bowl
+
+The unstackable meals finally repay the bowl: **Rabbit Stew** grants 5%
+movement speed, **Beetroot Soup** 10% faster block breaking, **Mushroom Stew**
+10% slower hunger drain — each for 2 minutes — and **Suspicious Stew** rolls
+one of the three at double strength on top of its usual gamble.
+
+### Enriched Tilling & Fertilizer
+
+Till with a **diamond** hoe and that block gains a permanent **10%** chance of
+an extra drop per harvest (**netherite: 15%**). The composter produces
+**Fertilizer** instead of bone meal — one dose gives a farmland block a
+permanent **+1 crop** on every harvest. Both last until the block reverts to
+dirt, and they stack.
+
+### The Scythe
+
+A new tool in iron, diamond, and netherite: one swing harvests a full **3×3**
+of mature crops and replants each block from its own drops. Immature crops are
+skipped, Fortune applies per block, and large-scale manual farming becomes
+rhythm instead of tedium.
+
+### Farmers Who Farm
+
+Villager farmers live by the same soil: their harvests drain fertility, they
+rotate crops when a plot tires, and they leave exhausted ground fallow until it
+recovers. Village fields become rotating patchworks — and nothing about trades,
+prices, or reputation changes.
+
+## Commands
+
+Player commands: `/cultivation soil` — fertility, band, last crop, and bonuses
+of the block you're looking at; `/cultivation diet` — your current food
+fatigue. Operator commands cover config reload and soil/diet testing levers.
+Full reference:
+[cultivation.rfizzle.com/commands.html](https://cultivation.rfizzle.com/commands.html)
+
+## Optional integrations
+
+Cultivation detects and integrates with these mods when present. **None are
+bundled** — install whichever you already use.
+
+- [Mod Menu](https://modrinth.com/mod/modmenu) — config screen entry
+- [Cloth Config](https://modrinth.com/mod/cloth-config) — settings GUI
+- [Jade](https://modrinth.com/mod/jade) / [WTHIT](https://modrinth.com/mod/wthit)
+  — farmland fertility and crop growth modifiers at a glance
+- [EMI](https://modrinth.com/mod/emi) / [REI](https://modrinth.com/mod/rei) /
+  [JEI](https://modrinth.com/mod/jei) — scythe recipes and Fertilizer source info
+
+**Enhanced by** its Concord siblings, never required: with
+[Meridian](https://modrinth.com/mod/meridian-enchanting-overhaul) scythes and
+hoes become first-class enchanting targets; with
+[Mercantile](https://modrinth.com/mod/mercantile-villager-overhaul) high
+reputation puts Fertilizer on a farmer's counter; with
+[Prosperity](https://modrinth.com/mod/prosperity-loot-overhaul) far-flung
+chests can hold Fertilizer caches and rare seeds; with Tribulation a hard
+world makes a varied pantry real preparation; with Distillation your crops
+feed the still.
+
+## Requirements
+
+- Minecraft **1.21.1**
+- Fabric Loader **0.16.10+**
+- Fabric API
+- Java **21+**

@@ -1,0 +1,1 @@
+A standalone Minecraft 1.21.1 Fabric mod overhauling agriculture — soil, harvests, and food. Worth growing: living soil that tires and recovers, polyculture and rotation bonuses, dietary variety, and the 3x3 scythe. Part of the Concord collection.

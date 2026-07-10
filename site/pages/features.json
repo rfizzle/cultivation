@@ -1,0 +1,133 @@
+{
+  "nav": "Features",
+  "metaTitle": "Features — Cultivation",
+  "metaDescription": "Cultivation's feature set as specced: living soil fertility, the polyculture bonus, dietary fatigue, meal buffs, enriched tilling, Fertilizer, the Scythe, and villager field stewardship.",
+  "title": "Features",
+  "lede": "The eight headline systems, as specced in <a href='https://github.com/rfizzle/cultivation/blob/master/design/SPEC.md' class='text-accent hover:text-accent2 underline'>design/SPEC.md</a>. Cultivation is in development — these are commitments, not yet a shipped jar.",
+  "width": "5xl",
+  "scale": "lg",
+  "sections": [
+    {
+      "id": "living-soil",
+      "title": "Living Soil",
+      "intro": "Every farmland block carries its own fertility — draining under harvest, recovering when rested.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Harvesting drains a block about 3% of its fertility each time — half that if you plant a different crop than last season. Leave a block fallow and it recovers fully over roughly three in-game days; a sprinkle of bone meal on empty farmland restores a quarter instantly. Tired soil (below 25%) grows crops 25% slower and turns visibly pale and cracked; exhausted soil grows at half speed and yields the bare minimum.",
+            "Soil is shared world state, exactly like vanilla hydration — every player works the same ground. Read any block's exact fertility with <code>/cultivation soil</code>, or at a glance with Jade/WTHIT installed."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "polyculture",
+      "title": "Polyculture",
+      "intro": "Mixed fields grow faster than monoculture — the layout is the mechanic.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "A crop bordered by at least two cardinal neighbors of a different crop grows 20% faster. Plant in alternating rows — wheat, carrots, potatoes — and every interior row qualifies. Monoculture is never punished; it simply grows at the vanilla rate. The fastest farm on the server is a striped one."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "varied-table",
+      "title": "A Varied Table",
+      "intro": "Eating the same food again and again dulls it; three different foods reset the fatigue.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Each consecutive repeat of the same food restores 10% less hunger and saturation, bottoming out at half effect. Eating three different foods clears the fatigue entirely — a three-food rotation always eats at 100%, while a two-food alternation grinds both down together. Food effects are never touched: golden apples, suspicious stews, and meal buffs apply at full strength regardless.",
+            "The food's tooltip tells you plainly when it's losing its appeal and by how much. Fatigue is strictly per-player and clears on death."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "worth-the-bowl",
+      "title": "Worth the Bowl",
+      "intro": "The crafted, unstackable meals finally repay the inventory space.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Each bowl food carries a 2-minute buff: Rabbit Stew grants 5% movement speed (Nimble), Beetroot Soup grants 10% faster block breaking (Diligent), Mushroom Stew slows your hunger drain by 10% (Sated), and Suspicious Stew gambles as always — but grants one of the three at double strength alongside its usual rolled effect. One bowl at a time; a new stew replaces the buff rather than stacking it."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enriched-tilling",
+      "title": "Enriched Tilling",
+      "intro": "Diamond and netherite hoes till better farmland — permanently.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Till with a diamond hoe and that block gains a permanent 10% chance of one extra drop per harvest; netherite makes it 15%. The bonus lasts until the block reverts to dirt, and stacks with Fertilizer. There is finally a reason to carry a late-game hoe."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fertilizer",
+      "title": "Compost Fertilizer",
+      "intro": "The composter produces Fertilizer — permanent improvement instead of a growth accelerant.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Emptying a full composter yields one Fertilizer instead of bone meal (skeletons and fishing still supply bone meal as ever, and one option restores the vanilla output). Apply a dose to a farmland block for a permanent +1 crop on every harvest — one dose per block, forever, until the block reverts to dirt. A netherite-tilled, fertilized plot on healthy soil is the long-term-investment ceiling."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scythe",
+      "title": "The Scythe",
+      "intro": "A harvesting tool in iron, diamond, and netherite: one swing reaps and replants a 3×3.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Break a fully grown crop with a scythe and it harvests the full 3×3 around it, withdraws one seed per block from the drops, and replants each block at age zero. Immature crops are skipped; each block harvested costs one durability; Fortune on the scythe applies per block. Crafted from three ingots (or diamonds) and two sticks, with the netherite tier through the vanilla smithing upgrade. It harvests — it never plows or fights beyond an ordinary tool."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stewardship",
+      "title": "Farmers Who Farm",
+      "intro": "Villager farmers live by the same soil you do.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Villager harvests drain fertility exactly like yours. When a plot tires, its farmer replants a different crop; when a block drops below 25% fertility they leave it fallow until it recovers to 50%. Village fields settle into rotating patchworks with resting strips — visibly tended ground. Nothing about who the villager is changes: names, trades, prices, and reputation are untouched."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Better Together",
+      "intro": "With siblings from the Concord collection installed, Cultivation lights up further — never required, and with none installed nothing is missing.",
+      "blocks": [
+        {
+          "type": "list",
+          "items": [
+            "<strong class='text-bone'>Meridian</strong> — scythes and hoes are first-class enchanting targets; a charted enchantment on a netherite scythe is the endgame of the harvest.",
+            "<strong class='text-bone'>Mercantile</strong> — farmer villagers who remember you deal in the good stuff: high-reputation trades offer Fertilizer and buy your surplus at its worth.",
+            "<strong class='text-bone'>Tribulation</strong> — when the world pushes back, a stocked and varied pantry is armor you can eat.",
+            "<strong class='text-bone'>Prosperity</strong> — chests far from home can hold caches of Fertilizer and rare seeds worth carrying back to your fields.",
+            "<strong class='text-bone'>Distillation</strong> — the still drinks from your fields: crops you grow turn up among its brews' ingredients."
+          ]
+        }
+      ]
+    }
+  ]
+}

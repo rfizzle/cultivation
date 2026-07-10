@@ -1,0 +1,51 @@
+{
+  "nav": "FAQ",
+  "metaTitle": "FAQ — Cultivation",
+  "metaDescription": "Frequently asked questions about Cultivation: release status, soil fairness in multiplayer, the composter change, and compatibility.",
+  "title": "FAQ",
+  "lede": "",
+  "width": "4xl",
+  "sections": [
+    {
+      "blocks": [
+        {
+          "type": "faq",
+          "items": [
+            {
+              "q": "Is Cultivation released?",
+              "a": "Not yet — it is in development. The design is committed (vision, full behavioral spec, brand), the repo builds, and features are being implemented against the spec. Watch <a href='https://github.com/rfizzle/cultivation/releases' class='text-accent hover:text-accent2 underline'>GitHub Releases</a>."
+            },
+            {
+              "q": "Does soil fertility punish farming?",
+              "a": "No — it rewards tending. Fresh soil starts at full fertility, a monoculture block sustains 33 harvests before exhausting, rotation doubles that, and a fallow block fully recovers in about three in-game days. Even exhausted soil still grows and still feeds you; it's just slower and leaner than ground you care for."
+            },
+            {
+              "q": "How does it work in multiplayer?",
+              "a": "Soil is honest shared ground — one fertility per block for everyone, exactly like vanilla hydration, with no per-player instancing and no login races. Dietary fatigue and meal buffs are strictly per-player."
+            },
+            {
+              "q": "The composter doesn't make bone meal anymore?",
+              "a": "By default it yields Fertilizer — a permanent +1-yield soil investment — instead. Skeletons, fishing, and bone blocks still supply bone meal as ever, and a single option (<code>composterProducesFertilizer=false</code>) restores the vanilla output."
+            },
+            {
+              "q": "Can I turn parts of it off?",
+              "a": "Every system independently: soil fertility, polyculture, dietary fatigue, meal buffs, enriched tilling, Fertilizer, the scythe sweep, and villager stewardship each have their own toggle. Turn everything off and farmland behaves exactly like vanilla."
+            },
+            {
+              "q": "Do I need the other Concord mods?",
+              "a": "No. Cultivation is complete on its own — with siblings installed some integrations light up (enchanted scythes, Fertilizer trades, far-tier seed caches, farm-grown reagents), but none are ever required."
+            },
+            {
+              "q": "Will it work with Sodium / Iris / performance mods?",
+              "a": "Yes by design — Cultivation never replaces farmland or crop blocks; soil condition renders as a post-pass overlay, the same approach Prosperity's indicators use. Mods that replant by silently swapping block states may bypass soil drain; ones that break crops normally are fully compatible."
+            },
+            {
+              "q": "Client, server, or both?",
+              "a": "Both, like its siblings: the gameplay is server-authoritative, and the client side carries the config screen, soil overlays, and food tooltips."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
