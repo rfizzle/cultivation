@@ -1,0 +1,17 @@
+# Thin stub — logic lives in rfizzle/concord (mod-release.yml).
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    uses: rfizzle/concord/.github/workflows/mod-release.yml@master
+    # Add modrinth-id / curseforge-id under `with:` once the store projects exist.
+    secrets: inherit
