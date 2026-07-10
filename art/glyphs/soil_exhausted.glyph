@@ -1,0 +1,33 @@
+# cultivation — soil_exhausted: the heavy sibling of soil_tired, rendered by mod code
+# as a translucent flat quad on vanilla farmland's top face. Same crack skeleton and
+# loam tone family as soil_tired, intensified: a connected 1-2px crack network with
+# X/Y junctions, two full-width and two full-height cracks, and a few 2-4px flaked
+# patches; ~63% of pixels stay transparent. Tiles seamlessly: horizontal cracks exit
+# and re-enter the left/right edges at rows 4 and 11; vertical cracks exit and
+# re-enter the top/bottom edges at columns 4, 8, and 10. Code-bound (not on the block
+# atlas), so no outline and no margin.
+size: 16
+
+legend:
+  . transparent
+  a #9C8A6ECC   # pale loam crack (~80% alpha)
+  b #C4B49AC8   # lighter loam / flake highlight
+  d #5E5040AA   # dark crack core
+
+grid:
+  ....a...a.a.....
+  ....d...b.d.....
+  .....a.a.ad..ab.
+  .....badada..d..
+  ab..adadbad..aba
+  ..daa.d..b.ad.a.
+  ...ba.a..a.b..d.
+  ...a..b...a...d.
+  ...d..ad..b..a..
+  ...a......da.da.
+  ...a.......da...
+  adaab..aa.daabaa
+  .da.aadb.aad....
+  ..d.b...a.ad....
+  ...a....d.a.d...
+  ....a...a.d.....

@@ -1,0 +1,39 @@
+# Cultivation — fertilizer item sprite (16px native).
+# A tied burlap sack of dark rich compost: flared open top showing compost with
+# amber/sprout granules, amber tie cord at the neck, bulging body shaded from a
+# pale-loam base with a top-left light and lower-right occlusion. Two granules
+# rest on the shoulder where they spilled from the opening.
+size: 16
+
+legend:
+  . transparent
+  K ink          # #0a0a0a outline
+  L #b5a17c      # burlap light (top-left lit)
+  B #9c8a6e      # burlap base — Pale Loam
+  S #7d6c52      # burlap shadow
+  O #5c4d3a      # burlap occlusion (lower-right core)
+  t #edc35c      # tie cord light — Harvest
+  T #d9a441      # tie cord shade / amber granule — Wheat Amber
+  c #3e2a18      # compost — Rich Earth
+  C #2a1c0f      # compost dark
+  o #55391f      # compost lit (top surface catch)
+  g #a5d66a      # granule — Sprout
+  G #7cb342      # granule shade — Leaf Green
+
+grid:
+  ................
+  .....KKKKK......
+  ....KogcTcK.....
+  .....KLBSK......
+  .....KtTTK......
+  ....KLLBBSK.....
+  ...KLLBSBgGK....
+  ..KLTBBSBBSSK...
+  ..KLBBBBBBSSOK..
+  ..KLBBBBBBSSOK..
+  ..KLBBBBBSSSOK..
+  ..KBBBBSSSSOOK..
+  ...KBBSSSSOOK...
+  ....KKKKKKKK....
+  ................
+  ................

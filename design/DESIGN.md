@@ -24,7 +24,7 @@ The motif object is a **bound wheat sheaf crossed with a hoe** — one composed 
 
 **Icon (`art/icon-128.png`):** The bound wheat sheaf isolated — golden stalks, twine band, two small leaf sprigs at the base — with a warm amber glow against a dark/transparent background. Reads cleanly at 128×128.
 
-**Glyph (`art/glyph-16.png`):** A 16×16 pixel wheat sheaf — 3–4 golden stalks flaring above a twine band, `ink` outline — for Jade/WTHIT and recipe-viewer contexts. Cultivation has no HUD slot (§2 below), so this glyph never renders as a HUD element.
+**Glyph (`art/glyphs/sheaf-16.glyph`):** A 16×16 pixel wheat sheaf — three golden wheat heads fanned above a pale twine band, a small leaf sprig at the base, `ink` outline — for Jade/WTHIT and recipe-viewer contexts. Cultivation has no HUD slot (§2 below), so this glyph never renders as a HUD element.
 
 ### Color Palette
 
