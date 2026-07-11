@@ -26,16 +26,16 @@ public class SoilGrowthGameTest implements FabricGameTest {
         var cropAbs = helper.absolutePos(CROP);
 
         placeTrackedFarmland(helper, FARM, 80.0F, Blocks.WHEAT);
-        helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs) == 1.0F, "Rich soil grows at the vanilla rate");
+        helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs, level.getBlockState(cropAbs)) == 1.0F, "Rich soil grows at the vanilla rate");
 
         placeTrackedFarmland(helper, FARM, 25.0F, Blocks.WHEAT);
-        helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs) == 1.0F, "exactly the Tired threshold is Fair");
+        helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs, level.getBlockState(cropAbs)) == 1.0F, "exactly the Tired threshold is Fair");
 
         placeTrackedFarmland(helper, FARM, 10.0F, Blocks.WHEAT);
-        helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs) == 0.75F, "Tired soil grows at 0.75x");
+        helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs, level.getBlockState(cropAbs)) == 0.75F, "Tired soil grows at 0.75x");
 
         placeTrackedFarmland(helper, FARM, 0.0F, Blocks.WHEAT);
-        helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs) == 0.5F, "Exhausted soil grows at 0.5x");
+        helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs, level.getBlockState(cropAbs)) == 0.5F, "Exhausted soil grows at 0.5x");
         helper.succeed();
     }
 
@@ -43,7 +43,8 @@ public class SoilGrowthGameTest implements FabricGameTest {
     public void untrackedFarmlandGrowsVanilla(GameTestHelper helper) {
         helper.setBlock(FARM, Blocks.FARMLAND);
         helper.setBlock(CROP, Blocks.WHEAT.defaultBlockState());
-        helper.assertTrue(SoilGrowth.multiplierAt(helper.getLevel(), helper.absolutePos(CROP)) == 1.0F,
+        helper.assertTrue(SoilGrowth.multiplierAt(helper.getLevel(), helper.absolutePos(CROP),
+                        helper.getBlockState(CROP)) == 1.0F,
                 "pristine ground must be bit-identical to vanilla growth");
         helper.succeed();
     }
@@ -63,7 +64,7 @@ public class SoilGrowthGameTest implements FabricGameTest {
             helper.setBlock(CROP, Blocks.WHEAT.defaultBlockState());
             var level = helper.getLevel();
             var cropAbs = helper.absolutePos(CROP);
-            helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs) >= com.rfizzle.cultivation.soil.SoilMath.MIN_GROWTH_MULTIPLIER,
+            helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs, level.getBlockState(cropAbs)) >= com.rfizzle.cultivation.soil.SoilMath.MIN_GROWTH_MULTIPLIER,
                     "the effective multiplier must be floored away from zero");
             helper.assertTrue(level.getRawBrightness(cropAbs, 0) >= 9,
                     "the growth roll needs light or this regression test is vacuous");
@@ -81,7 +82,8 @@ public class SoilGrowthGameTest implements FabricGameTest {
     public void stemsReceiveTheModifier(GameTestHelper helper) {
         placeTrackedFarmland(helper, FARM, 10.0F, Blocks.WHEAT);
         helper.setBlock(CROP, Blocks.MELON_STEM.defaultBlockState().setValue(BlockStateProperties.AGE_7, 3));
-        helper.assertTrue(SoilGrowth.multiplierAt(helper.getLevel(), helper.absolutePos(CROP)) == 0.75F,
+        helper.assertTrue(SoilGrowth.multiplierAt(helper.getLevel(), helper.absolutePos(CROP),
+                        helper.getBlockState(CROP)) == 0.75F,
                 "stems over tired soil grow at 0.75x even though they never drain");
         helper.succeed();
     }

@@ -143,6 +143,7 @@ When a supported crop (or stem) rolls a growth tick, count its four cardinal nei
 - **Field edges:** the end-cap blocks of the two outermost rows have only 1 different-crop neighbor and miss the bonus. Accepted — interior dominates, and the rule stays four block reads.
 - **Mixed maturity:** neighbor maturity is irrelevant; only block id is compared. A just-planted neighbor counts.
 - **Stems:** an attached stem keeps its base stem's id for comparison; melon and pumpkin stems count as two distinct crops.
+- **Torchflower:** the mature torchflower keeps `torchflower_crop` as its comparison id — the one crop whose maturity changes its block id never drops out of a field's neighbor counts by growing up.
 - **Multiplayer:** none — layout is world geometry, identical for everyone.
 
 ### Config

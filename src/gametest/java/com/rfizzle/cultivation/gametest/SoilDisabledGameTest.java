@@ -63,7 +63,7 @@ public class SoilDisabledGameTest implements FabricGameTest {
             // Growth multiplier pinned to 1.0 even on exhausted soil.
             placeTrackedFarmland(helper, FARM, 0.0F, Blocks.WHEAT);
             helper.setBlock(CROP, Blocks.WHEAT.defaultBlockState());
-            helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs) == 1.0F,
+            helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs, level.getBlockState(cropAbs)) == 1.0F,
                     "all growth multipliers must be 1.0 while disabled");
             helper.setBlock(CROP, Blocks.AIR);
 
