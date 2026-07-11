@@ -56,7 +56,7 @@
         {
           "type": "prose",
           "html": [
-            "Each bowl food carries a 2-minute buff: Rabbit Stew grants 5% movement speed (Nimble), Beetroot Soup grants 10% faster block breaking (Diligent), Mushroom Stew slows your hunger drain by 10% (Sated), and Suspicious Stew gambles as always — but grants one of the three at double strength alongside its usual rolled effect. One bowl at a time; a new stew replaces the buff rather than stacking it."
+            "Each bowl food carries a 2-minute buff: Rabbit Stew grants 5% movement speed (Nimble), Beetroot Soup grants 10% faster block breaking (Diligent), Mushroom Stew slows your hunger drain by 10% (Sated), and Suspicious Stew gambles as always — but grants one of the three at double strength alongside its usual rolled effect. Cake is the celebration meal: each slice grants all three buffs at once for 1 minute — the one exception to one-meal-at-a-time. Otherwise a new meal replaces the buff rather than stacking it."
           ]
         }
       ]
@@ -77,12 +77,12 @@
     {
       "id": "fertilizer",
       "title": "Compost Fertilizer",
-      "intro": "The composter produces Fertilizer — permanent improvement instead of a growth accelerant.",
+      "intro": "The composter produces Fertilizer — a renewable amendment instead of a growth accelerant.",
       "blocks": [
         {
           "type": "prose",
           "html": [
-            "Emptying a full composter yields one Fertilizer instead of bone meal (skeletons and fishing still supply bone meal as ever, and one option restores the vanilla output). Apply a dose to a farmland block for a permanent +1 crop on every harvest — one dose per block, forever, until the block reverts to dirt. A netherite-tilled, fertilized plot on healthy soil is the long-term-investment ceiling."
+            "Emptying a full composter yields one Fertilizer instead of bone meal (skeletons and fishing still supply bone meal as ever, and one option restores the vanilla output). Apply a dose to a farmland block and its next 15 harvests each yield a guaranteed +1 of the crop's product; top up any time, and exhausted ground never spends a dose it doesn't pay out. A dosed block shows dark compost flecks, so the investment reads at a glance. A netherite-tilled plot on healthy soil with an active dose is the investment ceiling — sustained by re-dosing, so a working farm keeps its composter busy forever."
           ]
         }
       ]

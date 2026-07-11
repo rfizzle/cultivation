@@ -58,15 +58,17 @@ touched, and the tooltip tells you plainly when a food is losing its appeal.
 The unstackable meals finally repay the bowl: **Rabbit Stew** grants 5%
 movement speed, **Beetroot Soup** 10% faster block breaking, **Mushroom Stew**
 10% slower hunger drain — each for 2 minutes — and **Suspicious Stew** rolls
-one of the three at double strength on top of its usual gamble.
+one of the three at double strength on top of its usual gamble. **Cake** is
+the celebration meal: each slice grants all three buffs at once for a minute.
 
 ### Enriched Tilling & Fertilizer
 
 Till with a **diamond** hoe and that block gains a permanent **10%** chance of
 an extra drop per harvest (**netherite: 15%**). The composter produces
-**Fertilizer** instead of bone meal — one dose gives a farmland block a
-permanent **+1 crop** on every harvest. Both last until the block reverts to
-dirt, and they stack.
+**Fertilizer** instead of bone meal — one dose covers a farmland block's next
+**15 harvests** with a guaranteed **+1 crop** each, and re-dosing keeps the
+composter loop alive for the life of the farm. Enrichment lasts until the
+block reverts to dirt, and the two stack.
 
 ### The Scythe
 
