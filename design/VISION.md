@@ -14,7 +14,7 @@ In your first hours nothing is unfamiliar: you till, you plant, you eat. Then th
 
 ### Living soil
 - **What it is** — Every farmland block carries its own fertility, from rich to exhausted. Rich farmland is visibly dark; tired soil turns pale and cracked.
-- **How you use it** — Harvesting drains a block about 3% each time — half that if you plant a different crop than last season. Leave a block fallow and it recovers fully over three in-game days; a sprinkle of bone meal on empty farmland restores a quarter instantly. `/cultivation soil` reads the exact fertility of the block you're looking at.
+- **How you use it** — Harvesting drains a block about 3% each time — half that if you plant a different crop than last season. Leave a block fallow and it recovers fully over three in-game days — half that when rain falls on it under open sky; a sprinkle of bone meal on empty farmland restores a quarter instantly. `/cultivation soil` reads the exact fertility of the block you're looking at.
 - **What changes for you** — Below a quarter fertility, crops grow 25% slower; exhausted soil grows at half speed and yields the bare minimum. The hundred-hour wheat square stops being free — you rotate, rest, and feed your fields, and a well-kept farm outproduces a neglected one by a wide margin.
 
 ### Polyculture
@@ -25,17 +25,17 @@ In your first hours nothing is unfamiliar: you till, you plant, you eat. Then th
 ### A varied table
 - **What it is** — Eating the exact same food again and again dulls it. Each consecutive repeat restores 10% less hunger and saturation, bottoming out at half effect.
 - **How you use it** — Keep two or three foods in your hotbar and alternate. Eating three different foods clears the fatigue entirely; the food's tooltip tells you plainly when it's losing its appeal and by how much.
-- **What changes for you** — Golden carrots stay excellent — they just stop being the only answer. A varied pantry becomes the strongest food strategy in the game, and every crop you grow has a seat at the table.
+- **What changes for you** — Golden carrots stay excellent — they just stop being the only answer. Any three foods keep the table fresh, so a modest, varied pantry becomes the strongest food strategy in the game.
 
 ### Worth the bowl
-- **What it is** — The crafted, unstackable meals finally repay the inventory space. Each bowl food carries a small buff for 2 minutes.
-- **How you use it** — Eat the stew: Rabbit Stew grants 5% movement speed, Beetroot Soup grants 10% faster block breaking, Mushroom Stew slows your hunger drain by 10%, and Suspicious Stew gambles as always — but grants one of the other three buffs at double strength alongside its usual effect.
-- **What changes for you** — The recipes vanilla shipped and nobody crafted become the traveler's meal, the miner's breakfast, and the gambler's dare. One bowl at a time; eating another stew replaces the buff rather than stacking it.
+- **What it is** — The crafted meals finally repay their cost. Each bowl food carries a small buff for 2 minutes, and cake — the meal you have to sit down for — briefly carries them all.
+- **How you use it** — Eat the stew: Rabbit Stew grants 5% movement speed, Beetroot Soup grants 10% faster block breaking, Mushroom Stew slows your hunger drain by 10%, and Suspicious Stew gambles as always — but grants one of the other three buffs at double strength alongside its usual effect. Bake a cake for the send-off: every slice grants all three buffs at once for 60 seconds — seven slices, one party.
+- **What changes for you** — The recipes vanilla shipped and nobody crafted become the traveler's meal, the miner's breakfast, the gambler's dare, and the feast a group shares before a big job. One meal at a time; eating another stew or slice replaces what you had rather than stacking it.
 
 ### Farmland you invest in
-- **What it is** — Two permanent upgrades for a plot you intend to keep. Late-game hoes till better farmland, and the composter now produces Fertilizer — a distinct item, not bone meal.
-- **How you use it** — Till with a diamond hoe and that block gains a permanent 10% chance of one extra drop per harvest; netherite makes it 15%. Fill a composter and collect Fertilizer; apply one dose to a farmland block for a permanent +1 drop on every harvest. One dose per block, and both bonuses stack — they last until the block reverts to dirt. Skeletons and fishing still supply bone meal as ever, and a single option returns the composter to bone meal if you prefer vanilla.
-- **What changes for you** — There is finally a reason to carry a netherite hoe. A plot you till, fertilize, and keep fertile for a season outyields fresh dirt harvest after harvest — farming gains the same "invest here, it pays forever" pull as a beacon room.
+- **What it is** — Two ways to build a plot worth keeping: permanent craftsmanship from late-game hoes, and Fertilizer — a renewable amendment the composter produces instead of bone meal. Both show on the ground itself.
+- **How you use it** — Till with a diamond hoe and that block gains a permanent 10% chance of one extra drop per harvest; netherite makes it 15% — quality that lasts as long as the farmland does, marked by a warm fleck in the soil. Fill a composter and collect Fertilizer; one dose on a farmland block adds a guaranteed +1 drop for its next 15 harvests, shown as dark compost flecks that fade out when the dose runs dry. Top a dose back up whenever you like, and both bonuses stack. Skeletons and fishing still supply bone meal as ever, and a single option returns the composter to bone meal if you prefer vanilla.
+- **What changes for you** — There is finally a reason to carry a netherite hoe, and the composter feeds the farm instead of looping back into more bone meal. Keeping the flecks dark across your rows becomes the farm's heartbeat: a tilled, dosed, rested plot visibly outyields fresh dirt harvest after harvest.
 
 ### The Scythe
 - **What it is** — A new harvesting tool in iron, diamond, and netherite, crafted from the same materials as any tool.
@@ -44,7 +44,7 @@ In your first hours nothing is unfamiliar: you till, you plant, you eat. Then th
 
 ### Farmers who farm
 - **What it is** — Villager farmers live by the same soil you do. Their fields tire, and they respond like farmers instead of harvest machines.
-- **How you use it** — Nothing — watch a village. When a plot wears down, its farmer replants a different crop; when a block is exhausted, they leave it fallow until it recovers. Village fields grow in the same alternating rows a good player field does.
+- **How you use it** — Nothing — watch a village. When a plot wears down, its farmer replants a different crop; when a block is exhausted, they leave it fallow until it recovers. Their composter hands them Fertilizer, and they dose the blocks whose flecks have faded — toss a farmer your spare doses and those go to work too. Village fields grow in the same alternating rows a good player field does.
 - **What changes for you** — Village farms become rotating patchworks that look tended, and their output obeys the same rules yours does. Nothing about who the villager is changes — names, trades, prices, and reputation are untouched here.
 
 ## Staying in control

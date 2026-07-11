@@ -14,7 +14,7 @@
           "headers": ["Accessor", "Returns"],
           "rows": [
             ["<code>getFertility(ServerLevel, BlockPos)</code>", "Fertility 0–100; 100 for untracked farmland; −1 if the block is not farmland"],
-            ["<code>getSoilInfo(ServerLevel, BlockPos)</code>", "Optional record of fertility, enriched chance, fertilized flag, and last crop"],
+            ["<code>getSoilInfo(ServerLevel, BlockPos)</code>", "Optional record of fertility, enriched chance, remaining Fertilizer dose, and last crop"],
             ["<code>getFoodEffectiveness(ServerPlayer, ItemStack)</code>", "The 0.5–1.0 multiplier the player's next eat of this item would receive"]
           ]
         }

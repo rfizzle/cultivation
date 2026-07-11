@@ -37,7 +37,7 @@
             {
               "icon": "&#129689;",
               "title": "Invested Farmland",
-              "html": ["Diamond and netherite hoes till farmland with a permanent bonus-drop chance, and the composter produces Fertilizer — one dose, +1 yield on every harvest, forever."]
+              "html": ["Diamond and netherite hoes till farmland with a permanent bonus-drop chance, and the composter produces Fertilizer — one dose, +1 yield on each of the next 15 harvests, renewed for the life of the farm."]
             },
             {
               "icon": "&#9986;&#65039;",
