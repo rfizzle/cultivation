@@ -25,7 +25,7 @@
             },
             {
               "q": "The composter doesn't make bone meal anymore?",
-              "a": "By default it yields Fertilizer — a permanent +1-yield soil investment — instead. Skeletons, fishing, and bone blocks still supply bone meal as ever, and a single option (<code>composterProducesFertilizer=false</code>) restores the vanilla output."
+              "a": "By default it yields Fertilizer — a renewable amendment that guarantees +1 yield for a block's next 15 harvests — instead. Skeletons, fishing, and bone blocks still supply bone meal as ever, and a single option (<code>composterProducesFertilizer=false</code>) restores the vanilla output."
             },
             {
               "q": "Can I turn parts of it off?",
