@@ -5,7 +5,11 @@
     "compatibilityLevel": "JAVA_21",
     "mixins": [
         "BlockBehaviourMixin",
-        "BlockMixin"
+        "BlockMixin",
+        "CropBlockMixin",
+        "FarmBlockMixin",
+        "PitcherCropBlockMixin",
+        "StemBlockMixin"
     ],
     "client": [],
     "injectors": {
