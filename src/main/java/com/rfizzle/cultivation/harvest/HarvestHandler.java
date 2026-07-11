@@ -5,6 +5,7 @@ import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.soil.EnrichedTilling;
+import com.rfizzle.cultivation.soil.Fertilizer;
 import com.rfizzle.cultivation.soil.SoilMath;
 import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.minecraft.core.BlockPos;
@@ -60,9 +61,9 @@ public final class HarvestHandler {
             });
         }
 
-        // One post-drain read serves the exhausted clamp and the enriched roll
-        // alike; an untracked position reads as pristine.
-        SoilData soil = config.enableSoilFertility || config.enableEnrichedTilling
+        // One post-drain read serves the exhausted clamp, the enriched roll, and
+        // the Fertilizer dose alike; an untracked position reads as pristine.
+        SoilData soil = config.enableSoilFertility || config.enableEnrichedTilling || config.enableFertilizer
                 ? SoilStores.peek(level, soilPos)
                 : null;
 
@@ -80,6 +81,16 @@ public final class HarvestHandler {
             if (chance > 0 && EnrichedTilling.grantsBonus(chance, level.getRandom().nextInt(100))) {
                 drops.add(new ItemStack(profile.product()));
             }
+        }
+
+        // Fertilizer bonus (SPEC §6): a guaranteed +1 that spends one dose,
+        // stacking independently with the enriched roll above. Exhausted ground
+        // suppresses it and spends nothing — a dose is never paid without payout.
+        if (config.enableFertilizer && !exhausted && soil != null
+                && Fertilizer.grantsHarvestBonus(soil.fertilizerRemaining())) {
+            drops.add(new ItemStack(profile.product()));
+            SoilStores.update(level, soilPos, true,
+                    data -> data.withFertilizerRemaining(data.fertilizerRemaining() - 1));
         }
 
         CultivationHarvestCallback.EVENT.invoker().onHarvest(level, pos, state, drops, harvester);
