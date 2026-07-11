@@ -44,9 +44,11 @@ public final class SupportedCrops {
      * drops-carrying form, else null. The torchflower crop matures by becoming
      * the {@code minecraft:torchflower} flower block, so the flower is the
      * harvestable form. The pitcher crop counts only as its lower half — the
-     * loot table conditions every drop on {@code half=lower}, so the lower
-     * half's resolution is the one destruction-with-drops event and the
-     * farmland is uniformly the block below.
+     * loot table conditions every drop on {@code half=lower}, so whichever half
+     * is broken first, the lower half's resolution is the one
+     * destruction-with-drops event (an upper-half break destroys the orphaned
+     * lower half with drops via {@code updateOrDestroy}) and the farmland is
+     * uniformly the block below.
      */
     @Nullable
     public static CropProfile matureProfile(BlockState state) {
