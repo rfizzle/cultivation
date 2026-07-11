@@ -25,7 +25,8 @@
             "com.rfizzle.cultivation.gametest.PolycultureGameTest",
             "com.rfizzle.cultivation.gametest.SoilDisabledGameTest",
             "com.rfizzle.cultivation.gametest.HarvestCallbackGameTest",
-            "com.rfizzle.cultivation.gametest.EnrichedTillingGameTest"
+            "com.rfizzle.cultivation.gametest.EnrichedTillingGameTest",
+            "com.rfizzle.cultivation.gametest.FertilizerGameTest"
         ]
     },
     "suggests": {

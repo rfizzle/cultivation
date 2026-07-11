@@ -70,6 +70,10 @@ public record SoilData(
         return new SoilData(fertility, lastCrop, chance, fertilizerRemaining, lastRecoveryCheck);
     }
 
+    public SoilData withFertilizerRemaining(int remaining) {
+        return new SoilData(fertility, lastCrop, enrichedChance, remaining, lastRecoveryCheck);
+    }
+
     /**
      * Farmland reversion ({@code design/SPEC.md} §1 edge cases): the
      * block-lifetime investments — enriched chance and the Fertilizer dose —

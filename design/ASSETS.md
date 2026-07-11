@@ -25,7 +25,7 @@ implementation (no `src/main/resources/` tree exists yet).
 | Asset | `.glyph` source | Final asset |
 |---|---|---|
 | Sheaf brand glyph 16×16 (Jade/recipe viewers, suite footer) | `art/glyphs/sheaf-16.glyph` | `assets/cultivation/textures/gui/sheaf.png` — (not yet shipped) |
-| Fertilizer item 16×16 | `art/glyphs/fertilizer.glyph` | `assets/cultivation/textures/item/fertilizer.png` — (not yet shipped) |
+| Fertilizer item 16×16 | `art/glyphs/fertilizer.glyph` | `assets/cultivation/textures/item/fertilizer.png` |
 | Iron scythe item 16×16 | `art/glyphs/iron_scythe.glyph` | `assets/cultivation/textures/item/iron_scythe.png` — (not yet shipped) |
 | Diamond scythe item 16×16 | `art/glyphs/diamond_scythe.glyph` | `assets/cultivation/textures/item/diamond_scythe.png` — (not yet shipped) |
 | Netherite scythe item 16×16 | `art/glyphs/netherite_scythe.glyph` | `assets/cultivation/textures/item/netherite_scythe.png` — (not yet shipped) |
