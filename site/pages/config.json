@@ -43,7 +43,7 @@
             ["<code>enableVillagerStewardship</code>", "bool", "<code>true</code>", "—", "Stewardship"],
             ["<code>enableVillagerFertilizing</code>", "bool", "<code>true</code>", "—", "Stewardship"],
             ["<code>villagerFallowThreshold</code>", "float", "<code>25.0</code>", "0–100", "Stewardship"],
-            ["<code>villagerReplantThreshold</code>", "float", "<code>50.0</code>", "0–100", "Stewardship"]
+            ["<code>villagerReplantThreshold</code>", "float", "<code>50.0</code>", "0–100 (≥ fallow threshold, clamped up)", "Stewardship"]
           ],
           "note": "Turning <code>enableSoilFertility</code> off freezes the soil system — farmland behaves exactly like vanilla and stored soil data is retained untouched. <code>composterProducesFertilizer=false</code> restores vanilla bone-meal output. <code>enableScytheHarvest=false</code> reduces scythes to ordinary single-block tools."
         }
@@ -54,11 +54,11 @@
       "blocks": [
         {
           "type": "table",
-          "headers": ["Key", "Type", "Default", "Description"],
+          "headers": ["Key", "Type", "Default", "Range", "Description"],
           "rows": [
-            ["<code>showSoilOverlays</code>", "bool", "<code>true</code>", "Render the tired/exhausted farmland overlays"],
-            ["<code>soilOverlayRenderDistance</code>", "int", "<code>24</code>", "Max overlay render distance (blocks)"],
-            ["<code>showFatigueTooltips</code>", "bool", "<code>true</code>", "Show fatigue lines on food tooltips"]
+            ["<code>showSoilOverlays</code>", "bool", "<code>true</code>", "—", "Render the tired/exhausted farmland overlays"],
+            ["<code>soilOverlayRenderDistance</code>", "int", "<code>24</code>", "4–64", "Max overlay render distance (blocks)"],
+            ["<code>showFatigueTooltips</code>", "bool", "<code>true</code>", "—", "Show fatigue lines on food tooltips"]
           ]
         }
       ]
