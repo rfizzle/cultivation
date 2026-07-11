@@ -70,6 +70,16 @@ class SoilDataTest {
         assertEquals(new SoilData(30.0F, Optional.of(WHEAT), 10, 5, 77L), base.withFertility(30.0F));
         assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 10, 5, 99L), base.withRecoveryCheck(99L));
         assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 15, 5, 77L), base.withEnrichedChance(15));
+        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 10, 15, 77L), base.withFertilizerRemaining(15));
+    }
+
+    @Test
+    void fertilizerRemainingWitherClampsNegativesToZero() {
+        SoilData base = SoilData.pristine(0L);
+        assertEquals(15, base.withFertilizerRemaining(15).fertilizerRemaining());
+        assertEquals(0, base.withFertilizerRemaining(-3).fertilizerRemaining());
+        // A block whose only non-default state was its dose returns to all-default when spent.
+        assertTrue(base.withFertilizerRemaining(5).withFertilizerRemaining(0).isDefault());
     }
 
     @Test
