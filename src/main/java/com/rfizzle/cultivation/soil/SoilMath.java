@@ -11,6 +11,15 @@ public final class SoilMath {
     /** Rich starts at 75 regardless of the configurable Tired threshold (SPEC §1 band table). */
     public static final float RICH_THRESHOLD = 75.0F;
 
+    /**
+     * Floor for the growth multiplier. Vanilla growth rolls
+     * {@code nextInt((int) (25.0F / speed) + 1)}: a multiplier of 0 would make
+     * the division overflow into a negative {@code nextInt} bound and crash the
+     * server tick, so a configured 0 means "grows ~2500x slower", never "divide
+     * by zero".
+     */
+    public static final float MIN_GROWTH_MULTIPLIER = 0.01F;
+
     /** Vanilla rolls each random tick per block with probability randomTickSpeed / 4096 per game tick. */
     private static final double RANDOM_TICK_DENOMINATOR = 4096.0;
 
@@ -58,8 +67,8 @@ public final class SoilMath {
     /** The band's crop growth-speed multiplier; Rich and Fair grow at the vanilla rate. */
     public static float growthMultiplier(SoilBand band, double tiredMultiplier, double exhaustedMultiplier) {
         return switch (band) {
-            case TIRED -> (float) tiredMultiplier;
-            case EXHAUSTED -> (float) exhaustedMultiplier;
+            case TIRED -> Math.max(MIN_GROWTH_MULTIPLIER, (float) tiredMultiplier);
+            case EXHAUSTED -> Math.max(MIN_GROWTH_MULTIPLIER, (float) exhaustedMultiplier);
             case RICH, FAIR -> 1.0F;
         };
     }

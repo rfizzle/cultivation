@@ -49,6 +49,35 @@ public class SoilGrowthGameTest implements FabricGameTest {
     }
 
     @GameTest(template = TEMPLATE)
+    public void zeroConfiguredMultiplierNeverCrashesTheGrowthRoll(GameTestHelper helper) {
+        // Regression: exhaustedGrowthMultiplier=0 is in the config's documented
+        // range; unfloored it would overflow vanilla's nextInt bound and crash
+        // the tick. Drive the real randomTick with the multiplier configured to 0.
+        var config = com.rfizzle.cultivation.config.CultivationConfig.get();
+        double savedExhausted = config.exhaustedGrowthMultiplier;
+        double savedTired = config.tiredGrowthMultiplier;
+        config.exhaustedGrowthMultiplier = 0.0;
+        config.tiredGrowthMultiplier = 0.0;
+        try {
+            placeTrackedFarmland(helper, FARM, 0.0F, Blocks.WHEAT);
+            helper.setBlock(CROP, Blocks.WHEAT.defaultBlockState());
+            var level = helper.getLevel();
+            var cropAbs = helper.absolutePos(CROP);
+            helper.assertTrue(SoilGrowth.multiplierAt(level, cropAbs) >= com.rfizzle.cultivation.soil.SoilMath.MIN_GROWTH_MULTIPLIER,
+                    "the effective multiplier must be floored away from zero");
+            helper.assertTrue(level.getRawBrightness(cropAbs, 0) >= 9,
+                    "the growth roll needs light or this regression test is vacuous");
+            level.getBlockState(cropAbs).randomTick(level, cropAbs, level.random);
+            helper.assertTrue(level.getBlockState(cropAbs).is(Blocks.WHEAT),
+                    "the growth roll must survive a configured zero multiplier");
+            helper.succeed();
+        } finally {
+            config.exhaustedGrowthMultiplier = savedExhausted;
+            config.tiredGrowthMultiplier = savedTired;
+        }
+    }
+
+    @GameTest(template = TEMPLATE)
     public void stemsReceiveTheModifier(GameTestHelper helper) {
         placeTrackedFarmland(helper, FARM, 10.0F, Blocks.WHEAT);
         helper.setBlock(CROP, Blocks.MELON_STEM.defaultBlockState().setValue(BlockStateProperties.AGE_7, 3));

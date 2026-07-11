@@ -99,6 +99,27 @@ public class SoilRecoveryGameTest implements FabricGameTest {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE)
+    public void fullyRecoveredFarmlandStopsDirtyingItsChunk(GameTestHelper helper) {
+        // Regression: a once-harvested field that has fully recovered must not
+        // keep re-dirtying its chunk on every random tick just for bookkeeping.
+        placeTrackedFarmland(helper, FARM, 100.0F, Blocks.WHEAT);
+        helper.setBlock(ROOF, Blocks.SMOOTH_STONE);
+        ServerLevel level = helper.getLevel();
+        BlockPos farmAbs = helper.absolutePos(FARM);
+        SoilData before = SoilFixtures.data(helper, FARM);
+        helper.assertTrue(before != null, "the entry keeps its rotation memory at full fertility");
+
+        level.getChunkAt(farmAbs).setUnsaved(false);
+        SoilRecovery.onFarmlandRandomTick(level, farmAbs);
+
+        helper.assertTrue(!level.getChunkAt(farmAbs).isUnsaved(),
+                "a no-op recovery tick must not mark the chunk unsaved");
+        helper.assertTrue(before.equals(SoilFixtures.data(helper, FARM)),
+                "a no-op recovery tick must not rewrite the entry");
+        helper.succeed();
+    }
+
     @GameTest(template = TEMPLATE, batch = "cultivationWeather", timeoutTicks = 200)
     public void rainDoublesLiveRecovery(GameTestHelper helper) {
         placeTrackedFarmland(helper, FARM, 50.0F, Blocks.WHEAT);

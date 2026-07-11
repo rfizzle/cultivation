@@ -29,6 +29,14 @@ public final class SoilRecovery {
         if (data == null) {
             return; // pristine ground stays zero-data
         }
+        if (data.fertility() >= SoilMath.MAX_FERTILITY) {
+            // Nothing to restore, so skip the write — otherwise a once-harvested,
+            // fully recovered field would dirty its chunk on every random tick
+            // forever just to bump the clock. The stale bookmark is harmless: any
+            // later settle either advances without accrual (farmland) or accrues
+            // into a fertility already at the clamp.
+            return;
+        }
         long now = SoilClockState.get(level).time();
         // Re-read the world: vanilla's randomTick may have reverted the block to
         // dirt earlier in this same call, and the injected state argument is stale.
