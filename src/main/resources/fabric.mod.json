@@ -17,7 +17,13 @@
         "main": ["com.rfizzle.cultivation.Cultivation"],
         "client": ["com.rfizzle.cultivation.client.CultivationClient"],
         "fabric-gametest": [
-            "com.rfizzle.cultivation.gametest.SmokeGameTest"
+            "com.rfizzle.cultivation.gametest.SmokeGameTest",
+            "com.rfizzle.cultivation.gametest.MockPlayersGameTest",
+            "com.rfizzle.cultivation.gametest.SoilDrainGameTest",
+            "com.rfizzle.cultivation.gametest.SoilRecoveryGameTest",
+            "com.rfizzle.cultivation.gametest.SoilGrowthGameTest",
+            "com.rfizzle.cultivation.gametest.SoilDisabledGameTest",
+            "com.rfizzle.cultivation.gametest.HarvestCallbackGameTest"
         ]
     },
     "suggests": {

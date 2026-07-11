@@ -3,7 +3,14 @@
     "minVersion": "0.8",
     "package": "com.rfizzle.cultivation.mixin",
     "compatibilityLevel": "JAVA_21",
-    "mixins": [],
+    "mixins": [
+        "BlockBehaviourMixin",
+        "BlockMixin",
+        "CropBlockMixin",
+        "FarmBlockMixin",
+        "PitcherCropBlockMixin",
+        "StemBlockMixin"
+    ],
     "client": [],
     "injectors": {
         "defaultRequire": 1

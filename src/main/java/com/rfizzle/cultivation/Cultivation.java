@@ -1,6 +1,9 @@
 package com.rfizzle.cultivation;
 
+import com.rfizzle.cultivation.attachment.CultivationAttachments;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.event.SoilInteractionHandler;
+import com.rfizzle.cultivation.soil.SoilClockState;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
@@ -14,6 +17,9 @@ public class Cultivation implements ModInitializer {
     public void onInitialize() {
         // Materializes config/cultivation.json with defaults on first launch.
         CultivationConfig.get();
+        CultivationAttachments.init();
+        SoilClockState.register();
+        SoilInteractionHandler.register();
         LOGGER.info("Cultivation initialized");
     }
 
