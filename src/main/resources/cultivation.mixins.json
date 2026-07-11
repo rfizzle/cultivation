@@ -6,6 +6,8 @@
     "mixins": [
         "BlockBehaviourMixin",
         "BlockMixin",
+        "ComposterBlockMixin",
+        "ComposterOutputContainerMixin",
         "CropBlockMixin",
         "FarmBlockMixin",
         "HoeItemMixin",
