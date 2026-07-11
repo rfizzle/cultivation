@@ -329,6 +329,40 @@ class CultivationConfigTest {
     }
 
     @Test
+    void nanValuesResetToTheirDefaults() {
+        CultivationConfig config = new CultivationConfig();
+        config.polycultureGrowthMultiplier = Double.NaN;
+        config.tiredGrowthMultiplier = Double.NaN;
+        config.villagerReplantThreshold = Double.NaN;
+
+        config.clamp();
+
+        CultivationConfig defaults = new CultivationConfig();
+        assertEquals(defaults.polycultureGrowthMultiplier, config.polycultureGrowthMultiplier);
+        assertEquals(defaults.tiredGrowthMultiplier, config.tiredGrowthMultiplier);
+        assertEquals(defaults.villagerReplantThreshold, config.villagerReplantThreshold);
+    }
+
+    @Test
+    void nanValuesInFileResetToDefaultsOnLoad(@TempDir Path dir) throws IOException {
+        Path path = dir.resolve("cultivation.json");
+        // Gson's lenient parse accepts a bare NaN token, so a hand-edited file
+        // can deliver one; it must never reach a growth roll.
+        Files.writeString(path, """
+                {
+                  "configVersion": 1,
+                  "polycultureGrowthMultiplier": NaN,
+                  "harvestDrain": 5.0
+                }
+                """);
+
+        CultivationConfig config = CultivationConfig.load(path);
+
+        assertEquals(new CultivationConfig().polycultureGrowthMultiplier, config.polycultureGrowthMultiplier);
+        assertEquals(5.0, config.harvestDrain, "healthy keys in the same file must load normally");
+    }
+
+    @Test
     void replantThresholdIsRaisedToTheFallowThreshold() {
         CultivationConfig config = new CultivationConfig();
         config.villagerFallowThreshold = 60.0;
