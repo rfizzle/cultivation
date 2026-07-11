@@ -8,6 +8,7 @@
         "BlockMixin",
         "CropBlockMixin",
         "FarmBlockMixin",
+        "HoeItemMixin",
         "PitcherCropBlockMixin",
         "StemBlockMixin"
     ],

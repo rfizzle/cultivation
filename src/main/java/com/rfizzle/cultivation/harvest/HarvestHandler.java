@@ -1,8 +1,10 @@
 package com.rfizzle.cultivation.harvest;
 
 import com.rfizzle.cultivation.api.CultivationHarvestCallback;
+import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.soil.EnrichedTilling;
 import com.rfizzle.cultivation.soil.SoilMath;
 import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.minecraft.core.BlockPos;
@@ -48,6 +50,7 @@ public final class HarvestHandler {
         }
 
         CultivationConfig config = CultivationConfig.get();
+        boolean exhausted = false;
         if (config.enableSoilFertility) {
             ResourceLocation cropId = profile.cropId();
             SoilStores.update(level, soilPos, true, data -> {
@@ -58,8 +61,19 @@ public final class HarvestHandler {
             });
             // The clamp keys on post-drain fertility: the harvest that lands the
             // soil on 0 is already the exhausted one (SPEC §1's 33-harvest count).
-            if (SoilStores.fertilityAt(level, soilPos) <= 0.0F) {
+            exhausted = SoilStores.fertilityAt(level, soilPos) <= 0.0F;
+            if (exhausted) {
                 YieldClamp.clampToBareMinimum(drops, profile.product(), profile.seed());
+            }
+        }
+
+        // Enriched bonus (SPEC §5): rolled after the clamp so exhausted ground
+        // suppresses it, appended after vanilla loot so Fortune applied first.
+        if (config.enableEnrichedTilling && !exhausted) {
+            SoilData soil = SoilStores.peek(level, soilPos);
+            int chance = soil == null ? 0 : soil.enrichedChance();
+            if (chance > 0 && EnrichedTilling.grantsBonus(chance, level.getRandom().nextInt(100))) {
+                drops.add(new ItemStack(profile.product()));
             }
         }
 

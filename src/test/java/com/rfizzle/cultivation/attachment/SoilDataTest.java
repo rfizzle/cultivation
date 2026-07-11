@@ -69,5 +69,26 @@ class SoilDataTest {
         SoilData base = new SoilData(60.0F, Optional.of(WHEAT), 10, 5, 77L);
         assertEquals(new SoilData(30.0F, Optional.of(WHEAT), 10, 5, 77L), base.withFertility(30.0F));
         assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 10, 5, 99L), base.withRecoveryCheck(99L));
+        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 15, 5, 77L), base.withEnrichedChance(15));
+    }
+
+    @Test
+    void enrichedChanceWitherClampsLikeTheConstructor() {
+        SoilData base = SoilData.pristine(0L);
+        assertEquals(100, base.withEnrichedChance(500).enrichedChance());
+        assertEquals(0, base.withEnrichedChance(-5).enrichedChance());
+    }
+
+    @Test
+    void investmentsClearingPreservesSoilMemory() {
+        SoilData invested = new SoilData(60.0F, Optional.of(WHEAT), 15, 7, 77L);
+        SoilData cleared = invested.withInvestmentsCleared();
+        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 0, 0, 77L), cleared);
+
+        // A block whose only non-default state was its investments returns to
+        // all-default on clearing, so the store evicts it.
+        SoilData investedOnly = SoilData.pristine(42L).withEnrichedChance(15);
+        assertFalse(investedOnly.isDefault());
+        assertTrue(investedOnly.withInvestmentsCleared().isDefault());
     }
 }

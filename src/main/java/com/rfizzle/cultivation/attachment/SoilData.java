@@ -65,4 +65,18 @@ public record SoilData(
     public SoilData withRecoveryCheck(long now) {
         return new SoilData(fertility, lastCrop, enrichedChance, fertilizerRemaining, now);
     }
+
+    public SoilData withEnrichedChance(int chance) {
+        return new SoilData(fertility, lastCrop, chance, fertilizerRemaining, lastRecoveryCheck);
+    }
+
+    /**
+     * Farmland reversion ({@code design/SPEC.md} §1 edge cases): the
+     * block-lifetime investments — enriched chance and the Fertilizer dose —
+     * clear with the block, while fertility, rotation memory, and recovery
+     * bookkeeping persist at the position.
+     */
+    public SoilData withInvestmentsCleared() {
+        return new SoilData(fertility, lastCrop, 0, 0, lastRecoveryCheck);
+    }
 }
