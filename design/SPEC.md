@@ -532,11 +532,11 @@ All features are independently toggleable via a ModMenu / Cloth Config screen an
 
 ### Client Config
 
-| Key | Type | Default | Description |
-|---|---|---|---|
-| `showSoilOverlays` | bool | true | Render Tired/Exhausted farmland overlays |
-| `soilOverlayRenderDistance` | int | 24 | Max overlay render distance (blocks) |
-| `showFatigueTooltips` | bool | true | Show fatigue lines on food tooltips |
+| Key | Type | Default | Range | Description |
+|---|---|---|---|---|
+| `showSoilOverlays` | bool | true | — | Render Tired/Exhausted farmland overlays |
+| `soilOverlayRenderDistance` | int | 24 | 4–64 | Max overlay render distance (blocks) |
+| `showFatigueTooltips` | bool | true | — | Show fatigue lines on food tooltips |
 
 ---
 
