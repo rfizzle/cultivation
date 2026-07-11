@@ -50,7 +50,6 @@ public final class HarvestHandler {
         }
 
         CultivationConfig config = CultivationConfig.get();
-        boolean exhausted = false;
         if (config.enableSoilFertility) {
             ResourceLocation cropId = profile.cropId();
             SoilStores.update(level, soilPos, true, data -> {
@@ -59,19 +58,25 @@ public final class HarvestHandler {
                         - SoilMath.drainAmount(sameCrop, config.harvestDrain, config.rotationDrainMultiplier);
                 return data.withFertility(drained).withLastCrop(cropId);
             });
-            // The clamp keys on post-drain fertility: the harvest that lands the
-            // soil on 0 is already the exhausted one (SPEC §1's 33-harvest count).
-            exhausted = SoilStores.fertilityAt(level, soilPos) <= 0.0F;
-            if (exhausted) {
-                YieldClamp.clampToBareMinimum(drops, profile.product(), profile.seed());
-            }
+        }
+
+        // One post-drain read serves the exhausted clamp and the enriched roll
+        // alike; an untracked position reads as pristine.
+        SoilData soil = config.enableSoilFertility || config.enableEnrichedTilling
+                ? SoilStores.peek(level, soilPos)
+                : null;
+
+        // The clamp keys on post-drain fertility: the harvest that lands the
+        // soil on 0 is already the exhausted one (SPEC §1's 33-harvest count).
+        boolean exhausted = config.enableSoilFertility && soil != null && soil.fertility() <= 0.0F;
+        if (exhausted) {
+            YieldClamp.clampToBareMinimum(drops, profile.product(), profile.seed());
         }
 
         // Enriched bonus (SPEC §5): rolled after the clamp so exhausted ground
         // suppresses it, appended after vanilla loot so Fortune applied first.
-        if (config.enableEnrichedTilling && !exhausted) {
-            SoilData soil = SoilStores.peek(level, soilPos);
-            int chance = soil == null ? 0 : soil.enrichedChance();
+        if (config.enableEnrichedTilling && !exhausted && soil != null) {
+            int chance = soil.enrichedChance();
             if (chance > 0 && EnrichedTilling.grantsBonus(chance, level.getRandom().nextInt(100))) {
                 drops.add(new ItemStack(profile.product()));
             }
