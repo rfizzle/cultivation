@@ -92,26 +92,27 @@ public class CultivationConfig {
     public boolean showFatigueTooltips = true;
 
     public void clamp() {
-        harvestDrain = clampDouble("harvestDrain", harvestDrain, 0.0, 100.0);
-        rotationDrainMultiplier = clampDouble("rotationDrainMultiplier", rotationDrainMultiplier, 0.0, 1.0);
-        fallowRecoveryPerRandomTick = clampDouble("fallowRecoveryPerRandomTick", fallowRecoveryPerRandomTick, 0.0, 100.0);
-        rainRecoveryMultiplier = clampDouble("rainRecoveryMultiplier", rainRecoveryMultiplier, 1.0, 10.0);
-        boneMealFertilityRestore = clampDouble("boneMealFertilityRestore", boneMealFertilityRestore, 0.0, 100.0);
-        tiredThreshold = clampDouble("tiredThreshold", tiredThreshold, 0.0, 100.0);
-        tiredGrowthMultiplier = clampDouble("tiredGrowthMultiplier", tiredGrowthMultiplier, 0.0, 1.0);
-        exhaustedGrowthMultiplier = clampDouble("exhaustedGrowthMultiplier", exhaustedGrowthMultiplier, 0.0, 1.0);
-        polycultureGrowthMultiplier = clampDouble("polycultureGrowthMultiplier", polycultureGrowthMultiplier, 1.0, 5.0);
+        CultivationConfig defaults = new CultivationConfig();
+        harvestDrain = clampDouble("harvestDrain", harvestDrain, 0.0, 100.0, defaults.harvestDrain);
+        rotationDrainMultiplier = clampDouble("rotationDrainMultiplier", rotationDrainMultiplier, 0.0, 1.0, defaults.rotationDrainMultiplier);
+        fallowRecoveryPerRandomTick = clampDouble("fallowRecoveryPerRandomTick", fallowRecoveryPerRandomTick, 0.0, 100.0, defaults.fallowRecoveryPerRandomTick);
+        rainRecoveryMultiplier = clampDouble("rainRecoveryMultiplier", rainRecoveryMultiplier, 1.0, 10.0, defaults.rainRecoveryMultiplier);
+        boneMealFertilityRestore = clampDouble("boneMealFertilityRestore", boneMealFertilityRestore, 0.0, 100.0, defaults.boneMealFertilityRestore);
+        tiredThreshold = clampDouble("tiredThreshold", tiredThreshold, 0.0, 100.0, defaults.tiredThreshold);
+        tiredGrowthMultiplier = clampDouble("tiredGrowthMultiplier", tiredGrowthMultiplier, 0.0, 1.0, defaults.tiredGrowthMultiplier);
+        exhaustedGrowthMultiplier = clampDouble("exhaustedGrowthMultiplier", exhaustedGrowthMultiplier, 0.0, 1.0, defaults.exhaustedGrowthMultiplier);
+        polycultureGrowthMultiplier = clampDouble("polycultureGrowthMultiplier", polycultureGrowthMultiplier, 1.0, 5.0, defaults.polycultureGrowthMultiplier);
         polycultureMinDifferentNeighbors = clampInt("polycultureMinDifferentNeighbors", polycultureMinDifferentNeighbors, 1, 4);
-        fatiguePerRepeat = clampDouble("fatiguePerRepeat", fatiguePerRepeat, 0.0, 1.0);
-        fatigueFloor = clampDouble("fatigueFloor", fatigueFloor, 0.0, 1.0);
+        fatiguePerRepeat = clampDouble("fatiguePerRepeat", fatiguePerRepeat, 0.0, 1.0, defaults.fatiguePerRepeat);
+        fatigueFloor = clampDouble("fatigueFloor", fatigueFloor, 0.0, 1.0, defaults.fatigueFloor);
         fatigueResetDistinctFoods = clampInt("fatigueResetDistinctFoods", fatigueResetDistinctFoods, 2, 5);
         mealBuffDurationTicks = clampInt("mealBuffDurationTicks", mealBuffDurationTicks, 200, 72000);
         cakeBuffDurationTicks = clampInt("cakeBuffDurationTicks", cakeBuffDurationTicks, 200, 72000);
         diamondHoeEnrichChance = clampInt("diamondHoeEnrichChance", diamondHoeEnrichChance, 0, 100);
         netheriteHoeEnrichChance = clampInt("netheriteHoeEnrichChance", netheriteHoeEnrichChance, 0, 100);
         fertilizerDoseHarvests = clampInt("fertilizerDoseHarvests", fertilizerDoseHarvests, 1, 1000);
-        villagerFallowThreshold = clampDouble("villagerFallowThreshold", villagerFallowThreshold, 0.0, 100.0);
-        villagerReplantThreshold = clampDouble("villagerReplantThreshold", villagerReplantThreshold, 0.0, 100.0);
+        villagerFallowThreshold = clampDouble("villagerFallowThreshold", villagerFallowThreshold, 0.0, 100.0, defaults.villagerFallowThreshold);
+        villagerReplantThreshold = clampDouble("villagerReplantThreshold", villagerReplantThreshold, 0.0, 100.0, defaults.villagerReplantThreshold);
         soilOverlayRenderDistance = clampInt("soilOverlayRenderDistance", soilOverlayRenderDistance, 4, 64);
         // Replanting must resume no lower than where it stopped (SPEC §8 hysteresis); runs after
         // the range clamps so the raised value stays inside both fields' stated ranges.
@@ -136,8 +137,19 @@ public class CultivationConfig {
         return clamped;
     }
 
-    /** Double counterpart of {@link #clampInt}. */
-    private static double clampDouble(String name, double value, double min, double max) {
+    /**
+     * Double counterpart of {@link #clampInt}. NaN slides through
+     * {@code Math.clamp} untouched (and Gson's lenient parse accepts a bare
+     * {@code NaN} token), so it is healed to the field default before the
+     * range clamp — a NaN multiplier would otherwise silently break every
+     * growth roll it feeds.
+     */
+    private static double clampDouble(String name, double value, double min, double max, double fallback) {
+        if (Double.isNaN(value)) {
+            Cultivation.LOGGER.warn("Config '{}' value {} is not a number; reset to default {}",
+                    name, value, fallback);
+            return fallback;
+        }
         double clamped = Math.clamp(value, min, max);
         if (clamped != value) {
             Cultivation.LOGGER.warn("Config '{}' value {} out of range [{}, {}]; clamped to {}",
