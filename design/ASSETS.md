@@ -29,9 +29,9 @@ implementation (no `src/main/resources/` tree exists yet).
 | Iron scythe item 16×16 | `art/glyphs/iron_scythe.glyph` | `assets/cultivation/textures/item/iron_scythe.png` — (not yet shipped) |
 | Diamond scythe item 16×16 | `art/glyphs/diamond_scythe.glyph` | `assets/cultivation/textures/item/diamond_scythe.png` — (not yet shipped) |
 | Netherite scythe item 16×16 | `art/glyphs/netherite_scythe.glyph` | `assets/cultivation/textures/item/netherite_scythe.png` — (not yet shipped) |
-| Nimble effect icon 18×18 | `art/glyphs/effect_nimble.glyph` | `assets/cultivation/textures/mob_effect/nimble.png` — (not yet shipped) |
-| Diligent effect icon 18×18 | `art/glyphs/effect_diligent.glyph` | `assets/cultivation/textures/mob_effect/diligent.png` — (not yet shipped) |
-| Sated effect icon 18×18 | `art/glyphs/effect_sated.glyph` | `assets/cultivation/textures/mob_effect/sated.png` — (not yet shipped) |
+| Nimble effect icon 18×18 | `art/glyphs/effect_nimble.glyph` | `assets/cultivation/textures/mob_effect/nimble.png` |
+| Diligent effect icon 18×18 | `art/glyphs/effect_diligent.glyph` | `assets/cultivation/textures/mob_effect/diligent.png` |
+| Sated effect icon 18×18 | `art/glyphs/effect_sated.glyph` | `assets/cultivation/textures/mob_effect/sated.png` |
 | Tired-soil overlay 16×16 (code-bound, tiling) | `art/glyphs/soil_tired.glyph` | `assets/cultivation/textures/overlay/soil_tired.png` — (not yet shipped) |
 | Exhausted-soil overlay 16×16 (code-bound, tiling) | `art/glyphs/soil_exhausted.glyph` | `assets/cultivation/textures/overlay/soil_exhausted.png` — (not yet shipped) |
 

@@ -1,5 +1,8 @@
 {
   "item.cultivation.fertilizer": "Fertilizer",
+  "effect.cultivation.nimble": "Nimble",
+  "effect.cultivation.diligent": "Diligent",
+  "effect.cultivation.sated": "Sated",
   "tooltip.cultivation.fatigue.appeal": "Losing its appeal (-%s%%)",
   "tooltip.cultivation.fatigue.tired": "Thoroughly tired of this (-%s%%)"
 }
