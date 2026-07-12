@@ -1,9 +1,9 @@
 {
   "nav": "Commands",
   "metaTitle": "Commands — Cultivation",
-  "metaDescription": "Cultivation's command reference as specced: /cultivation soil, diet, and reload.",
+  "metaDescription": "Cultivation's command reference: /cultivation soil, diet, and reload.",
   "title": "Commands",
-  "lede": "The <code>/cultivation</code> command tree, as specced. Cultivation is in development; this is the surface the implementation will ship.",
+  "lede": "The <code>/cultivation</code> command tree — inspect soil and diet state, and administer both.",
   "width": "4xl",
   "sections": [
     {
