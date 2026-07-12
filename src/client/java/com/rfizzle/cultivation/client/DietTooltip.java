@@ -27,13 +27,17 @@ public final class DietTooltip {
         if (!CultivationConfig.get().showFatigueTooltips) {
             return;
         }
+        ClientDietData.Snapshot snapshot = ClientDietData.snapshot();
+        if (snapshot.isEmpty()) {
+            return;
+        }
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
-        int stacks = ClientDietData.stackCount(id);
+        int stacks = snapshot.stackCount(id);
         if (stacks <= 0) {
             return;
         }
-        float perRepeat = ClientDietData.fatiguePerRepeat();
-        float floor = ClientDietData.fatigueFloor();
+        float perRepeat = snapshot.fatiguePerRepeat();
+        float floor = snapshot.fatigueFloor();
         double effectiveness = DietData.effectiveness(stacks, perRepeat, floor);
         int percent = DietData.reductionPercent(effectiveness);
         String key = DietData.atFloor(stacks, perRepeat, floor)
