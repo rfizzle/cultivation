@@ -13,7 +13,7 @@
           "headers": ["Command", "Permission", "What it does"],
           "nowrapHeaders": true,
           "rows": [
-            ["<code>/cultivation soil</code>", "everyone", "Reports the farmland you're looking at (up to 10 blocks): fertility % and band, last crop, enriched %, remaining Fertilizer dose (<code>fertilizer 7/15</code>)"],
+            ["<code>/cultivation soil</code>", "everyone", "Reports the farmland you're looking at (up to 10 blocks): fertility % and band, last crop, enriched %, remaining Fertilizer dose (<code>Fertilizer 7/15</code>)"],
             ["<code>/cultivation soil set &lt;0..100&gt;</code>", "op (level 2)", "Sets the targeted farmland's fertility — the testing lever for bands and stewardship thresholds"],
             ["<code>/cultivation diet</code>", "everyone", "Lists your current fatigue entries (<code>Bread −30%</code>) and your last three foods"],
             ["<code>/cultivation diet reset [player]</code>", "op (level 2)", "Clears dietary fatigue for the target (default: yourself)"],
