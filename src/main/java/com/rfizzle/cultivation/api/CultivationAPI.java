@@ -1,10 +1,16 @@
 package com.rfizzle.cultivation.api;
 
+import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
+import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.soil.SoilMath;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
 import java.util.Optional;
@@ -42,5 +48,20 @@ public final class CultivationAPI {
         }
         return Optional.of(new SoilInfo(
                 data.fertility(), data.enrichedChance(), data.fertilizerRemaining(), data.lastCrop()));
+    }
+
+    /**
+     * The dietary-fatigue multiplier the player's next eat of {@code stack} would
+     * receive, in {@code [fatigueFloor, 1.0]} (the floor is configurable, so the
+     * lower bound follows the server's {@code fatigueFloor}). Returns {@code 1.0}
+     * when dietary fatigue is disabled. Cake stacks key to {@code minecraft:cake}.
+     */
+    public static float getFoodEffectiveness(ServerPlayer player, ItemStack stack) {
+        CultivationConfig config = CultivationConfig.get();
+        if (!config.enableDietaryFatigue) {
+            return 1.0F;
+        }
+        ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        return (float) DietStore.get(player).effectiveness(id, config.fatiguePerRepeat, config.fatigueFloor);
     }
 }
