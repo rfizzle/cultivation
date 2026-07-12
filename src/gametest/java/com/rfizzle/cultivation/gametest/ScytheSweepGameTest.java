@@ -192,6 +192,48 @@ public class ScytheSweepGameTest implements FabricGameTest {
         }
     }
 
+    @GameTest(template = TEMPLATE)
+    public void protectionDeniedCenterIsSkipped(GameTestHelper helper) {
+        fillField(helper, matureWheat());
+        Denier.armAt(helper.absolutePos(CENTER));
+        try {
+            ServerPlayer player = survivalScyther(helper, CultivationItems.IRON_SCYTHE);
+            breakCenter(helper, player);
+
+            BlockState center = helper.getBlockState(CENTER);
+            helper.assertTrue(center.is(Blocks.WHEAT) && center.getValue(CropBlock.AGE) == CropBlock.MAX_AGE,
+                    "a denied center block must be left mature — the center is checked like every other block");
+            BlockState edge = helper.getBlockState(EDGE);
+            helper.assertTrue(edge.is(Blocks.WHEAT) && edge.getValue(CropBlock.AGE) == 0,
+                    "unprotected neighbors must still be harvested when only the center is denied");
+            player.discard();
+            helper.succeed();
+        } finally {
+            Denier.disarm();
+        }
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void scytheBreakingMidSweepStopsCleanly(GameTestHelper helper) {
+        fillField(helper, matureWheat());
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        player.setGameMode(GameType.SURVIVAL);
+        // One durability left: the scythe breaks on the first crop of the sweep.
+        ItemStack scythe = new ItemStack(CultivationItems.IRON_SCYTHE);
+        scythe.setDamageValue(scythe.getMaxDamage() - 1);
+        player.setItemInHand(InteractionHand.MAIN_HAND, scythe);
+
+        breakCenter(helper, player);
+
+        helper.assertTrue(player.getMainHandItem().getCount() == 0,
+                "a scythe that breaks mid-sweep must end empty, never a negative-count stack");
+        // The break stops the sweep, so the center (reached fifth) is never harvested.
+        helper.assertTrue(helper.getBlockState(CENTER).getValue(CropBlock.AGE) == CropBlock.MAX_AGE,
+                "the sweep must stop once the tool breaks, leaving later blocks unharvested");
+        player.discard();
+        helper.succeed();
+    }
+
     // --- helpers ---
 
     /**

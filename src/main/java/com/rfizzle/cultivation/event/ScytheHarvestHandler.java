@@ -98,12 +98,22 @@ public final class ScytheHarvestHandler implements PlayerBlockBreakEvents.Before
                 if (profile == null) {
                     continue; // immature, stem, non-crop, or empty — untouched
                 }
-                boolean center0 = pos.equals(center);
-                if (!center0 && !PlayerBlockBreakEvents.BEFORE.invoker()
+                // Replay the break event for every position, the center included, so
+                // a protection/claim mod that registered after Cultivation still gets
+                // to veto it — the SWEEPING guard makes this handler's own re-entrant
+                // vote a no-op, leaving only the other listeners a fresh say.
+                if (!PlayerBlockBreakEvents.BEFORE.invoker()
                         .beforeBlockBreak(level, player, pos, state, level.getBlockEntity(pos))) {
                     continue; // a protection/claim mod denied this block
                 }
                 harvest(level, player, tool, pos, state, profile);
+                if (tool.isEmpty()) {
+                    // The scythe broke on this crop; a broken tool can't keep reaping.
+                    break;
+                }
+            }
+            if (tool.isEmpty()) {
+                break;
             }
         }
         level.playSound(null, center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5,
