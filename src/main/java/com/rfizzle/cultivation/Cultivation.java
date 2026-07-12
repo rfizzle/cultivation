@@ -3,6 +3,7 @@ package com.rfizzle.cultivation;
 import com.rfizzle.cultivation.attachment.CultivationAttachments;
 import com.rfizzle.cultivation.command.CultivationCommand;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.criteria.CultivationCriteria;
 import com.rfizzle.cultivation.effect.CultivationEffects;
 import com.rfizzle.cultivation.event.ScytheHarvestHandler;
 import com.rfizzle.cultivation.event.SoilInteractionHandler;
@@ -25,6 +26,7 @@ public class Cultivation implements ModInitializer {
         CultivationConfig.get();
         CultivationItems.register();
         CultivationEffects.register();
+        CultivationCriteria.register();
         CultivationAttachments.init();
         SoilClockState.register();
         SoilInteractionHandler.register();

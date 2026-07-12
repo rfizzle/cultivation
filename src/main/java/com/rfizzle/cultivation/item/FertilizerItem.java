@@ -1,9 +1,11 @@
 package com.rfizzle.cultivation.item;
 
+import com.rfizzle.cultivation.criteria.CultivationCriteria;
 import com.rfizzle.cultivation.soil.Fertilizer;
 import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -41,6 +43,11 @@ public class FertilizerItem extends Item {
         Player player = context.getPlayer();
         if (player == null || !player.getAbilities().instabuild) {
             context.getItemInHand().shrink(1);
+        }
+        // Player-driven only: the villager stewardship dose reaches Fertilizer
+        // #applyDose with a null player and grants nothing (§10).
+        if (player instanceof ServerPlayer serverPlayer) {
+            CultivationCriteria.LONG_TERM_INVESTMENT.trigger(serverPlayer);
         }
         return InteractionResult.sidedSuccess(false);
     }

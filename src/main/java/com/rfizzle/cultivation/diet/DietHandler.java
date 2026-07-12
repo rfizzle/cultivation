@@ -4,6 +4,7 @@ import com.rfizzle.cultivation.api.CultivationFoodCallback;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.criteria.CultivationCriteria;
 import com.rfizzle.cultivation.network.DietNetworking;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -43,6 +44,12 @@ public final class DietHandler {
         DietStore.set(player, after);
         DietNetworking.sync(player);
         CultivationFoodCallback.EVENT.invoker().onFood(player, item, (float) effectiveness);
+        // A variety reset clears a non-empty diet back to the pristine state; a
+        // non-reset eat always leaves at least this bite in the history, so an
+        // empty result after a non-empty start is exactly the reset edge (§10).
+        if (after.isDefault() && !before.isDefault()) {
+            CultivationCriteria.BALANCED_TABLE.trigger(player);
+        }
         return effectiveness;
     }
 
