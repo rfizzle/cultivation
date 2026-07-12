@@ -26,9 +26,9 @@ implementation (no `src/main/resources/` tree exists yet).
 |---|---|---|
 | Sheaf brand glyph 16×16 (Jade/recipe viewers, suite footer) | `art/glyphs/sheaf-16.glyph` | `assets/cultivation/textures/gui/sheaf.png` — (not yet shipped) |
 | Fertilizer item 16×16 | `art/glyphs/fertilizer.glyph` | `assets/cultivation/textures/item/fertilizer.png` |
-| Iron scythe item 16×16 | `art/glyphs/iron_scythe.glyph` | `assets/cultivation/textures/item/iron_scythe.png` — (not yet shipped) |
-| Diamond scythe item 16×16 | `art/glyphs/diamond_scythe.glyph` | `assets/cultivation/textures/item/diamond_scythe.png` — (not yet shipped) |
-| Netherite scythe item 16×16 | `art/glyphs/netherite_scythe.glyph` | `assets/cultivation/textures/item/netherite_scythe.png` — (not yet shipped) |
+| Iron scythe item 16×16 | `art/glyphs/iron_scythe.glyph` | `assets/cultivation/textures/item/iron_scythe.png` |
+| Diamond scythe item 16×16 | `art/glyphs/diamond_scythe.glyph` | `assets/cultivation/textures/item/diamond_scythe.png` |
+| Netherite scythe item 16×16 | `art/glyphs/netherite_scythe.glyph` | `assets/cultivation/textures/item/netherite_scythe.png` |
 | Nimble effect icon 18×18 | `art/glyphs/effect_nimble.glyph` | `assets/cultivation/textures/mob_effect/nimble.png` |
 | Diligent effect icon 18×18 | `art/glyphs/effect_diligent.glyph` | `assets/cultivation/textures/mob_effect/diligent.png` |
 | Sated effect icon 18×18 | `art/glyphs/effect_sated.glyph` | `assets/cultivation/textures/mob_effect/sated.png` |

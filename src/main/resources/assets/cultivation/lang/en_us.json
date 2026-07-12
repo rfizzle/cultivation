@@ -1,5 +1,8 @@
 {
   "item.cultivation.fertilizer": "Fertilizer",
+  "item.cultivation.iron_scythe": "Iron Scythe",
+  "item.cultivation.diamond_scythe": "Diamond Scythe",
+  "item.cultivation.netherite_scythe": "Netherite Scythe",
   "effect.cultivation.nimble": "Nimble",
   "effect.cultivation.diligent": "Diligent",
   "effect.cultivation.sated": "Sated",
