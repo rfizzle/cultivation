@@ -11,11 +11,13 @@
         "ComposterOutputContainerMixin",
         "CropBlockMixin",
         "FarmBlockMixin",
+        "HarvestFarmlandMixin",
         "HoeItemMixin",
         "PitcherCropBlockMixin",
         "PlayerEatMixin",
         "PlayerExhaustionMixin",
-        "StemBlockMixin"
+        "StemBlockMixin",
+        "VillagerMixin"
     ],
     "client": [],
     "injectors": {
