@@ -158,6 +158,37 @@ public class CultivationConfig {
         return clamped;
     }
 
+    /**
+     * Serializes this config to the JSON the server→client sync ships. The whole
+     * POJO rides across so a new field reaches clients without a bespoke codec;
+     * the client only ever <em>reads</em> the server-authoritative keys back
+     * (client-only presentation keys stay local — see {@code ClientCultivationConfig}).
+     */
+    public String toSyncJson() {
+        return GSON.toJson(this);
+    }
+
+    /**
+     * Rebuilds a config from a {@link #toSyncJson()} blob: deserialize, then clamp
+     * so a hostile or malformed payload can never seat an out-of-range rule on the
+     * client. No migration runs — the sending server already carries the current
+     * schema. A parse failure degrades to defaults rather than dropping the
+     * connection.
+     */
+    public static CultivationConfig fromSyncJson(String json) {
+        try {
+            CultivationConfig config = GSON.fromJson(json, CultivationConfig.class);
+            if (config == null) {
+                config = new CultivationConfig();
+            }
+            config.clamp();
+            return config;
+        } catch (Exception e) {
+            Cultivation.LOGGER.warn("Failed to parse synced config; using defaults", e);
+            return new CultivationConfig();
+        }
+    }
+
     public static CultivationConfig get() {
         CultivationConfig local = INSTANCE;
         if (local == null) {

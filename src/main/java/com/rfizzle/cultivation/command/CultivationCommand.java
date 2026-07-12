@@ -12,6 +12,7 @@ import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.network.ConfigNetworking;
 import com.rfizzle.cultivation.soil.SoilBand;
 import com.rfizzle.cultivation.soil.SoilMath;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -234,6 +235,9 @@ public final class CultivationCommand {
                     "command.cultivation.reload_failed", String.valueOf(e.getMessage())));
             return 0;
         }
+        // Push the freshly loaded rules to every connected client so their config-derived
+        // surfaces (diet tooltips) reflect the change without a rejoin.
+        ConfigNetworking.syncAll(src.getServer());
         src.sendSuccess(() -> Component.translatable("command.cultivation.reload"), true);
         return Command.SINGLE_SUCCESS;
     }

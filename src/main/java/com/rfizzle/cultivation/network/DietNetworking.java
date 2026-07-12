@@ -27,11 +27,9 @@ public final class DietNetworking {
 
     /** Pushes the player's current diet snapshot; empty stacks while fatigue is disabled. */
     public static void sync(ServerPlayer player) {
-        CultivationConfig config = CultivationConfig.get();
-        Map<ResourceLocation, Integer> stacks = config.enableDietaryFatigue
+        Map<ResourceLocation, Integer> stacks = CultivationConfig.get().enableDietaryFatigue
                 ? DietStore.get(player).stacks()
                 : Map.of();
-        ServerPlayNetworking.send(player,
-                new DietSyncS2CPayload(stacks, (float) config.fatiguePerRepeat, (float) config.fatigueFloor));
+        ServerPlayNetworking.send(player, new DietSyncS2CPayload(stacks));
     }
 }
