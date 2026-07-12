@@ -34,7 +34,8 @@
             "com.rfizzle.cultivation.gametest.SoilOverlaySyncGameTest",
             "com.rfizzle.cultivation.gametest.CultivationCommandGameTest",
             "com.rfizzle.cultivation.gametest.AdvancementGameTest"
-        ]
+        ],
+        "modmenu": ["com.rfizzle.cultivation.compat.modmenu.CultivationModMenu"]
     },
     "suggests": {
         "modmenu": "*",
