@@ -37,9 +37,16 @@ abstract class CakeBlockMixin {
         if (player instanceof ServerPlayer serverPlayer) {
             double effectiveness = DietHandler.consume(serverPlayer, Items.CAKE);
             int nutrition = args.get(0);
-            float saturation = args.get(1);
-            args.set(0, DietData.scaledNutrition(nutrition, effectiveness));
-            args.set(1, (float) (saturation * effectiveness));
+            float saturationModifier = args.get(1);
+            int scaledNutrition = DietData.scaledNutrition(nutrition, effectiveness);
+            args.set(0, scaledNutrition);
+            // FoodData.eat(int, float) treats the float as a saturation *modifier*: restored
+            // saturation is nutrition * modifier * 2, so scaling both nutrition and the modifier
+            // would apply fatigue twice. Rebase the modifier against the scaled nutrition so
+            // restored saturation scales by effectiveness exactly once, matching the food path.
+            args.set(1, scaledNutrition > 0
+                    ? (float) ((double) nutrition * saturationModifier * effectiveness / scaledNutrition)
+                    : 0.0F);
         }
     }
 }

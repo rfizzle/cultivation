@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.api.CultivationAPI;
+import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -20,6 +21,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * The dietary-fatigue seams driven through the real world (SPEC §3): the
@@ -88,6 +90,30 @@ public class DietFatigueGameTest implements FabricGameTest {
         helper.assertTrue(DietStore.get(player).stackCount(idOf(Items.CAKE)) == 1, "the slice recorded a cake stack");
         assertClose(helper, CultivationAPI.getFoodEffectiveness(player, new ItemStack(Items.CAKE)),
                 0.9F, "a second slice would eat at reduced strength");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void cakeSliceScalesRestoredSaturationOnce(GameTestHelper helper) {
+        FoodRecorder.ensureRegistered();
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        player.getFoodData().setFoodLevel(6);
+        player.getFoodData().setSaturation(0.0F);
+        // Pre-fatigue cake to the floor so this slice eats at effectiveness 0.5.
+        DietStore.set(player, new DietData(Map.of(idOf(Items.CAKE), 5), List.of()));
+
+        BlockPos cake = new BlockPos(1, 1, 1);
+        helper.setBlock(cake, Blocks.CAKE);
+        BlockPos abs = helper.absolutePos(cake);
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false);
+        helper.getLevel().getBlockState(abs).useWithoutItem(helper.getLevel(), player, hit);
+
+        // Vanilla restores nutrition 2, saturation 2*0.1*2 = 0.4. At effectiveness 0.5 the SPEC
+        // wants nutrition max(1, round(1.0)) = 1 and saturation 0.4*0.5 = 0.2 — not 0.1 (eff^2).
+        assertClose(helper, player.getFoodData().getSaturationLevel(), 0.2F,
+                "cake saturation scales by effectiveness once, not twice");
+        helper.assertTrue(player.getFoodData().getFoodLevel() == 7,
+                "cake nutrition scales to 1 at the floor (6 + 1)");
         helper.succeed();
     }
 
