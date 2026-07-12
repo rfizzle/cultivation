@@ -32,8 +32,10 @@ implementation (no `src/main/resources/` tree exists yet).
 | Nimble effect icon 18×18 | `art/glyphs/effect_nimble.glyph` | `assets/cultivation/textures/mob_effect/nimble.png` |
 | Diligent effect icon 18×18 | `art/glyphs/effect_diligent.glyph` | `assets/cultivation/textures/mob_effect/diligent.png` |
 | Sated effect icon 18×18 | `art/glyphs/effect_sated.glyph` | `assets/cultivation/textures/mob_effect/sated.png` |
-| Tired-soil overlay 16×16 (code-bound, tiling) | `art/glyphs/soil_tired.glyph` | `assets/cultivation/textures/overlay/soil_tired.png` — (not yet shipped) |
-| Exhausted-soil overlay 16×16 (code-bound, tiling) | `art/glyphs/soil_exhausted.glyph` | `assets/cultivation/textures/overlay/soil_exhausted.png` — (not yet shipped) |
+| Tired-soil overlay 16×16 (code-bound, tiling) | `art/glyphs/soil_tired.glyph` | `assets/cultivation/textures/overlay/soil_tired.png` |
+| Exhausted-soil overlay 16×16 (code-bound, tiling) | `art/glyphs/soil_exhausted.glyph` | `assets/cultivation/textures/overlay/soil_exhausted.png` |
+| Fertilized-soil fleck overlay 16×16 (code-bound, tiling) | `art/glyphs/soil_fertilized.glyph` | `assets/cultivation/textures/overlay/soil_fertilized.png` |
+| Enriched-soil fleck overlay 16×16 (code-bound, tiling) | `art/glyphs/soil_enriched.glyph` | `assets/cultivation/textures/overlay/soil_enriched.png` |
 
 ## Not yet created
 
