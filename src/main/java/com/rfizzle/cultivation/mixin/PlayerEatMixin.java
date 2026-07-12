@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.rfizzle.cultivation.diet.DietHandler;
+import com.rfizzle.cultivation.meal.MealBuffs;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
@@ -38,6 +39,10 @@ abstract class PlayerEatMixin {
         if ((Object) this instanceof ServerPlayer player) {
             double effectiveness = DietHandler.consume(player, stack.getItem());
             original.call(foodData, DietHandler.scale(food, effectiveness));
+            // Meal buffs (SPEC §4) ride the same seam but gate on their own config, independent
+            // of the fatigue toggle DietHandler#consume checks. This runs before super.eat rolls
+            // the food's own effects, so a suspicious stew's vanilla effect still applies untouched.
+            MealBuffs.grant(player, stack.getItem());
         } else {
             original.call(foodData, food);
         }
