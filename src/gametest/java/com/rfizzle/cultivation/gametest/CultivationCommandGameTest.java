@@ -1,0 +1,127 @@
+package com.rfizzle.cultivation.gametest;
+
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.tree.CommandNode;
+import com.rfizzle.cultivation.api.CultivationAPI;
+import com.rfizzle.cultivation.attachment.DietData;
+import com.rfizzle.cultivation.attachment.DietStore;
+import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Blocks;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Drives the {@code /cultivation} tree (SPEC §9) through the real dispatcher:
+ * per-node permission gating, and the two mutations plus reload run end-to-end.
+ * The pure formatting is covered at Tier 1 in {@code CommandTextTest}; these
+ * prove the tree is wired, gated, and routes writes through the stores.
+ */
+public class CultivationCommandGameTest implements FabricGameTest {
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void treeGatesEachNodeByPermission(GameTestHelper helper) {
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandNode<CommandSourceStack> root = server.getCommands().getDispatcher().getRoot().getChild("cultivation");
+        helper.assertTrue(root != null, "the /cultivation root is registered");
+
+        CommandSourceStack nonOp = server.createCommandSourceStack().withPermission(0);
+        CommandSourceStack op = server.createCommandSourceStack().withPermission(2);
+
+        CommandNode<CommandSourceStack> soil = root.getChild("soil");
+        CommandNode<CommandSourceStack> diet = root.getChild("diet");
+        helper.assertTrue(soil.canUse(nonOp), "soil read is public");
+        helper.assertTrue(diet.canUse(nonOp), "diet read is public");
+        helper.assertFalse(soil.getChild("set").canUse(nonOp), "soil set denies non-ops");
+        helper.assertTrue(soil.getChild("set").canUse(op), "soil set allows ops");
+        helper.assertFalse(diet.getChild("reset").canUse(nonOp), "diet reset denies non-ops");
+        helper.assertTrue(diet.getChild("reset").canUse(op), "diet reset allows ops");
+        helper.assertFalse(root.getChild("reload").canUse(nonOp), "reload denies non-ops");
+        helper.assertTrue(root.getChild("reload").canUse(op), "reload allows ops");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void soilSetMutatesTheLookedAtFarmland(GameTestHelper helper) throws CommandSyntaxException {
+        BlockPos rel = new BlockPos(1, 1, 1);
+        helper.setBlock(rel, Blocks.FARMLAND);
+        BlockPos abs = helper.absolutePos(rel);
+
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        aimStraightDownAt(player, abs);
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
+
+        int result = server.getCommands().getDispatcher().execute("cultivation soil set 40", op);
+        helper.assertTrue(result > 0, "soil set on targeted farmland succeeds");
+        float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), abs).orElseThrow().fertility();
+        helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4, "fertility is set to 40, got " + fertility);
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void soilReportFailsWhenNotLookingAtFarmland(GameTestHelper helper) throws CommandSyntaxException {
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        // Aim up at open sky — nothing to hit within reach.
+        player.moveTo(player.getX(), player.getY(), player.getZ(), 0.0F, -90.0F);
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack source = player.createCommandSourceStack();
+
+        int result = server.getCommands().getDispatcher().execute("cultivation soil", source);
+        helper.assertTrue(result == 0, "soil report fails with no farmland in sight");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void dietResetClearsTheTargetThroughTheStore(GameTestHelper helper) throws CommandSyntaxException {
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        ResourceLocation carrot = BuiltInRegistries.ITEM.getKey(Items.CARROT);
+        DietStore.set(player, new DietData(Map.of(carrot, 3), List.of(carrot)));
+        helper.assertFalse(DietStore.get(player).isDefault(), "player is fatigued before the reset");
+
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
+        int result = server.getCommands().getDispatcher().execute("cultivation diet reset", op);
+
+        helper.assertTrue(result > 0, "diet reset succeeds");
+        helper.assertTrue(DietStore.get(player).isDefault(), "diet reset clears the player's diet data");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void dietReadReportsFatigueForTheCaller(GameTestHelper helper) throws CommandSyntaxException {
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        ResourceLocation carrot = BuiltInRegistries.ITEM.getKey(Items.CARROT);
+        DietStore.set(player, new DietData(Map.of(carrot, 2), List.of(carrot)));
+
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack source = player.createCommandSourceStack();
+        int result = server.getCommands().getDispatcher().execute("cultivation diet", source);
+
+        helper.assertTrue(result > 0, "diet read succeeds for a fatigued caller");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void reloadSucceedsForOps(GameTestHelper helper) throws CommandSyntaxException {
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack op = server.createCommandSourceStack().withPermission(2);
+        int result = server.getCommands().getDispatcher().execute("cultivation reload", op);
+        helper.assertTrue(result > 0, "reload succeeds for an operator source");
+        helper.succeed();
+    }
+
+    /** Places the player centered above {@code target} looking straight down, so a pick clips its top face. */
+    private static void aimStraightDownAt(ServerPlayer player, BlockPos target) {
+        player.moveTo(target.getX() + 0.5, target.getY() + 2, target.getZ() + 0.5, 0.0F, 90.0F);
+    }
+}
