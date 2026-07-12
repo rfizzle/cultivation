@@ -1,9 +1,9 @@
 {
   "nav": "Developers",
   "metaTitle": "Developers — Cultivation",
-  "metaDescription": "Cultivation's public API surface as specced: read-only soil and diet accessors, the CultivationHarvestCallback with its sanctioned mutable drops list, and the CultivationFoodCallback.",
+  "metaDescription": "Cultivation's public API surface: read-only soil and diet accessors, the CultivationHarvestCallback with its sanctioned mutable drops list, and the CultivationFoodCallback.",
   "title": "For Developers",
-  "lede": "Cultivation publishes a stable integration surface under <code>com.rfizzle.cultivation.api</code>, per the suite <a href='https://github.com/rfizzle/concord/blob/master/API-STANDARD.md' class='text-accent hover:text-accent2 underline'>API standard</a>: read-only static accessors, array-backed Fabric events, server-authoritative. Specced, pre-implementation — it lands with the first release.",
+  "lede": "Cultivation publishes a stable integration surface under <code>com.rfizzle.cultivation.api</code>, per the suite <a href='https://github.com/rfizzle/concord/blob/master/API-STANDARD.md' class='text-accent hover:text-accent2 underline'>API standard</a>: read-only static accessors, array-backed Fabric events, server-authoritative.",
   "width": "5xl",
   "sections": [
     {

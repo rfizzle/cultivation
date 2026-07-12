@@ -549,9 +549,9 @@ Per concord [`API-STANDARD.md`](../../concord/API-STANDARD.md): the only stable 
 
 - `CultivationAPI.getFertility(ServerLevel, BlockPos): float` — 0–100; `100` for untracked farmland; `-1` if the block is not farmland.
 - `CultivationAPI.getSoilInfo(ServerLevel, BlockPos): Optional<SoilInfo>` — `SoilInfo(float fertility, int enrichedChance, int fertilizerRemaining, Optional<ResourceLocation> lastCrop)`; empty if not farmland.
-- `CultivationAPI.getFoodEffectiveness(ServerPlayer, ItemStack): float` — 0.5–1.0, the multiplier the player's next eat of this item would receive.
+- `CultivationAPI.getFoodEffectiveness(ServerPlayer, ItemStack): float` — the multiplier the player's next eat of this item would receive, in `[fatigueFloor, 1.0]` (the floor is the configurable `fatigueFloor`, default `0.5`); `1.0` when dietary fatigue is disabled.
 - **`CultivationHarvestCallback`** — Fabric event fired server-side from the harvest choke point after Cultivation's own drain/bonuses: `(ServerLevel, BlockPos, BlockState crop, List<ItemStack> drops, @Nullable Entity harvester)`. The drops list is mutable — the sanctioned mutation point for siblings/third parties (e.g. quality-produce injection). A listener that throws is caught, logged, and skipped.
-- **`CultivationFoodCallback`** — Fabric event fired server-side after a food is consumed and fatigue applied: `(ServerPlayer, ItemStack, float effectivenessApplied)`. Observation only.
+- **`CultivationFoodCallback`** — Fabric event fired server-side after a food is consumed and fatigue applied: `(ServerPlayer, Item food, float effectivenessApplied)`. Observation only.
 
 ### Deliberate absences
 
