@@ -6,12 +6,14 @@
     "mixins": [
         "BlockBehaviourMixin",
         "BlockMixin",
+        "CakeBlockMixin",
         "ComposterBlockMixin",
         "ComposterOutputContainerMixin",
         "CropBlockMixin",
         "FarmBlockMixin",
         "HoeItemMixin",
         "PitcherCropBlockMixin",
+        "PlayerEatMixin",
         "StemBlockMixin"
     ],
     "client": [],
