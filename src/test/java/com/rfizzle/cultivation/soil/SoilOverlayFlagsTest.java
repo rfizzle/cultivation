@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class SoilOverlayFlagsTest {
@@ -53,6 +54,62 @@ class SoilOverlayFlagsTest {
         assertTrue(SoilOverlayFlags.isEnriched(enriched));
         assertFalse(SoilOverlayFlags.hasDose(enriched));
         assertTrue(SoilOverlayFlags.isDeviating(enriched));
+    }
+
+    private static byte band(SoilBand band) {
+        return (byte) band.ordinal();
+    }
+
+    @Test
+    void transitionBetweenTwoHealthyBandsSendsNothing() {
+        assertNull(SoilOverlayFlags.transition(band(SoilBand.RICH), band(SoilBand.FAIR)));
+        assertNull(SoilOverlayFlags.transition(band(SoilBand.FAIR), band(SoilBand.RICH)));
+    }
+
+    @Test
+    void transitionIntoAndOutOfDeviationAddsThenRemoves() {
+        SoilOverlayFlags.Transition entering =
+                SoilOverlayFlags.transition(band(SoilBand.FAIR), band(SoilBand.TIRED));
+        assertTrue(entering != null && entering.present());
+        assertEquals(band(SoilBand.TIRED), entering.flags());
+
+        SoilOverlayFlags.Transition leaving =
+                SoilOverlayFlags.transition(band(SoilBand.TIRED), band(SoilBand.FAIR));
+        assertTrue(leaving != null && !leaving.present());
+    }
+
+    @Test
+    void transitionBetweenDeviatingBandsUpdatesFlags() {
+        SoilOverlayFlags.Transition worsening =
+                SoilOverlayFlags.transition(band(SoilBand.TIRED), band(SoilBand.EXHAUSTED));
+        assertTrue(worsening != null && worsening.present());
+        assertEquals(band(SoilBand.EXHAUSTED), worsening.flags());
+    }
+
+    @Test
+    void transitionWithNoVisibleChangeSendsNothing() {
+        byte tired = band(SoilBand.TIRED);
+        assertNull(SoilOverlayFlags.transition(tired, tired));
+    }
+
+    @Test
+    void doseStartAddsAndRunOutOnHealthySoilRemoves() {
+        byte fair = band(SoilBand.FAIR);
+        byte fairDosed = (byte) (fair | SoilOverlayFlags.DOSE_BIT);
+        SoilOverlayFlags.Transition started = SoilOverlayFlags.transition(fair, fairDosed);
+        assertTrue(started != null && started.present() && SoilOverlayFlags.hasDose(started.flags()));
+
+        SoilOverlayFlags.Transition ranOut = SoilOverlayFlags.transition(fairDosed, fair);
+        assertTrue(ranOut != null && !ranOut.present());
+    }
+
+    @Test
+    void doseRunOutOnStillTiredSoilKeepsTheCrack() {
+        byte tired = band(SoilBand.TIRED);
+        byte tiredDosed = (byte) (tired | SoilOverlayFlags.DOSE_BIT);
+        SoilOverlayFlags.Transition ranOut = SoilOverlayFlags.transition(tiredDosed, tired);
+        assertTrue(ranOut != null && ranOut.present());
+        assertEquals(tired, ranOut.flags());
     }
 
     @Test

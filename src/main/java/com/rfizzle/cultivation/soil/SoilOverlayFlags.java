@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.soil;
 
 import com.rfizzle.cultivation.attachment.SoilData;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The 4-bit overlay flag byte that soil sync carries per position
@@ -26,7 +27,20 @@ public final class SoilOverlayFlags {
     public static final int DOSE_BIT = 0b0100;
     public static final int ENRICHED_BIT = 0b1000;
 
+    // Cached to avoid SoilBand.values() cloning the backing array once per drawn
+    // position per frame in the renderer's hot path.
+    private static final SoilBand[] BANDS = SoilBand.values();
+
+    private static final Transition REMOVE = new Transition(false, (byte) 0);
+
     private SoilOverlayFlags() {
+    }
+
+    /**
+     * A single-position overlay delta: {@code present == false} drops the position
+     * client-side, otherwise {@code flags} is the new overlay byte.
+     */
+    public record Transition(boolean present, byte flags) {
     }
 
     /** Packs a position's soil state into the overlay flag byte. */
@@ -44,7 +58,26 @@ public final class SoilOverlayFlags {
 
     /** The band component of a flag byte. */
     public static SoilBand band(byte flags) {
-        return SoilBand.values()[flags & BAND_MASK];
+        return BANDS[flags & BAND_MASK];
+    }
+
+    /**
+     * The overlay delta a write should push given the pre- and post-write flag
+     * bytes, or {@code null} when the client-visible representation is unchanged
+     * (both non-deviating, or both deviating with identical flags). Pure, so the
+     * full transition table unit-tests without a server.
+     */
+    @Nullable
+    public static Transition transition(byte before, byte after) {
+        boolean beforeVisible = isDeviating(before);
+        boolean afterVisible = isDeviating(after);
+        if (!beforeVisible && !afterVisible) {
+            return null;
+        }
+        if (beforeVisible && afterVisible && before == after) {
+            return null;
+        }
+        return afterVisible ? new Transition(true, after) : REMOVE;
     }
 
     public static boolean hasDose(byte flags) {

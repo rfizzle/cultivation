@@ -15,6 +15,22 @@ class SoilOverlayMathTest {
     }
 
     @Test
+    void chunkDistanceIsChebyshevAndSymmetric() {
+        assertEquals(0L, SoilOverlayMath.chunkChebyshevDistance(3, -4, 3, -4));
+        assertEquals(5L, SoilOverlayMath.chunkChebyshevDistance(0, 0, 5, 2));
+        assertEquals(5L, SoilOverlayMath.chunkChebyshevDistance(5, 2, 0, 0));
+    }
+
+    @Test
+    void chunkDistanceDoesNotOverflowOnCraftedCoordinates() {
+        // A client sending playerChunkX + Integer.MIN_VALUE would make an int
+        // subtraction wrap and Math.abs stay negative — the long path must not.
+        long distance = SoilOverlayMath.chunkChebyshevDistance(0, 0, Integer.MIN_VALUE, 0);
+        assertTrue(distance > 0, "crafted min-value coordinate must not defeat the range gate");
+        assertTrue(distance > 66, "must exceed any real view distance (max 32 + slack)");
+    }
+
+    @Test
     void brightnessFloorAndCeilingClamp() {
         assertEquals(SoilOverlayMath.MIN_BRIGHTNESS, SoilOverlayMath.brightnessFactor(0), 1e-6);
         assertEquals(SoilOverlayMath.MIN_BRIGHTNESS, SoilOverlayMath.brightnessFactor(-5), 1e-6);

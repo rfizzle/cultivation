@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.network;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.soil.SoilOverlayMath;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -59,8 +60,10 @@ public final class SoilOverlayNetworking {
         }
         ServerLevel level = player.serverLevel();
         ChunkPos requested = new ChunkPos(payload.chunkX(), payload.chunkZ());
+        ChunkPos playerChunk = player.chunkPosition();
         int maxChunks = level.getServer().getPlayerList().getViewDistance() + 2;
-        if (chunkDistance(player.chunkPosition(), requested) > maxChunks) {
+        if (SoilOverlayMath.chunkChebyshevDistance(
+                playerChunk.x, playerChunk.z, requested.x, requested.z) > maxChunks) {
             return; // out of the player's view — never a legitimate request
         }
         if (!consumeToken(player.getUUID())) {
@@ -68,11 +71,6 @@ public final class SoilOverlayNetworking {
         }
         List<SoilBandsS2CPayload.Entry> entries = SoilOverlayServer.collectChunkEntries(level, requested);
         ServerPlayNetworking.send(player, new SoilBandsS2CPayload(requested.toLong(), entries));
-    }
-
-    /** Chebyshev (chunk-grid) distance between two chunk positions. */
-    private static int chunkDistance(ChunkPos a, ChunkPos b) {
-        return Math.max(Math.abs(a.x - b.x), Math.abs(a.z - b.z));
     }
 
     private static boolean consumeToken(UUID player) {

@@ -14,7 +14,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -82,15 +81,10 @@ public final class SoilOverlayServer {
         }
         byte beforeFlags = SoilOverlayFlags.computeFlags(before, config.tiredThreshold);
         byte afterFlags = SoilOverlayFlags.computeFlags(after, config.tiredThreshold);
-        boolean beforeVisible = SoilOverlayFlags.isDeviating(beforeFlags);
-        boolean afterVisible = SoilOverlayFlags.isDeviating(afterFlags);
-        if (!beforeVisible && !afterVisible) {
-            return; // nothing shown before or after
+        SoilOverlayFlags.Transition transition = SoilOverlayFlags.transition(beforeFlags, afterFlags);
+        if (transition != null) {
+            sendDelta(level, pos, transition.present(), transition.flags());
         }
-        if (beforeVisible && afterVisible && beforeFlags == afterFlags) {
-            return; // same overlay
-        }
-        sendDelta(level, pos, afterVisible ? afterFlags : null);
     }
 
     /**
@@ -110,14 +104,14 @@ public final class SoilOverlayServer {
         }
         byte flags = SoilOverlayFlags.computeFlags(data, config.tiredThreshold);
         if (SoilOverlayFlags.isDeviating(flags)) {
-            sendDelta(level, pos, null);
+            sendDelta(level, pos, false, (byte) 0);
         }
     }
 
-    private static void sendDelta(ServerLevel level, BlockPos pos, @Nullable Byte flags) {
+    private static void sendDelta(ServerLevel level, BlockPos pos, boolean present, byte flags) {
         ChunkPos chunkPos = new ChunkPos(pos);
-        SoilBandDeltaS2CPayload payload = new SoilBandDeltaS2CPayload(
-                chunkPos.toLong(), SoilStore.pack(pos), flags != null, flags != null ? flags : 0);
+        SoilBandDeltaS2CPayload payload =
+                new SoilBandDeltaS2CPayload(chunkPos.toLong(), SoilStore.pack(pos), present, flags);
         for (ServerPlayer player : PlayerLookup.tracking(level, chunkPos)) {
             ServerPlayNetworking.send(player, payload);
         }

@@ -13,6 +13,18 @@ public final class SoilOverlayMath {
     private SoilOverlayMath() {
     }
 
+    /**
+     * Chunk-grid (Chebyshev) distance between two chunk coordinates, computed in
+     * {@code long} so a crafted request coordinate can't overflow the subtraction
+     * and defeat the C2S view-distance gate ({@code Math.abs(Integer.MIN_VALUE)}
+     * stays negative).
+     */
+    public static long chunkChebyshevDistance(int ax, int az, int bx, int bz) {
+        long dx = Math.abs((long) ax - bx);
+        long dz = Math.abs((long) az - bz);
+        return Math.max(dx, dz);
+    }
+
     /** True when a camera-relative offset is within {@code maxBlocks} (compared squared). */
     public static boolean withinRenderDistanceSq(double dx, double dy, double dz, double maxBlocks) {
         double max = Math.max(0.0, maxBlocks);

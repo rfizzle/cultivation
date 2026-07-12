@@ -27,8 +27,8 @@ import org.joml.Matrix4f;
  * ground. Cracks flush before flecks so investment overlays compose on top.
  */
 public final class SoilOverlayRenderer {
-    /** Farmland's top face sits at 15/16; lift the quad a hair above it to avoid z-fighting. */
-    private static final float SURFACE_Y = 0.9375F + 0.02F;
+    /** Farmland's top face sits at 15/16; SPEC §1 lifts the quad 1px (1/16) above it. */
+    private static final float SURFACE_Y = 0.9375F + 0.0625F;
 
     private SoilOverlayRenderer() {
     }
@@ -58,10 +58,9 @@ public final class SoilOverlayRenderer {
         BlockPos.MutableBlockPos scratch = new BlockPos.MutableBlockPos();
 
         ClientSoilOverlayData.forEach((chunkPos, packedPos, flags) -> {
-            ChunkPos chunk = new ChunkPos(chunkPos);
-            int blockX = chunk.getMinBlockX() + SoilStore.unpackX(packedPos);
+            int blockX = (ChunkPos.getX(chunkPos) << 4) + SoilStore.unpackX(packedPos);
             int blockY = SoilStore.unpackY(packedPos);
-            int blockZ = chunk.getMinBlockZ() + SoilStore.unpackZ(packedPos);
+            int blockZ = (ChunkPos.getZ(chunkPos) << 4) + SoilStore.unpackZ(packedPos);
 
             double dx = blockX + 0.5 - cam.x;
             double dy = blockY + 0.5 - cam.y;
