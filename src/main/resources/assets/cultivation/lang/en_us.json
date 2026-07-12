@@ -7,5 +7,22 @@
   "effect.cultivation.diligent": "Diligent",
   "effect.cultivation.sated": "Sated",
   "tooltip.cultivation.fatigue.appeal": "Losing its appeal (-%s%%)",
-  "tooltip.cultivation.fatigue.tired": "Thoroughly tired of this (-%s%%)"
+  "tooltip.cultivation.fatigue.tired": "Thoroughly tired of this (-%s%%)",
+  "command.cultivation.soil.report": "Fertility %1$s%% (%2$s)",
+  "command.cultivation.soil.crop": " — last crop: %s",
+  "command.cultivation.soil.enriched": ". Enriched +%s%%",
+  "command.cultivation.soil.fertilizer": ". Fertilizer %1$s/%2$s",
+  "command.cultivation.soil.band.rich": "Rich",
+  "command.cultivation.soil.band.fair": "Fair",
+  "command.cultivation.soil.band.tired": "Tired",
+  "command.cultivation.soil.band.exhausted": "Exhausted",
+  "command.cultivation.soil.not_farmland": "No farmland in sight within %s blocks.",
+  "command.cultivation.soil.set": "Set fertility to %1$s%% at %2$s.",
+  "command.cultivation.diet.none": "No dietary fatigue.",
+  "command.cultivation.diet.fatigue": "Fatigue: %s",
+  "command.cultivation.diet.entry": "%1$s −%2$s%%",
+  "command.cultivation.diet.recent": "Recent: %s",
+  "command.cultivation.diet.reset": "Cleared dietary fatigue for %s.",
+  "command.cultivation.reload": "Reloaded Cultivation config.",
+  "command.cultivation.reload_failed": "Config reload failed: %s"
 }
