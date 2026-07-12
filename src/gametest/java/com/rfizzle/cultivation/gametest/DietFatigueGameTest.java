@@ -118,6 +118,28 @@ public class DietFatigueGameTest implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void foodPathScalesRestoredSaturationOnce(GameTestHelper helper) {
+        FoodRecorder.ensureRegistered();
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        player.getFoodData().setFoodLevel(6);
+        player.getFoodData().setSaturation(0.0F);
+        // Pre-fatigue steak to the floor so this eat lands at effectiveness 0.5.
+        DietStore.set(player, new DietData(Map.of(idOf(Items.COOKED_BEEF), 5), List.of()));
+
+        eat(helper, player, Items.COOKED_BEEF);
+
+        // Steak's FoodProperties#saturation is the absolute restored saturation, 8*0.8*2 = 12.8,
+        // and Player#eat adds it directly via FoodData#eat(FoodProperties). At effectiveness 0.5
+        // the SPEC wants nutrition max(1, round(4.0)) = 4 and saturation 12.8*0.5 = 6.4 — asserting
+        // it stays 6.4 guards the food path from a cake-style double-scale (which would over-restore).
+        assertClose(helper, player.getFoodData().getSaturationLevel(), 6.4F,
+                "steak saturation scales by effectiveness exactly once");
+        helper.assertTrue(player.getFoodData().getFoodLevel() == 10,
+                "steak nutrition scales to 4 at the floor (6 + 4)");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void disabledConfigLeavesEatsUnscaledAndUnrecorded(GameTestHelper helper) {
         FoodRecorder.ensureRegistered();
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);

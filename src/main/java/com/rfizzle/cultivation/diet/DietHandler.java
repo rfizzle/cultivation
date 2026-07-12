@@ -57,6 +57,11 @@ public final class DietHandler {
             return food;
         }
         int nutrition = DietData.scaledNutrition(food.nutrition(), effectiveness);
+        // FoodProperties#saturation is already the absolute restored saturation (built as
+        // nutrition * modifier * 2), and Player#eat routes through FoodData#eat(FoodProperties)
+        // -> add(nutrition, saturation), which adds it directly. So scaling it by effectiveness
+        // once matches SPEC §3 exactly. (The cake seam is different: CakeBlock#eat calls the
+        // FoodData#eat(int, float) overload with a raw modifier, so CakeBlockMixin has to rebase.)
         float saturation = (float) (food.saturation() * effectiveness);
         return new FoodProperties(
                 nutrition, saturation, food.canAlwaysEat(), food.eatSeconds(), food.usingConvertsTo(), food.effects());
