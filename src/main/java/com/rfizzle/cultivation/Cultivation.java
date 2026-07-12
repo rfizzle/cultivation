@@ -7,6 +7,7 @@ import com.rfizzle.cultivation.event.ScytheHarvestHandler;
 import com.rfizzle.cultivation.event.SoilInteractionHandler;
 import com.rfizzle.cultivation.item.CultivationItems;
 import com.rfizzle.cultivation.network.DietNetworking;
+import com.rfizzle.cultivation.network.SoilOverlayNetworking;
 import com.rfizzle.cultivation.soil.SoilClockState;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.ResourceLocation;
@@ -28,6 +29,7 @@ public class Cultivation implements ModInitializer {
         SoilInteractionHandler.register();
         ScytheHarvestHandler.register();
         DietNetworking.register();
+        SoilOverlayNetworking.register();
         LOGGER.info("Cultivation initialized");
     }
 

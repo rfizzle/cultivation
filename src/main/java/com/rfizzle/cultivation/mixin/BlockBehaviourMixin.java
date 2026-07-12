@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.rfizzle.cultivation.harvest.HarvestHandler;
+import com.rfizzle.cultivation.network.SoilOverlayServer;
 import com.rfizzle.cultivation.soil.FarmlandReversion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -48,6 +49,10 @@ abstract class BlockBehaviourMixin {
             return;
         }
         if (level instanceof ServerLevel serverLevel) {
+            // Removal delta first, while the pre-removal soil state is still intact:
+            // a crack-only (uninvested) block never reaches FarmlandReversion's write,
+            // so the overlay clear must not depend on it (SPEC §1).
+            SoilOverlayServer.notifyFarmlandRemoved(serverLevel, pos);
             FarmlandReversion.onFarmlandRemoved(serverLevel, pos);
         }
     }

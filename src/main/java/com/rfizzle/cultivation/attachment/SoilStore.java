@@ -72,6 +72,16 @@ public final class SoilStore {
         return entries.isEmpty();
     }
 
+    /**
+     * Visits every stored entry as {@code (data, packedKey)}. Iteration order is
+     * unspecified; the soil-overlay response builder ({@link
+     * com.rfizzle.cultivation.network.SoilOverlayServer}) re-derives world
+     * positions from the keys and does not depend on order.
+     */
+    public void forEach(java.util.function.ObjIntConsumer<SoilData> action) {
+        entries.int2ObjectEntrySet().forEach(entry -> action.accept(entry.getValue(), entry.getIntKey()));
+    }
+
     public int size() {
         return entries.size();
     }

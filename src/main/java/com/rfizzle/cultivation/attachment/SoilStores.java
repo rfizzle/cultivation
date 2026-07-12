@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.attachment;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.network.SoilOverlayServer;
 import com.rfizzle.cultivation.soil.SoilClockState;
 import com.rfizzle.cultivation.soil.SoilMath;
 import net.minecraft.core.BlockPos;
@@ -79,19 +80,22 @@ public final class SoilStores {
         } else if (settleFirst) {
             data = settled(level, pos, data, now);
         }
-        store.put(key, op.apply(data));
+        SoilData before = data;
+        SoilData after = op.apply(before);
+        store.put(key, after);
         if (store.isEmpty()) {
             if (!created) {
                 chunk.removeAttached(CultivationAttachments.SOIL);
                 chunk.setUnsaved(true);
             }
-            return;
-        }
-        if (created) {
+        } else if (created) {
             chunk.setAttached(CultivationAttachments.SOIL, store);
         } else {
             chunk.setUnsaved(true);
         }
+        // Overlay sync (SPEC §1): every write is the single seam where a position's
+        // visible band/dose/enrichment can change, so the delta push rides here.
+        SoilOverlayServer.notifyFlagChange(level, pos, before, after);
     }
 
     private static SoilData settled(ServerLevel level, BlockPos pos, SoilData data, long now) {
