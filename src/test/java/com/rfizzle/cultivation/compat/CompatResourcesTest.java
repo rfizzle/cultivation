@@ -58,4 +58,26 @@ class CompatResourcesTest {
             assertNonBlank(lang, spec.tooltipKey());
         }
     }
+
+    /** Keys the Jade/WTHIT soil and crop tooltip formatters emit (mc-probe-tooltips). */
+    private static final String[] PROBE_TOOLTIP_KEYS = {
+            "tooltip.cultivation.soil.fertility",
+            "tooltip.cultivation.soil.band.rich",
+            "tooltip.cultivation.soil.band.fair",
+            "tooltip.cultivation.soil.band.tired",
+            "tooltip.cultivation.soil.band.exhausted",
+            "tooltip.cultivation.soil.enriched",
+            "tooltip.cultivation.soil.fertilizer",
+            "tooltip.cultivation.soil.crop",
+            "tooltip.cultivation.crop.growth",
+            "tooltip.cultivation.crop.polyculture",
+    };
+
+    @Test
+    void everyProbeTooltipKeyIsLocalized() {
+        JsonObject lang = lang();
+        for (String key : PROBE_TOOLTIP_KEYS) {
+            assertNonBlank(lang, key);
+        }
+    }
 }

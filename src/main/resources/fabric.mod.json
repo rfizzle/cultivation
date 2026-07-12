@@ -33,9 +33,11 @@
             "com.rfizzle.cultivation.gametest.VillagerStewardshipGameTest",
             "com.rfizzle.cultivation.gametest.SoilOverlaySyncGameTest",
             "com.rfizzle.cultivation.gametest.CultivationCommandGameTest",
-            "com.rfizzle.cultivation.gametest.AdvancementGameTest"
+            "com.rfizzle.cultivation.gametest.AdvancementGameTest",
+            "com.rfizzle.cultivation.gametest.ProbeTooltipGameTest"
         ],
-        "modmenu": ["com.rfizzle.cultivation.compat.modmenu.CultivationModMenu"]
+        "modmenu": ["com.rfizzle.cultivation.compat.modmenu.CultivationModMenu"],
+        "jade": ["com.rfizzle.cultivation.compat.jade.CultivationJadePlugin"]
     },
     "suggests": {
         "modmenu": "*",
