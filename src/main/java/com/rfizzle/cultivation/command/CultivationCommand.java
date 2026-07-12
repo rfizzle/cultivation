@@ -159,6 +159,10 @@ public final class CultivationCommand {
         if (!data.stacks().isEmpty()) {
             MutableComponent entries = joinFatigue(data, CultivationConfig.get());
             src.sendSuccess(() -> Component.translatable("command.cultivation.diet.fatigue", entries), false);
+        } else {
+            // Foods eaten but no fatigue accrued (e.g. decay disabled) — state it plainly rather than
+            // leaving only the recent-foods line.
+            src.sendSuccess(() -> Component.translatable("command.cultivation.diet.none"), false);
         }
         List<ResourceLocation> recent = CommandText.lastFoods(data.history(), 3);
         if (!recent.isEmpty()) {
