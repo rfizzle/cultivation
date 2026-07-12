@@ -4,6 +4,7 @@ import com.rfizzle.cultivation.attachment.CultivationAttachments;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.event.SoilInteractionHandler;
 import com.rfizzle.cultivation.item.CultivationItems;
+import com.rfizzle.cultivation.network.DietNetworking;
 import com.rfizzle.cultivation.soil.SoilClockState;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.ResourceLocation;
@@ -22,6 +23,7 @@ public class Cultivation implements ModInitializer {
         CultivationAttachments.init();
         SoilClockState.register();
         SoilInteractionHandler.register();
+        DietNetworking.register();
         LOGGER.info("Cultivation initialized");
     }
 
