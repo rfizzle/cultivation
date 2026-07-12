@@ -1,9 +1,9 @@
 {
   "nav": "Features",
   "metaTitle": "Features — Cultivation",
-  "metaDescription": "Cultivation's feature set as specced: living soil fertility, the polyculture bonus, dietary fatigue, meal buffs, enriched tilling, Fertilizer, the Scythe, and villager field stewardship.",
+  "metaDescription": "Cultivation's feature set as specced: living soil fertility, the polyculture bonus, dietary fatigue, meal buffs, enriched tilling, Fertilizer, the Scythe, villager field stewardship, and the Husbandry-tab advancements.",
   "title": "Features",
-  "lede": "The eight headline systems, as specced in <a href='https://github.com/rfizzle/cultivation/blob/master/design/SPEC.md' class='text-accent hover:text-accent2 underline'>design/SPEC.md</a>. Cultivation is in development — these are commitments, not yet a shipped jar.",
+  "lede": "The eight headline systems, as specced in <a href='https://github.com/rfizzle/cultivation/blob/master/design/SPEC.md' class='text-accent hover:text-accent2 underline'>design/SPEC.md</a>, plus the advancements that mark your progress through them. Cultivation is in development — these are commitments, not yet a shipped jar.",
   "width": "5xl",
   "scale": "lg",
   "sections": [
@@ -110,6 +110,19 @@
           "type": "prose",
           "html": [
             "Villager harvests drain fertility exactly like yours. When a plot tires, its farmer replants a different crop; when a block drops below 25% fertility they leave it fallow until it recovers to 50%. Farmers pick up Fertilizer the way they pick up seeds and apply a dose to any fully spent block — never topping up a partial one — so a village's composters feed its own fields and the grow-compost-dose loop runs unaided. Village fields settle into rotating patchworks with resting strips — visibly tended ground. Nothing about who the villager is changes: names, trades, prices, and reputation are untouched."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "advancements",
+      "title": "Marks of Mastery",
+      "intro": "Four advancements in the vanilla Husbandry tab acknowledge the systems as you learn them.",
+      "blocks": [
+        {
+          "type": "prose",
+          "html": [
+            "Cultivation extends the vanilla Husbandry tab rather than opening its own. <strong>A Balanced Table</strong> marks the first time three different foods reset your dietary fatigue; <strong>Long-Term Investment</strong> the first Fertilizer dose applied to farmland; <strong>Reap What You Sow</strong> a single scythe sweep that fells all nine crops around it; and <strong>Old Growth</strong> a harvest from soil that is both enriched and still carrying a dose. No custom tab and no fanfare beyond the game's own — just the quiet acknowledgment vanilla already gives."
           ]
         }
       ]
