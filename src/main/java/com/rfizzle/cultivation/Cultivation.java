@@ -2,6 +2,7 @@ package com.rfizzle.cultivation;
 
 import com.rfizzle.cultivation.attachment.CultivationAttachments;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.effect.CultivationEffects;
 import com.rfizzle.cultivation.event.SoilInteractionHandler;
 import com.rfizzle.cultivation.item.CultivationItems;
 import com.rfizzle.cultivation.network.DietNetworking;
@@ -20,6 +21,7 @@ public class Cultivation implements ModInitializer {
         // Materializes config/cultivation.json with defaults on first launch.
         CultivationConfig.get();
         CultivationItems.register();
+        CultivationEffects.register();
         CultivationAttachments.init();
         SoilClockState.register();
         SoilInteractionHandler.register();

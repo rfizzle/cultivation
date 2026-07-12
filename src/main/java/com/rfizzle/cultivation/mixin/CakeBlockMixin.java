@@ -3,6 +3,7 @@ package com.rfizzle.cultivation.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.diet.DietHandler;
+import com.rfizzle.cultivation.meal.MealBuffs;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Items;
@@ -36,6 +37,8 @@ abstract class CakeBlockMixin {
     private static void cultivation$applyCakeFatigue(Args args, @Local(argsOnly = true) Player player) {
         if (player instanceof ServerPlayer serverPlayer) {
             double effectiveness = DietHandler.consume(serverPlayer, Items.CAKE);
+            // Each slice grants the full meal-buff trio (SPEC §4), keyed to cake like the fatigue stack.
+            MealBuffs.grant(serverPlayer, Items.CAKE);
             int nutrition = args.get(0);
             float saturationModifier = args.get(1);
             int scaledNutrition = DietData.scaledNutrition(nutrition, effectiveness);
