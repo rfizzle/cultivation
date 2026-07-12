@@ -79,10 +79,11 @@ public record SoilData(
 
     /**
      * The villager-stewardship fallow latch ({@code design/SPEC.md} §8): true
-     * while a farmer holds a position out of its replant targets. Set when a
-     * farmer finds the block below {@code villagerFallowThreshold}, cleared once
-     * it recovers to {@code villagerReplantThreshold} — the hysteresis that keeps
-     * farmers from churning at the boundary.
+     * while a farmer holds a position out of its replant targets. Settled when a
+     * seed-carrying farmer evaluates the block — set below {@code villagerFallowThreshold},
+     * cleared once fertility recovers to {@code villagerReplantThreshold} — the
+     * hysteresis that keeps farmers from churning at the boundary. A stale latch
+     * on a recovered plot is inert: a farmer with no seed cannot replant regardless.
      */
     public SoilData withVillagerFallow(boolean fallow) {
         return new SoilData(fertility, lastCrop, enrichedChance, fertilizerRemaining, lastRecoveryCheck, fallow);

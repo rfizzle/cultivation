@@ -52,6 +52,10 @@ public final class VillagerStewardship {
      * latch, and writes the latch back through the store only when it flips.
      * Fallow village blocks stay farmland and recover on the live random-tick
      * path, so the peeked fertility is current without a settle.
+     *
+     * <p>Called from the replant gate, which only fires when the farmer holds a
+     * seed, so the latch settles on the farmer's next seed-in-hand visit — a
+     * recovered plot's stale latch is inert until then (no seed, no replant).
      */
     public static boolean canReplant(ServerLevel level, BlockPos soilPos, CultivationConfig config) {
         SoilData data = SoilStores.peek(level, soilPos);
