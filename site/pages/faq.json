@@ -40,6 +40,10 @@
               "a": "Yes by design — Cultivation never replaces farmland or crop blocks; soil condition renders as a post-pass overlay, the same approach Prosperity's indicators use. Mods that replant by silently swapping block states may bypass soil drain; ones that break crops normally are fully compatible."
             },
             {
+              "q": "Does it show up in Jade, WTHIT, or a recipe viewer?",
+              "a": "Yes, when they're installed. Jade and WTHIT show a looked-at block's fertility, band, enrichment, remaining Fertilizer dose, and last crop, plus a crop's current growth modifier and polyculture status. EMI, REI, and JEI browse the scythe recipes and an info entry naming the composter as Fertilizer's source. Mod Menu and Cloth Config open a full settings screen for every option."
+            },
+            {
               "q": "Client, server, or both?",
               "a": "Both, like its siblings: the gameplay is server-authoritative, and the client side carries the config screen, soil overlays, and food tooltips."
             }

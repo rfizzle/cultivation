@@ -80,4 +80,10 @@ class CompatResourcesTest {
             assertNonBlank(lang, key);
         }
     }
+
+    @Test
+    void fertilizerInfoEntryIsLocalized() {
+        // The composter-source line shared verbatim across EMI, REI, and JEI (mc-compat).
+        assertNonBlank(lang(), "info.cultivation.fertilizer");
+    }
 }

@@ -35,6 +35,7 @@
   "tooltip.cultivation.soil.crop": "Last crop: %s",
   "tooltip.cultivation.crop.growth": "Growth: %s×",
   "tooltip.cultivation.crop.polyculture": "Polyculture bonus active",
+  "info.cultivation.fertilizer": "A full composter yields Fertilizer in place of bone meal. Apply it to farmland for a run of bonus-yield harvests.",
   "config.cultivation.title": "Cultivation",
   "config.cultivation.category.soil": "Soil Fertility",
   "config.cultivation.category.polyculture": "Polyculture",
