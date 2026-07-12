@@ -12,6 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 
 import java.util.List;
+import java.util.function.IntSupplier;
 
 /**
  * The meal-buff grant choke point ({@code design/SPEC.md} §4). The five buffed
@@ -39,6 +40,8 @@ public final class MealBuffs {
     public record Grant(Buff buff, int amplifier) {
     }
 
+    private static final Buff[] BUFFS = Buff.values();
+
     private static final ResourceLocation RABBIT_STEW = ResourceLocation.withDefaultNamespace("rabbit_stew");
     private static final ResourceLocation BEETROOT_SOUP = ResourceLocation.withDefaultNamespace("beetroot_soup");
     private static final ResourceLocation MUSHROOM_STEW = ResourceLocation.withDefaultNamespace("mushroom_stew");
@@ -47,11 +50,12 @@ public final class MealBuffs {
 
     /**
      * The meal buffs {@code itemId} grants, or an empty list if it is not one of
-     * the five buffed foods. Suspicious Stew picks one buff at level II keyed by
-     * {@code suspiciousRoll} (any int; reduced mod 3), so this stays a pure
-     * function of its inputs — the caller supplies the roll from the world's RNG.
+     * the five buffed foods. Only Suspicious Stew consults {@code suspiciousRoll}
+     * — it picks one buff at level II keyed by the supplied int (any value;
+     * reduced mod 3) — so the roll is drawn lazily and never for the other four
+     * foods, keeping this a pure function of its inputs.
      */
-    public static List<Grant> grants(ResourceLocation itemId, int suspiciousRoll) {
+    public static List<Grant> grants(ResourceLocation itemId, IntSupplier suspiciousRoll) {
         if (RABBIT_STEW.equals(itemId)) {
             return List.of(new Grant(Buff.NIMBLE, 0));
         }
@@ -65,7 +69,7 @@ public final class MealBuffs {
             return List.of(new Grant(Buff.NIMBLE, 0), new Grant(Buff.DILIGENT, 0), new Grant(Buff.SATED, 0));
         }
         if (SUSPICIOUS_STEW.equals(itemId)) {
-            Buff picked = Buff.values()[Math.floorMod(suspiciousRoll, Buff.values().length)];
+            Buff picked = BUFFS[Math.floorMod(suspiciousRoll.getAsInt(), BUFFS.length)];
             return List.of(new Grant(picked, 1));
         }
         return List.of();
@@ -90,7 +94,7 @@ public final class MealBuffs {
             return;
         }
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(item);
-        List<Grant> grants = grants(id, player.getRandom().nextInt(Buff.values().length));
+        List<Grant> grants = grants(id, () -> player.getRandom().nextInt(BUFFS.length));
         if (grants.isEmpty()) {
             return;
         }
