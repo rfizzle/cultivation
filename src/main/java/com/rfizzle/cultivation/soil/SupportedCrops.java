@@ -2,7 +2,9 @@ package com.rfizzle.cultivation.soil;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.AttachedStemBlock;
 import net.minecraft.world.level.block.Block;
@@ -88,6 +90,23 @@ public final class SupportedCrops {
                 || block instanceof AttachedStemBlock
                 || block instanceof PitcherCropBlock
                 || state.is(Blocks.TORCHFLOWER);
+    }
+
+    /**
+     * The crop identity a seed plants — the {@code cropId} to compare against a
+     * block's {@link com.rfizzle.cultivation.attachment.SoilData#lastCrop()
+     * rotation memory} (SPEC §8). Every plantable seed the farmer handles is a
+     * {@link BlockItem} (wheat/beetroot/torchflower seeds and the pitcher pod
+     * name their crop block; the carrot and potato items are their own crop's
+     * {@code ItemNameBlockItem}), so the seed's block id is exactly the id the
+     * harvest choke point records for that crop. Null for anything that is not a
+     * block-placing item.
+     */
+    @Nullable
+    public static ResourceLocation cropIdForSeed(ItemStack seed) {
+        return seed.getItem() instanceof BlockItem blockItem
+                ? BuiltInRegistries.BLOCK.getKey(blockItem.getBlock())
+                : null;
     }
 
     @Nullable

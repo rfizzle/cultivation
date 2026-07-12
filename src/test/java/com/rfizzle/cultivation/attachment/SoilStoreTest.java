@@ -44,8 +44,8 @@ class SoilStoreTest {
     @Test
     void denseStoreRoundTrips() {
         SoilStore store = new SoilStore();
-        SoilData a = new SoilData(12.0F, Optional.of(CARROTS), 10, 3, 42L);
-        SoilData b = new SoilData(97.5F, Optional.empty(), 15, 0, 7L);
+        SoilData a = new SoilData(12.0F, Optional.of(CARROTS), 10, 3, 42L, true);
+        SoilData b = new SoilData(97.5F, Optional.empty(), 15, 0, 7L, false);
         store.put(5, a);
         store.put(9000, b);
 
@@ -59,7 +59,7 @@ class SoilStoreTest {
     void serializationIsDeterministicallyOrdered() {
         SoilStore forward = new SoilStore();
         SoilStore backward = new SoilStore();
-        SoilData data = new SoilData(50.0F, Optional.of(CARROTS), 0, 0, 1L);
+        SoilData data = new SoilData(50.0F, Optional.of(CARROTS), 0, 0, 1L, false);
         for (int key : new int[]{300, 1, 77}) {
             forward.put(key, data);
         }
@@ -76,7 +76,7 @@ class SoilStoreTest {
     @Test
     void putEvictsAllDefaultEntries() {
         SoilStore store = new SoilStore();
-        store.put(5, new SoilData(40.0F, Optional.empty(), 0, 0, 3L));
+        store.put(5, new SoilData(40.0F, Optional.empty(), 0, 0, 3L, false));
         assertEquals(1, store.size());
 
         // Returning to all-default values removes the entry rather than storing it.
@@ -88,7 +88,7 @@ class SoilStoreTest {
     @Test
     void loadEvictsHandEditedDefaultEntries() {
         SoilStore store = new SoilStore();
-        store.put(1, new SoilData(30.0F, Optional.empty(), 0, 0, 0L));
+        store.put(1, new SoilData(30.0F, Optional.empty(), 0, 0, 0L, false));
         ListTag encoded = (ListTag) encode(store);
 
         // Rewrite the entry's payload to all-default values and reload.
