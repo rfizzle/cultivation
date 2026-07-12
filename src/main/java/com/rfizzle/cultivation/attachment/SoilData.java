@@ -24,14 +24,16 @@ public record SoilData(
         Optional<ResourceLocation> lastCrop,
         int enrichedChance,
         int fertilizerRemaining,
-        long lastRecoveryCheck
+        long lastRecoveryCheck,
+        boolean villagerFallow
 ) {
     public static final Codec<SoilData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.FLOAT.optionalFieldOf("fertility", SoilMath.MAX_FERTILITY).forGetter(SoilData::fertility),
             ResourceLocation.CODEC.optionalFieldOf("last_crop").forGetter(SoilData::lastCrop),
             Codec.INT.optionalFieldOf("enriched_chance", 0).forGetter(SoilData::enrichedChance),
             Codec.INT.optionalFieldOf("fertilizer_remaining", 0).forGetter(SoilData::fertilizerRemaining),
-            Codec.LONG.optionalFieldOf("last_recovery_check", 0L).forGetter(SoilData::lastRecoveryCheck)
+            Codec.LONG.optionalFieldOf("last_recovery_check", 0L).forGetter(SoilData::lastRecoveryCheck),
+            Codec.BOOL.optionalFieldOf("villager_fallow", false).forGetter(SoilData::villagerFallow)
     ).apply(instance, SoilData::new));
 
     public SoilData {
@@ -43,7 +45,7 @@ public record SoilData(
 
     /** Pristine defaults with recovery bookkeeping anchored at {@code now}. */
     public static SoilData pristine(long now) {
-        return new SoilData(SoilMath.MAX_FERTILITY, Optional.empty(), 0, 0, now);
+        return new SoilData(SoilMath.MAX_FERTILITY, Optional.empty(), 0, 0, now, false);
     }
 
     /** All-default values; {@code lastRecoveryCheck} is pure bookkeeping and never blocks eviction. */
@@ -51,36 +53,49 @@ public record SoilData(
         return fertility >= SoilMath.MAX_FERTILITY
                 && lastCrop.isEmpty()
                 && enrichedChance == 0
-                && fertilizerRemaining == 0;
+                && fertilizerRemaining == 0
+                && !villagerFallow;
     }
 
     public SoilData withFertility(float newFertility) {
-        return new SoilData(newFertility, lastCrop, enrichedChance, fertilizerRemaining, lastRecoveryCheck);
+        return new SoilData(newFertility, lastCrop, enrichedChance, fertilizerRemaining, lastRecoveryCheck, villagerFallow);
     }
 
     public SoilData withLastCrop(ResourceLocation crop) {
-        return new SoilData(fertility, Optional.of(crop), enrichedChance, fertilizerRemaining, lastRecoveryCheck);
+        return new SoilData(fertility, Optional.of(crop), enrichedChance, fertilizerRemaining, lastRecoveryCheck, villagerFallow);
     }
 
     public SoilData withRecoveryCheck(long now) {
-        return new SoilData(fertility, lastCrop, enrichedChance, fertilizerRemaining, now);
+        return new SoilData(fertility, lastCrop, enrichedChance, fertilizerRemaining, now, villagerFallow);
     }
 
     public SoilData withEnrichedChance(int chance) {
-        return new SoilData(fertility, lastCrop, chance, fertilizerRemaining, lastRecoveryCheck);
+        return new SoilData(fertility, lastCrop, chance, fertilizerRemaining, lastRecoveryCheck, villagerFallow);
     }
 
     public SoilData withFertilizerRemaining(int remaining) {
-        return new SoilData(fertility, lastCrop, enrichedChance, remaining, lastRecoveryCheck);
+        return new SoilData(fertility, lastCrop, enrichedChance, remaining, lastRecoveryCheck, villagerFallow);
+    }
+
+    /**
+     * The villager-stewardship fallow latch ({@code design/SPEC.md} §8): true
+     * while a farmer holds a position out of its replant targets. Settled when a
+     * seed-carrying farmer evaluates the block — set below {@code villagerFallowThreshold},
+     * cleared once fertility recovers to {@code villagerReplantThreshold} — the
+     * hysteresis that keeps farmers from churning at the boundary. A stale latch
+     * on a recovered plot is inert: a farmer with no seed cannot replant regardless.
+     */
+    public SoilData withVillagerFallow(boolean fallow) {
+        return new SoilData(fertility, lastCrop, enrichedChance, fertilizerRemaining, lastRecoveryCheck, fallow);
     }
 
     /**
      * Farmland reversion ({@code design/SPEC.md} §1 edge cases): the
      * block-lifetime investments — enriched chance and the Fertilizer dose —
-     * clear with the block, while fertility, rotation memory, and recovery
-     * bookkeeping persist at the position.
+     * clear with the block, while fertility, rotation memory, recovery
+     * bookkeeping, and the fallow latch persist at the position.
      */
     public SoilData withInvestmentsCleared() {
-        return new SoilData(fertility, lastCrop, 0, 0, lastRecoveryCheck);
+        return new SoilData(fertility, lastCrop, 0, 0, lastRecoveryCheck, villagerFallow);
     }
 }

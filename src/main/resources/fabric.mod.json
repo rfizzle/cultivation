@@ -29,7 +29,8 @@
             "com.rfizzle.cultivation.gametest.FertilizerGameTest",
             "com.rfizzle.cultivation.gametest.DietFatigueGameTest",
             "com.rfizzle.cultivation.gametest.MealBuffGameTest",
-            "com.rfizzle.cultivation.gametest.ScytheSweepGameTest"
+            "com.rfizzle.cultivation.gametest.ScytheSweepGameTest",
+            "com.rfizzle.cultivation.gametest.VillagerStewardshipGameTest"
         ]
     },
     "suggests": {

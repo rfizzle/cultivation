@@ -45,7 +45,7 @@
             ["<code>villagerFallowThreshold</code>", "float", "<code>25.0</code>", "0–100", "Stewardship"],
             ["<code>villagerReplantThreshold</code>", "float", "<code>50.0</code>", "0–100 (≥ fallow threshold, clamped up)", "Stewardship"]
           ],
-          "note": "Turning <code>enableSoilFertility</code> off freezes the soil system — farmland behaves exactly like vanilla and stored soil data is retained untouched. <code>composterProducesFertilizer=false</code> restores vanilla bone-meal output. <code>enableScytheHarvest=false</code> reduces scythes to ordinary single-block tools."
+          "note": "Turning <code>enableSoilFertility</code> off freezes the soil system — farmland behaves exactly like vanilla and stored soil data is retained untouched. <code>composterProducesFertilizer=false</code> restores vanilla bone-meal output. <code>enableScytheHarvest=false</code> reduces scythes to ordinary single-block tools. <code>enableVillagerStewardship=false</code> returns farmer villagers to the fully vanilla work task; <code>enableVillagerFertilizing</code> gates both Fertilizer pickup and dosing and is inert unless <code>enableFertilizer</code> is also on."
         }
       ]
     },

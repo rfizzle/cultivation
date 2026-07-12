@@ -2,6 +2,7 @@ package com.rfizzle.cultivation.soil;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
@@ -93,6 +94,25 @@ class SupportedCropsTest {
         assertNull(SupportedCrops.matureProfile(Blocks.SWEET_BERRY_BUSH.defaultBlockState()));
         assertNull(SupportedCrops.matureProfile(Blocks.POPPY.defaultBlockState()));
         assertNull(SupportedCrops.matureProfile(Blocks.AIR.defaultBlockState()));
+    }
+
+    @Test
+    void seedsMapToTheCropIdTheyPlant() {
+        // The seed's block id is the same identity the choke point records as lastCrop.
+        assertEquals("minecraft:wheat", SupportedCrops.cropIdForSeed(new ItemStack(Items.WHEAT_SEEDS)).toString());
+        assertEquals("minecraft:beetroots", SupportedCrops.cropIdForSeed(new ItemStack(Items.BEETROOT_SEEDS)).toString());
+        assertEquals("minecraft:torchflower_crop", SupportedCrops.cropIdForSeed(new ItemStack(Items.TORCHFLOWER_SEEDS)).toString());
+        assertEquals("minecraft:pitcher_crop", SupportedCrops.cropIdForSeed(new ItemStack(Items.PITCHER_POD)).toString());
+        // Carrot and potato items are their own crop's block item.
+        assertEquals("minecraft:carrots", SupportedCrops.cropIdForSeed(new ItemStack(Items.CARROT)).toString());
+        assertEquals("minecraft:potatoes", SupportedCrops.cropIdForSeed(new ItemStack(Items.POTATO)).toString());
+    }
+
+    @Test
+    void cropIdForSeedIsNullForNonBlockItems() {
+        assertNull(SupportedCrops.cropIdForSeed(new ItemStack(Items.STICK)));
+        assertNull(SupportedCrops.cropIdForSeed(new ItemStack(Items.WHEAT)));
+        assertNull(SupportedCrops.cropIdForSeed(ItemStack.EMPTY));
     }
 
     @Test

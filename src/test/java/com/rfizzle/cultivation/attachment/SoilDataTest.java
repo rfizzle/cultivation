@@ -23,7 +23,7 @@ class SoilDataTest {
 
     @Test
     void denseRecordRoundTrips() {
-        SoilData data = new SoilData(42.5F, Optional.of(WHEAT), 15, 7, 123456L);
+        SoilData data = new SoilData(42.5F, Optional.of(WHEAT), 15, 7, 123456L, true);
         assertEquals(data, roundTrip(SoilData.CODEC, data));
     }
 
@@ -41,17 +41,18 @@ class SoilDataTest {
         assertEquals(0, data.enrichedChance());
         assertEquals(0, data.fertilizerRemaining());
         assertEquals(0L, data.lastRecoveryCheck());
+        assertFalse(data.villagerFallow());
     }
 
     @Test
     void constructorClampsTamperedValues() {
-        SoilData data = new SoilData(-10.0F, Optional.empty(), 500, -3, 0L);
+        SoilData data = new SoilData(-10.0F, Optional.empty(), 500, -3, 0L, false);
         assertEquals(0.0F, data.fertility());
         assertEquals(100, data.enrichedChance());
         assertEquals(0, data.fertilizerRemaining());
 
-        assertEquals(100.0F, new SoilData(Float.NaN, Optional.empty(), 0, 0, 0L).fertility());
-        assertEquals(100.0F, new SoilData(9999.0F, Optional.empty(), 0, 0, 0L).fertility());
+        assertEquals(100.0F, new SoilData(Float.NaN, Optional.empty(), 0, 0, 0L, false).fertility());
+        assertEquals(100.0F, new SoilData(9999.0F, Optional.empty(), 0, 0, 0L, false).fertility());
     }
 
     @Test
@@ -60,17 +61,30 @@ class SoilDataTest {
         assertTrue(SoilData.pristine(987654L).isDefault());
         assertFalse(SoilData.pristine(0L).withFertility(99.0F).isDefault());
         assertFalse(SoilData.pristine(0L).withLastCrop(WHEAT).isDefault());
-        assertFalse(new SoilData(100.0F, Optional.empty(), 10, 0, 0L).isDefault());
-        assertFalse(new SoilData(100.0F, Optional.empty(), 0, 5, 0L).isDefault());
+        assertFalse(new SoilData(100.0F, Optional.empty(), 10, 0, 0L, false).isDefault());
+        assertFalse(new SoilData(100.0F, Optional.empty(), 0, 5, 0L, false).isDefault());
+    }
+
+    @Test
+    void fallowLatchBlocksEvictionAndRoundTrips() {
+        // A block whose only non-default state is the fallow latch must be kept.
+        SoilData latched = SoilData.pristine(0L).withVillagerFallow(true);
+        assertFalse(latched.isDefault());
+        assertTrue(latched.villagerFallow());
+        assertEquals(latched, roundTrip(SoilData.CODEC, latched));
+
+        // Clearing it returns to all-default so the store evicts the entry.
+        assertTrue(latched.withVillagerFallow(false).isDefault());
     }
 
     @Test
     void withersPreserveOtherFields() {
-        SoilData base = new SoilData(60.0F, Optional.of(WHEAT), 10, 5, 77L);
-        assertEquals(new SoilData(30.0F, Optional.of(WHEAT), 10, 5, 77L), base.withFertility(30.0F));
-        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 10, 5, 99L), base.withRecoveryCheck(99L));
-        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 15, 5, 77L), base.withEnrichedChance(15));
-        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 10, 15, 77L), base.withFertilizerRemaining(15));
+        SoilData base = new SoilData(60.0F, Optional.of(WHEAT), 10, 5, 77L, true);
+        assertEquals(new SoilData(30.0F, Optional.of(WHEAT), 10, 5, 77L, true), base.withFertility(30.0F));
+        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 10, 5, 99L, true), base.withRecoveryCheck(99L));
+        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 15, 5, 77L, true), base.withEnrichedChance(15));
+        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 10, 15, 77L, true), base.withFertilizerRemaining(15));
+        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 10, 5, 77L, false), base.withVillagerFallow(false));
     }
 
     @Test
@@ -91,9 +105,10 @@ class SoilDataTest {
 
     @Test
     void investmentsClearingPreservesSoilMemory() {
-        SoilData invested = new SoilData(60.0F, Optional.of(WHEAT), 15, 7, 77L);
+        SoilData invested = new SoilData(60.0F, Optional.of(WHEAT), 15, 7, 77L, true);
         SoilData cleared = invested.withInvestmentsCleared();
-        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 0, 0, 77L), cleared);
+        // Fertility, rotation memory, recovery bookkeeping, and the fallow latch survive; the dose and enrich chance clear.
+        assertEquals(new SoilData(60.0F, Optional.of(WHEAT), 0, 0, 77L, true), cleared);
 
         // A block whose only non-default state was its investments returns to
         // all-default on clearing, so the store evicts it.

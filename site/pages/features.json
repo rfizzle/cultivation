@@ -108,7 +108,7 @@
         {
           "type": "prose",
           "html": [
-            "Villager harvests drain fertility exactly like yours. When a plot tires, its farmer replants a different crop; when a block drops below 25% fertility they leave it fallow until it recovers to 50%. Village fields settle into rotating patchworks with resting strips — visibly tended ground. Nothing about who the villager is changes: names, trades, prices, and reputation are untouched."
+            "Villager harvests drain fertility exactly like yours. When a plot tires, its farmer replants a different crop; when a block drops below 25% fertility they leave it fallow until it recovers to 50%. Farmers pick up Fertilizer the way they pick up seeds and apply a dose to any fully spent block — never topping up a partial one — so a village's composters feed its own fields and the grow-compost-dose loop runs unaided. Village fields settle into rotating patchworks with resting strips — visibly tended ground. Nothing about who the villager is changes: names, trades, prices, and reputation are untouched."
           ]
         }
       ]
