@@ -1,3 +1,5 @@
 {
-  "item.cultivation.fertilizer": "Fertilizer"
+  "item.cultivation.fertilizer": "Fertilizer",
+  "tooltip.cultivation.fatigue.appeal": "Losing its appeal (-%s%%)",
+  "tooltip.cultivation.fatigue.tired": "Thoroughly tired of this (-%s%%)"
 }
