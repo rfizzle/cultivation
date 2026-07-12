@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.event;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.criteria.CultivationCriteria;
 import com.rfizzle.cultivation.harvest.HarvestHandler;
 import com.rfizzle.cultivation.harvest.SeedWithdrawal;
 import com.rfizzle.cultivation.item.ScytheItem;
@@ -90,6 +91,7 @@ public final class ScytheHarvestHandler implements PlayerBlockBreakEvents.Before
     }
 
     private static void sweep(ServerLevel level, ServerPlayer player, ItemStack tool, BlockPos center) {
+        int harvested = 0;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 BlockPos pos = center.offset(dx, 0, dz);
@@ -107,6 +109,7 @@ public final class ScytheHarvestHandler implements PlayerBlockBreakEvents.Before
                     continue; // a protection/claim mod denied this block
                 }
                 harvest(level, player, tool, pos, state, profile);
+                harvested++;
                 if (tool.isEmpty()) {
                     // The scythe broke on this crop; a broken tool can't keep reaping.
                     break;
@@ -118,6 +121,11 @@ public final class ScytheHarvestHandler implements PlayerBlockBreakEvents.Before
         }
         level.playSound(null, center.getX() + 0.5, center.getY() + 0.5, center.getZ() + 0.5,
                 SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 1.0F, 1.0F);
+        // A full 3×3 of mature crops is the ceiling; a denied block or a tool that
+        // broke mid-sweep falls short and grants nothing (§10).
+        if (harvested >= 9) {
+            CultivationCriteria.REAP_WHAT_YOU_SOW.trigger(player);
+        }
     }
 
     private static void harvest(ServerLevel level, ServerPlayer player, ItemStack tool, BlockPos pos,

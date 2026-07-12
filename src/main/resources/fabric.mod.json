@@ -32,7 +32,8 @@
             "com.rfizzle.cultivation.gametest.ScytheSweepGameTest",
             "com.rfizzle.cultivation.gametest.VillagerStewardshipGameTest",
             "com.rfizzle.cultivation.gametest.SoilOverlaySyncGameTest",
-            "com.rfizzle.cultivation.gametest.CultivationCommandGameTest"
+            "com.rfizzle.cultivation.gametest.CultivationCommandGameTest",
+            "com.rfizzle.cultivation.gametest.AdvancementGameTest"
         ]
     },
     "suggests": {

@@ -4,6 +4,7 @@ import com.rfizzle.cultivation.api.CultivationHarvestCallback;
 import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.criteria.CultivationCriteria;
 import com.rfizzle.cultivation.soil.EnrichedTilling;
 import com.rfizzle.cultivation.soil.Fertilizer;
 import com.rfizzle.cultivation.soil.SoilMath;
@@ -11,6 +12,7 @@ import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -66,6 +68,17 @@ public final class HarvestHandler {
         SoilData soil = config.enableSoilFertility || config.enableEnrichedTilling || config.enableFertilizer
                 ? SoilStores.peek(level, soilPos)
                 : null;
+
+        // Old Growth (§10): a real player reaping a crop from soil that is both
+        // enriched and still carrying a live Fertilizer dose. Read before the
+        // dose is spent below, so "active dose" means the one this harvest rides.
+        // Exhausted ground is excluded so the grant marks a harvest that actually
+        // paid out — the enriched roll and the dose are both suppressed when
+        // fertility has bottomed out.
+        if (harvester instanceof ServerPlayer serverPlayer && soil != null
+                && soil.fertility() > 0.0F && soil.enrichedChance() > 0 && soil.fertilizerRemaining() > 0) {
+            CultivationCriteria.OLD_GROWTH.trigger(serverPlayer);
+        }
 
         // The clamp keys on post-drain fertility: the harvest that lands the
         // soil on 0 is already the exhausted one (SPEC §1's 33-harvest count).

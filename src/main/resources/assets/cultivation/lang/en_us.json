@@ -24,5 +24,13 @@
   "command.cultivation.diet.recent": "Recent: %s",
   "command.cultivation.diet.reset": "Cleared dietary fatigue for %s.",
   "command.cultivation.reload": "Reloaded Cultivation config.",
-  "command.cultivation.reload_failed": "Config reload failed: %s"
+  "command.cultivation.reload_failed": "Config reload failed: %s",
+  "advancements.cultivation.balanced_table.title": "A Balanced Table",
+  "advancements.cultivation.balanced_table.description": "Reset your dietary fatigue by eating three different foods in a row",
+  "advancements.cultivation.long_term_investment.title": "Long-Term Investment",
+  "advancements.cultivation.long_term_investment.description": "Apply Fertilizer to a block of farmland",
+  "advancements.cultivation.reap_what_you_sow.title": "Reap What You Sow",
+  "advancements.cultivation.reap_what_you_sow.description": "Harvest nine mature crops in a single scythe sweep",
+  "advancements.cultivation.old_growth.title": "Old Growth",
+  "advancements.cultivation.old_growth.description": "Harvest a crop from enriched soil still carrying a Fertilizer dose"
 }
