@@ -13,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,6 +34,7 @@ public class MealBuffGameTest implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void rabbitStewGrantsNimbleAtLevelOne(GameTestHelper helper) {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        double baseSpeed = player.getAttributeValue(Attributes.MOVEMENT_SPEED);
         eat(helper, player, Items.RABBIT_STEW);
 
         MobEffectInstance nimble = player.getEffect(CultivationEffects.NIMBLE);
@@ -40,6 +42,9 @@ public class MealBuffGameTest implements FabricGameTest {
         helper.assertTrue(nimble.getAmplifier() == 0, "Nimble is level I");
         helper.assertTrue(nimble.getDuration() == CultivationConfig.get().mealBuffDurationTicks,
                 "Nimble lasts mealBuffDurationTicks, got " + nimble.getDuration());
+        // The buff's payoff: +5% movement speed (multiply-total) actually lands on the attribute.
+        assertClose(helper, (float) player.getAttributeValue(Attributes.MOVEMENT_SPEED),
+                (float) (baseSpeed * 1.05), "Nimble I raises movement speed 5%");
         helper.assertTrue(player.getEffect(CultivationEffects.DILIGENT) == null, "only Nimble is granted");
         helper.assertTrue(player.getEffect(CultivationEffects.SATED) == null, "only Nimble is granted");
         helper.succeed();
@@ -48,9 +53,13 @@ public class MealBuffGameTest implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void beetrootSoupGrantsDiligentAndMushroomStewGrantsSated(GameTestHelper helper) {
         ServerPlayer soupEater = MockPlayers.serverPlayerInLevel(helper);
+        double baseBreak = soupEater.getAttributeValue(Attributes.BLOCK_BREAK_SPEED);
         eat(helper, soupEater, Items.BEETROOT_SOUP);
         MobEffectInstance diligent = soupEater.getEffect(CultivationEffects.DILIGENT);
         helper.assertTrue(diligent != null && diligent.getAmplifier() == 0, "beetroot soup grants Diligent I");
+        // The buff's payoff: +10% block-break speed (multiply-total) actually lands on the attribute.
+        assertClose(helper, (float) soupEater.getAttributeValue(Attributes.BLOCK_BREAK_SPEED),
+                (float) (baseBreak * 1.10), "Diligent I raises block-break speed 10%");
         helper.assertTrue(soupEater.getEffect(CultivationEffects.NIMBLE) == null
                 && soupEater.getEffect(CultivationEffects.SATED) == null, "only Diligent is granted");
 
