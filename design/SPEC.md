@@ -502,6 +502,54 @@ The scythe stays the tool for scale: one swing reaps and replants the full 3×3,
 
 - A `UseBlockCallback` listener, server-side only, gated on an empty main hand and a mature supported crop; it reaps through §1's harvest helper (the one code path for drops/drain/bonuses/callback) and the shared replant seam, then returns `SUCCESS`.
 
+### Broadcast Sowing
+
+The planting counterpart to the sweep, gated behind the **iron rake**. Right-clicking farmland with the rake in the main hand and a crop seed in the off-hand sows the surrounding 3×3 in one pass, so laying out a fresh field is no longer click-per-block. First sowing is the gap the scythe leaves — it replants what it reaps, but never seeds bare ground; the rake is the tool that does.
+
+#### Item & Recipe
+
+One item: `cultivation:iron_rake`. It draws the iron tier's stats and carries no attack modifiers — a tool, not a weapon.
+
+| Rake | Durability | Enchantability |
+|---|---|---|
+| Iron | 250 | 14 |
+
+Shaped recipe, 3 iron ingots + 2 sticks — a toothed head over a straight handle, distinct from the hoe and the scythe:
+
+```
+III
+ S
+ S
+```
+
+(row 1: `III`, row 2: ` S `, row 3: ` S ` — I = iron ingot, S = stick.) The rake accepts Unbreaking and Mending (`#minecraft:enchantable/durability`) and repairs with iron.
+
+#### Behavior
+
+When a player **right-clicks a farmland block** with an **iron rake in the main hand** and an **in-scope crop seed in the off-hand**:
+
+1. The 3×3 of farmland centered on the targeted block is sown, the center included. Each free block is planted with the off-hand seed's crop at age 0.
+2. A block is planted only where a single seed could be: the position is empty (replaceable) and the crop can survive there (farmland below, sufficient light). Occupied or unsuitable blocks are skipped.
+3. **One off-hand seed and one rake durability are spent per block actually planted**, in survival; the off-hand stack and the rake's remaining durability each cap how many blocks are sown, and a rake that breaks mid-pass stops the sow. In creative the full 3×3 is sown and no seed or durability is spent. The crop's own place sound plays once at the center.
+
+Without a rake, planting stays vanilla single-block. In-scope seeds are the six **farmland replant crops** (§1 table — wheat, carrots, potatoes, beetroots, torchflower, pitcher); nether wart and sweet berries are out of scope and fall through to vanilla. One seed type per pass — alternating polyculture rows (§2) stay a deliberate layout act. Sowing is not a harvest: a fresh plant touches no soil state, so it never drains fertility or records rotation memory.
+
+#### Differentiation from the Scythe
+
+The scythe reaps and replants a standing 3×3; the rake seeds a bare 3×3. Together they are the field's tool pair — the rake for ground still empty, the scythe for the crop already in it — covering the whole rhythm from first sowing through harvest-and-replant.
+
+#### Config
+
+| Key | Type | Default | Range |
+|---|---|---|---|
+| `enableBroadcastSowing` | bool | true | — |
+
+`false` reduces the rake to an inert tool; off-hand seeds plant one block the vanilla way (the item stays registered and craftable).
+
+#### Implementation Notes
+
+- A `UseBlockCallback` listener gated on an `iron_rake` in the main hand, an in-scope crop seed in the off-hand (`SupportedCrops.plantableCropForSeed`), and a farmland anchor. It checks each of the 3×3 positions for whether a seed could survive there — `canBeReplaced` for emptiness and `canSurvive` for farmland-below and light, a survivability test rather than full placement-permission parity (the off-center blocks are set directly, not replayed through a placement event) — then places the crop at age 0 (the pitcher's single-block pod handled like the shared replant seam), spends one off-hand seed and one rake durability per planted block, and plays the crop's place sound once at the center. The sow runs server-side; on the client a valid gesture returns `SUCCESS` on the main-hand pass so Fabric cancels the off-hand seed's predicted single-block placement and forwards the interaction, so the 3×3 and its sound are authored once by the server. It returns `SUCCESS` when the gesture applies (else `PASS`, so a lone off-hand seed can still land by vanilla when the whole 3×3 is occupied).
+
 ---
 
 ## 8. Villager Field Stewardship

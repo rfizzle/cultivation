@@ -63,13 +63,14 @@ public final class ConfigFields {
     public static final String CAT_FERTILIZER = "fertilizer";
     public static final String CAT_SCYTHE = "scythe";
     public static final String CAT_HARVEST = "harvest";
+    public static final String CAT_SOWING = "sowing";
     public static final String CAT_VILLAGER = "villager";
     public static final String CAT_CLIENT = "client";
 
     /** Every category suffix, in the order the screen renders its tabs. */
     public static final List<String> CATEGORIES = List.of(
             CAT_SOIL, CAT_POLYCULTURE, CAT_DIET, CAT_MEALS, CAT_TILLING,
-            CAT_FERTILIZER, CAT_SCYTHE, CAT_HARVEST, CAT_VILLAGER, CAT_CLIENT);
+            CAT_FERTILIZER, CAT_SCYTHE, CAT_HARVEST, CAT_SOWING, CAT_VILLAGER, CAT_CLIENT);
 
     public static final List<Spec> ALL = List.of(
             // Soil fertility (§1)
@@ -119,6 +120,9 @@ public final class ConfigFields {
 
             // Right-click harvest (§7)
             bool("enableRightClickHarvest", CAT_HARVEST, c -> c.enableRightClickHarvest, (c, v) -> c.enableRightClickHarvest = v),
+
+            // Broadcast sowing (§7)
+            bool("enableBroadcastSowing", CAT_SOWING, c -> c.enableBroadcastSowing, (c, v) -> c.enableBroadcastSowing = v),
 
             // Villager stewardship (§8)
             bool("enableVillagerStewardship", CAT_VILLAGER, c -> c.enableVillagerStewardship, (c, v) -> c.enableVillagerStewardship = v),

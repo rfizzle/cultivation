@@ -89,6 +89,9 @@ public class CultivationConfig {
     // Right-click harvest (§7)
     public boolean enableRightClickHarvest = true;
 
+    // Broadcast sowing (§7)
+    public boolean enableBroadcastSowing = true;
+
     // Villager stewardship (§8)
     public boolean enableVillagerStewardship = true;
     public boolean enableVillagerFertilizing = true;

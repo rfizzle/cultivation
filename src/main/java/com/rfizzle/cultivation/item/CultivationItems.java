@@ -18,7 +18,9 @@ import net.minecraft.world.item.Tiers;
  *
  * <p>The scythe attack stats reuse {@link DiggerItem#createAttributes}: a
  * {@code +1.0} damage bonus over each tier's base lands the §7 totals (4/5/6),
- * and the {@code -2.4} speed modifier yields the shared 1.6 attack speed.
+ * and the {@code -2.4} speed modifier yields the shared 1.6 attack speed. The
+ * iron rake (§7) is a tool, not a weapon, so it takes no attack attributes and
+ * joins the same Tools tab.
  */
 public final class CultivationItems {
     public static final Item FERTILIZER = new FertilizerItem(new Item.Properties());
@@ -26,6 +28,7 @@ public final class CultivationItems {
     public static final Item DIAMOND_SCYTHE = scythe(Tiers.DIAMOND);
     public static final Item NETHERITE_SCYTHE = new ScytheItem(Tiers.NETHERITE,
             new Item.Properties().fireResistant().attributes(DiggerItem.createAttributes(Tiers.NETHERITE, 1.0F, -2.4F)));
+    public static final Item IRON_RAKE = new RakeItem(Tiers.IRON, new Item.Properties());
 
     private CultivationItems() {
     }
@@ -35,11 +38,13 @@ public final class CultivationItems {
         Registry.register(BuiltInRegistries.ITEM, Cultivation.id("iron_scythe"), IRON_SCYTHE);
         Registry.register(BuiltInRegistries.ITEM, Cultivation.id("diamond_scythe"), DIAMOND_SCYTHE);
         Registry.register(BuiltInRegistries.ITEM, Cultivation.id("netherite_scythe"), NETHERITE_SCYTHE);
+        Registry.register(BuiltInRegistries.ITEM, Cultivation.id("iron_rake"), IRON_RAKE);
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.INGREDIENTS)
                 .register(entries -> entries.addAfter(Items.BONE_MEAL, FERTILIZER));
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES)
-                .register(entries -> entries.addAfter(Items.NETHERITE_HOE, IRON_SCYTHE, DIAMOND_SCYTHE, NETHERITE_SCYTHE));
+                .register(entries -> entries.addAfter(Items.NETHERITE_HOE,
+                        IRON_SCYTHE, DIAMOND_SCYTHE, NETHERITE_SCYTHE, IRON_RAKE));
     }
 
     private static ScytheItem scythe(Tiers tier) {

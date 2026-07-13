@@ -107,6 +107,12 @@
           "html": [
             "For a stray crop rather than a field, right-click a fully grown crop with an empty hand: it harvests that one block and replants a seed from its own drops — the single-block sibling of the sweep. There's no tool in hand, so no Fortune, no durability, no scale; the scythe stays the tool for harvesting rows at a time. Immature crops are left alone, and the toggle turns the gesture off for anyone who'd rather break and replant by hand."
           ]
+        },
+        {
+          "type": "prose",
+          "html": [
+            "To lay a fresh field there's a companion tool, the iron rake: hold it, keep a stack of seeds in your off-hand, and right-click farmland to sow the surrounding 3×3 at once — one seed and one durability per block, skipping any block already planted or unsuitable. It's the planting half of the field tool pair — the scythe replants what it reaps, and the rake seeds the bare ground it can't. Without a rake, seeds plant one block the vanilla way. Wheat, carrots, potatoes, beetroots, torchflower, and pitcher are in scope, one seed type per pass, so alternating polyculture rows stay a deliberate layout act. Crafted from three iron ingots and two sticks."
+          ]
         }
       ]
     },
