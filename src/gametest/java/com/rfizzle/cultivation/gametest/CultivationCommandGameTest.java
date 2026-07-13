@@ -5,6 +5,7 @@ import com.mojang.brigadier.tree.CommandNode;
 import com.rfizzle.cultivation.api.CultivationAPI;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
+import com.rfizzle.cultivation.attachment.SoilStores;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -13,6 +14,7 @@ import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
@@ -40,6 +42,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
         CommandNode<CommandSourceStack> soil = root.getChild("soil");
         CommandNode<CommandSourceStack> diet = root.getChild("diet");
         helper.assertTrue(soil.canUse(nonOp), "soil read is public");
+        helper.assertTrue(root.getChild("field").canUse(nonOp), "field read is public");
         helper.assertTrue(diet.canUse(nonOp), "diet read is public");
         helper.assertFalse(soil.getChild("set").canUse(nonOp), "soil set denies non-ops");
         helper.assertTrue(soil.getChild("set").canUse(op), "soil set allows ops");
@@ -78,6 +81,47 @@ public class CultivationCommandGameTest implements FabricGameTest {
 
         int result = server.getCommands().getDispatcher().execute("cultivation soil", source);
         helper.assertTrue(result == 0, "soil report fails with no farmland in sight");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void fieldReportFailsWhenNotLookingAtFarmland(GameTestHelper helper) throws CommandSyntaxException {
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        // Aim up at open sky — no farmland center to survey around.
+        player.moveTo(player.getX(), player.getY(), player.getZ(), 0.0F, -90.0F);
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack source = player.createCommandSourceStack();
+
+        int result = server.getCommands().getDispatcher().execute("cultivation field", source);
+        helper.assertTrue(result == 0, "field report fails with no farmland in sight");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void fieldSurveyReportsOverAPlot(GameTestHelper helper) throws CommandSyntaxException {
+        ServerLevel level = helper.getLevel();
+        ResourceLocation wheat = BuiltInRegistries.BLOCK.getKey(Blocks.WHEAT);
+        ResourceLocation carrots = BuiltInRegistries.BLOCK.getKey(Blocks.CARROTS);
+        // A 3×3 farmland plot; the radius-4 survey walks past it but skips non-farmland columns.
+        for (int x = 0; x <= 2; x++) {
+            for (int z = 0; z <= 2; z++) {
+                helper.setBlock(new BlockPos(x, 1, z), Blocks.FARMLAND);
+            }
+        }
+        // Vary the soil so the survey aggregates a real mix: one exhausted wheat block,
+        // one enriched carrot block, the rest pristine.
+        SoilStores.update(level, helper.absolutePos(new BlockPos(0, 1, 0)), false,
+                data -> data.withFertility(0.0F).withLastCrop(wheat));
+        SoilStores.update(level, helper.absolutePos(new BlockPos(2, 1, 2)), false,
+                data -> data.withEnrichedChance(15).withLastCrop(carrots));
+
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        aimStraightDownAt(player, helper.absolutePos(new BlockPos(1, 1, 1)));
+        MinecraftServer server = helper.getLevel().getServer();
+
+        int result = server.getCommands().getDispatcher()
+                .execute("cultivation field", player.createCommandSourceStack());
+        helper.assertTrue(result > 0, "field survey succeeds over a placed plot");
         helper.succeed();
     }
 

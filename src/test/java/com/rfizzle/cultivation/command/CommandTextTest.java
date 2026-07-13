@@ -46,4 +46,54 @@ class CommandTextTest {
         assertEquals(List.of(), CommandText.lastFoods(List.of(), 3));
         assertEquals(List.of(), CommandText.lastFoods(List.of("a", "b"), 0));
     }
+
+    @Test
+    void distinctKeepsFirstEncounterOrderAndDedupes() {
+        assertEquals(List.of("wheat", "carrots", "potatoes"),
+                CommandText.distinct(List.of("wheat", "carrots", "wheat", "potatoes", "carrots")));
+        assertEquals(List.of(), CommandText.distinct(List.of()));
+        assertEquals(List.of("wheat"), CommandText.distinct(List.of("wheat", "wheat")));
+    }
+
+    @Test
+    void summarizeAveragesFertilityAndBandsOffTheMean() {
+        // 100 + 50 -> mean 75 -> Rich (>= 75); tiredThreshold 25.
+        CommandText.FieldSummary summary = CommandText.summarize(List.of(
+                new CommandText.FieldBlock(100.0F, 0, 0),
+                new CommandText.FieldBlock(50.0F, 0, 0)), 25.0);
+        assertEquals(2, summary.farmland());
+        assertEquals(75, summary.avgPercent());
+        assertEquals(SoilBand.RICH, summary.band());
+    }
+
+    @Test
+    void summarizeCountsExhaustedEnrichedAndFertilizedBlocks() {
+        CommandText.FieldSummary summary = CommandText.summarize(List.of(
+                new CommandText.FieldBlock(0.0F, 0, 0),      // exhausted
+                new CommandText.FieldBlock(0.0F, 15, 0),     // exhausted + enriched
+                new CommandText.FieldBlock(60.0F, 10, 5),    // enriched + fertilized
+                new CommandText.FieldBlock(60.0F, 0, 0)), 25.0);
+        assertEquals(4, summary.farmland());
+        assertEquals(2, summary.exhausted());
+        assertEquals(2, summary.enriched());
+        assertEquals(1, summary.fertilized());
+    }
+
+    @Test
+    void summarizeTreatsPristineBlocksAsFullFertility() {
+        CommandText.FieldSummary summary = CommandText.summarize(List.of(
+                new CommandText.FieldBlock(100.0F, 0, 0),
+                new CommandText.FieldBlock(100.0F, 0, 0)), 25.0);
+        assertEquals(100, summary.avgPercent());
+        assertEquals(SoilBand.RICH, summary.band());
+        assertEquals(0, summary.exhausted());
+    }
+
+    @Test
+    void summarizeHandlesAnEmptySurvey() {
+        CommandText.FieldSummary summary = CommandText.summarize(List.of(), 25.0);
+        assertEquals(0, summary.farmland());
+        assertEquals(0, summary.avgPercent());
+        assertEquals(0, summary.exhausted());
+    }
 }
