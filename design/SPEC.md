@@ -187,6 +187,7 @@ When a supported crop (or stem) rolls a growth tick, a **populated** beehive or 
 #### Implementation Notes
 
 - Lives in the same growth-modifier seam as §1–§2: a static helper (`BeePollination`) gated by config runs the POI query and returns the multiplier. No attachment, no sync, no persistence — the POI index it reads is vanilla's own.
+- The POI query's cost scales quadratically in `beePollinationRange`: it spans a `floor(range / 16) + 1` chunk radius, so range 8 sweeps a 3×3 chunk column and range 16 a 5×5. The query short-circuits on the first populated hive and runs only when the feature is enabled and a crop actually rolls a growth tick; admins raising the range on large servers should weigh that scaling.
 
 ---
 
