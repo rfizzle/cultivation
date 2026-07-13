@@ -27,6 +27,22 @@ public final class SoilGrowth {
                 * BeePollination.multiplierAt(level, cropPos);
     }
 
+    /**
+     * The growth-roll bound a second-wave crop (nether wart, sweet berries) should
+     * use in place of its vanilla {@code nextInt(vanillaBound)}: the fertility band
+     * alone scales it — no polyculture or bee bonus, which stay a farmland-row
+     * mechanic (SPEC §1/§2). Returns {@code vanillaBound} unchanged (a bit-identical
+     * roll) whenever soil fertility or the non-farmland-soil toggle is off, or the
+     * ground below is untracked.
+     */
+    public static int secondWaveGrowthBound(int vanillaBound, ServerLevel level, BlockPos cropPos) {
+        CultivationConfig config = CultivationConfig.get();
+        if (!config.enableNonFarmlandSoil) {
+            return vanillaBound;
+        }
+        return SoilMath.scaledGrowthBound(vanillaBound, fertilityMultiplierAt(level, cropPos));
+    }
+
     /** The fertility band's multiplier alone (§1) — 1.0 while the soil system is disabled. */
     private static float fertilityMultiplierAt(ServerLevel level, BlockPos cropPos) {
         CultivationConfig config = CultivationConfig.get();

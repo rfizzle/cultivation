@@ -22,6 +22,7 @@
             "com.rfizzle.cultivation.gametest.SoilDrainGameTest",
             "com.rfizzle.cultivation.gametest.SoilRecoveryGameTest",
             "com.rfizzle.cultivation.gametest.SoilGrowthGameTest",
+            "com.rfizzle.cultivation.gametest.SecondWaveSoilGameTest",
             "com.rfizzle.cultivation.gametest.PolycultureGameTest",
             "com.rfizzle.cultivation.gametest.BeePollinationGameTest",
             "com.rfizzle.cultivation.gametest.SoilDisabledGameTest",

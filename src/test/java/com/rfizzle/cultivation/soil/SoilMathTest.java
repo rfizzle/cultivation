@@ -67,6 +67,19 @@ class SoilMathTest {
     }
 
     @Test
+    void scaledGrowthBoundWidensAsSoilTires() {
+        // Healthy soil (1.0) leaves the vanilla roll bit-identical.
+        assertEquals(10, SoilMath.scaledGrowthBound(10, 1.0F));
+        assertEquals(5, SoilMath.scaledGrowthBound(5, 1.0F));
+        // Tired (0.75) and Exhausted (0.5) widen the bound, so growth rolls succeed rarer.
+        assertEquals(13, SoilMath.scaledGrowthBound(10, 0.75F));
+        assertEquals(20, SoilMath.scaledGrowthBound(10, 0.5F));
+        // Never below 1, and a non-positive multiplier halts growth without a bad bound.
+        assertEquals(1, SoilMath.scaledGrowthBound(1, 5.0F));
+        assertEquals(Integer.MAX_VALUE, SoilMath.scaledGrowthBound(10, 0.0F));
+    }
+
+    @Test
     void lazyRecoveryMatchesLivePathExpectation() {
         // Live path expectation: randomTickSpeed/4096 random ticks per block per game
         // tick, each worth `perRandomTick` fertility. One in-game day at defaults:
