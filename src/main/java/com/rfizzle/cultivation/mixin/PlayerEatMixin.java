@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.rfizzle.cultivation.diet.DietHandler;
 import com.rfizzle.cultivation.meal.MealBuffs;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodData;
 import net.minecraft.world.food.FoodProperties;
@@ -46,5 +47,29 @@ abstract class PlayerEatMixin {
         } else {
             original.call(foodData, food);
         }
+    }
+
+    /**
+     * Once bowl foods stack (SPEC §4), eating one from a stack of two or more
+     * reaches vanilla's stack-{@code >1} return branch, which adds the empty
+     * bowl to the inventory but discards the result — silently destroying the
+     * bowl when the inventory is full. Mirror vanilla {@code HoneyBottleItem} and
+     * drop the bowl at the player's feet instead. The wrapped call already runs
+     * only in vanilla's server-side branch, so the drop is server-authoritative.
+     */
+    @WrapOperation(
+            method = "eat",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/entity/player/Inventory;add(Lnet/minecraft/world/item/ItemStack;)Z"
+            )
+    )
+    private boolean cultivation$dropBowlWhenInventoryFull(Inventory inventory, ItemStack bowl,
+                                                          Operation<Boolean> original) {
+        boolean added = original.call(inventory, bowl);
+        if (!added) {
+            ((Player) (Object) this).drop(bowl, false);
+        }
+        return added;
     }
 }
