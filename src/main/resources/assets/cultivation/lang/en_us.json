@@ -119,7 +119,7 @@
   "config.cultivation.enable_right_click_harvest": "Enable Right-Click Harvest",
   "config.cultivation.enable_right_click_harvest.tooltip": "Bare-hand right-click on a fully grown crop harvests it and replants one seed from its drops.",
   "config.cultivation.enable_broadcast_sowing": "Enable Broadcast Sowing",
-  "config.cultivation.enable_broadcast_sowing.tooltip": "Sneak-right-click farmland with seeds to sow the surrounding 3x3, one seed per block.",
+  "config.cultivation.enable_broadcast_sowing.tooltip": "Right-click farmland with an iron rake and off-hand seeds to sow the surrounding 3x3, one seed and one durability per block.",
   "config.cultivation.enable_villager_stewardship": "Enable Villager Stewardship",
   "config.cultivation.enable_villager_stewardship.tooltip": "Toggle farmer rotation and fallow behavior.",
   "config.cultivation.enable_villager_fertilizing": "Enable Villager Fertilizing",
