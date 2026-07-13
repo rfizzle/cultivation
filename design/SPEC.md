@@ -505,6 +505,7 @@ Village fields consequently settle into rotating patchworks with resting strips 
 |---|---|---|
 | `/cultivation soil` | 0 | Reports the farmland block the player is looking at (≤ 10 blocks): fertility % and band, last crop, enriched %, remaining Fertilizer dose — e.g. `Fertility 62% (Fair) — last crop: Wheat. Enriched +15%, fertilizer 7/15.` Error if not looking at farmland. |
 | `/cultivation soil set <0..100>` | 2 | Sets the targeted farmland's fertility. |
+| `/cultivation field` | 0 | Surveys the 9×9 plot around the looked-at farmland block (≤ 10 blocks): average fertility % and band, counts of exhausted, enriched, and fertilized blocks, and the distinct crops in rotation — e.g. `Field 9×9: 47 farmland, avg fertility 58% (Fair)` / `12 exhausted, 8 enriched, 5 fertilized` / `Crops: Wheat, Carrots, Potatoes`. Untracked columns count as full fertility. Error if not looking at farmland. |
 | `/cultivation diet` | 0 | Lists the caller's fatigue entries (`Bread −30%`) and last three foods. |
 | `/cultivation diet reset [player]` | 2 | Clears DietData for the target (default: caller). |
 | `/cultivation reload` | 2 | Reloads the JSON config from disk. |
@@ -683,7 +684,7 @@ Cultivation ships **no HUD element**. The slot decision and reasoning live in `d
 - Villager: farmer skips replanting below 25, resumes at 50, prefers a rotated seed when inventory allows; farmer picks up Fertilizer and doses a spent block, never a partial one
 - Fatigue: consecutive eats restore stepped-down hunger; three distinct foods reset; effects (golden apple) unaffected
 - Meal buffs: each stew grants its effect for 2400 ticks; a second stew replaces; suspicious stew grants a level-II roll plus its vanilla effect; a cake slice grants the trio for 1200 ticks and replaces a stew buff
-- Commands: `soil`, `soil set`, `diet`, `diet reset` behave and permission-gate as specced
+- Commands: `soil`, `soil set`, `field`, `diet`, `diet reset` behave and permission-gate as specced; the field survey aggregates fertility, band, and coverage counts over the plot
 
 ### Manual Testing
 

@@ -1,7 +1,7 @@
 {
   "nav": "Commands",
   "metaTitle": "Commands — Cultivation",
-  "metaDescription": "Cultivation's command reference: /cultivation soil, diet, and reload.",
+  "metaDescription": "Cultivation's command reference: /cultivation soil, field, diet, and reload.",
   "title": "Commands",
   "lede": "The <code>/cultivation</code> command tree — inspect soil and diet state, and administer both.",
   "width": "4xl",
@@ -15,6 +15,7 @@
           "rows": [
             ["<code>/cultivation soil</code>", "everyone", "Reports the farmland you're looking at (up to 10 blocks): fertility % and band, last crop, enriched %, remaining Fertilizer dose (<code>Fertilizer 7/15</code>)"],
             ["<code>/cultivation soil set &lt;0..100&gt;</code>", "op (level 2)", "Sets the targeted farmland's fertility — the testing lever for bands and stewardship thresholds"],
+            ["<code>/cultivation field</code>", "everyone", "Surveys the 9×9 plot around the farmland you're looking at: average fertility and band, counts of exhausted, enriched, and fertilized blocks, and the crops in rotation"],
             ["<code>/cultivation diet</code>", "everyone", "Lists your current fatigue entries (<code>Bread −30%</code>) and your last three foods"],
             ["<code>/cultivation diet reset [player]</code>", "op (level 2)", "Clears dietary fatigue for the target (default: yourself)"],
             ["<code>/cultivation reload</code>", "op (level 2)", "Reloads <code>config/cultivation.json</code> from disk"]
