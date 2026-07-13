@@ -14,8 +14,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
+import net.minecraft.world.level.block.PitcherCropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -166,12 +168,15 @@ public class BroadcastSowingGameTest implements FabricGameTest {
         }
     }
 
-    private static int countAge0(GameTestHelper helper, net.minecraft.world.level.block.Block crop) {
+    /** Counts positions in the 3×3 crop layer holding {@code crop} freshly sown at age 0. */
+    private static int countAge0(GameTestHelper helper, Block crop) {
+        BlockState age0 = crop instanceof PitcherCropBlock
+                ? crop.defaultBlockState() // age 0 is the single-block pod
+                : ((CropBlock) crop).getStateForAge(0);
         int count = 0;
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
-                BlockState state = helper.getBlockState(FARM.offset(dx, 0, dz).above());
-                if (state.is(crop) && state.getValue(CropBlock.AGE) == 0) {
+                if (helper.getBlockState(FARM.offset(dx, 0, dz).above()).equals(age0)) {
                     count++;
                 }
             }
