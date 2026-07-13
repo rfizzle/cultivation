@@ -107,6 +107,12 @@
           "html": [
             "For a stray crop rather than a field, right-click a fully grown crop with an empty hand: it harvests that one block and replants a seed from its own drops — the single-block sibling of the sweep. There's no tool in hand, so no Fortune, no durability, no scale; the scythe stays the tool for harvesting rows at a time. Immature crops are left alone, and the toggle turns the gesture off for anyone who'd rather break and replant by hand."
           ]
+        },
+        {
+          "type": "prose",
+          "html": [
+            "To lay a fresh field, sneak-right-click farmland with a stack of seeds: the surrounding 3×3 is sown at once, one seed per block, skipping any block already planted or unsuitable. It's the planting bookend to the harvest — the scythe replants what it reaps, and this seeds the bare ground it can't. A plain right-click still plants a single seed the vanilla way; only the sneak broadcasts. Wheat, carrots, potatoes, beetroots, torchflower, and pitcher are in scope, one seed type per gesture, so alternating polyculture rows stay a deliberate layout act."
+          ]
         }
       ]
     },

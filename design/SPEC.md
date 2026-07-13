@@ -502,6 +502,36 @@ The scythe stays the tool for scale: one swing reaps and replants the full 3×3,
 
 - A `UseBlockCallback` listener, server-side only, gated on an empty main hand and a mature supported crop; it reaps through §1's harvest helper (the one code path for drops/drain/bonuses/callback) and the shared replant seam, then returns `SUCCESS`.
 
+### Broadcast Sowing
+
+The planting counterpart to the sweep. A **sneak-right-click with a crop seed** on farmland sows the surrounding 3×3 in one gesture, so laying out a fresh field is no longer click-per-block. First sowing is the gap the scythe leaves — it replants what it reaps, but never seeds bare ground.
+
+#### Behavior
+
+When a player **sneak-right-clicks a farmland block** with an **in-scope crop seed in the main hand**:
+
+1. The 3×3 of farmland centered on the targeted block is sown, the center included. Each free block is planted with the seed's crop at age 0.
+2. A block is planted only where a single seed could be: the position is empty (replaceable) and the crop can survive there (farmland below, sufficient light). Occupied or unsuitable blocks are skipped.
+3. **One seed is consumed per block actually planted**, in survival; the held stack caps how many blocks are sown. In creative the full 3×3 is sown and no seed is spent. The crop's own place sound plays once at the center.
+
+A **non-sneak** right-click with a seed is left to vanilla single-block planting, untouched. Only the main hand triggers the gesture; the off-hand never does. In-scope seeds are the six **farmland replant crops** (§1 table — wheat, carrots, potatoes, beetroots, torchflower, pitcher); nether wart and sweet berries are out of scope and fall through to vanilla. One seed type per gesture — alternating polyculture rows (§2) stay a deliberate layout act. Sowing is not a harvest: a fresh plant touches no soil state, so it never drains fertility or records rotation memory.
+
+#### Differentiation from the Scythe
+
+The scythe reaps and replants a standing 3×3; broadcast sowing seeds a bare 3×3. Together they cover the field's whole rhythm — first sowing, then harvest-and-replant — the scythe for the crop already in the ground, the seed gesture for ground still empty.
+
+#### Config
+
+| Key | Type | Default | Range |
+|---|---|---|---|
+| `enableBroadcastSowing` | bool | true | — |
+
+`false` returns a sneak-right-click with seeds to vanilla single-block planting.
+
+#### Implementation Notes
+
+- A `UseBlockCallback` listener, server-side only, gated on the sneak modifier, an in-scope crop seed in the main hand (`SupportedCrops.plantableCropForSeed`), and a farmland anchor. It validates each of the 3×3 positions exactly as vanilla placement would (`canBeReplaced` for emptiness, `canSurvive` for farmland-below and light), places the crop at age 0 (the pitcher's single-block pod handled like the shared replant seam), spends one seed per planted block, and returns `SUCCESS` when at least one block is sown (else `PASS`, so a lone seed can still land by vanilla).
+
 ---
 
 ## 8. Villager Field Stewardship
