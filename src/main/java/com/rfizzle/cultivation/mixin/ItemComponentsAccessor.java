@@ -14,6 +14,10 @@ import org.spongepowered.asm.mixin.gen.Accessor;
  * component maps through this accessor once at init. The {@code components}
  * field is {@code private final}; {@link Mutable} lifts the {@code final} for
  * the setter.
+ *
+ * <p>A targeted accessor rather than an access widener: the mutation is a single
+ * one-off at init, and the mod ships no {@code .accesswidener}, so a narrowly
+ * scoped accessor keeps the widening off the global surface.
  */
 @Mixin(Item.class)
 public interface ItemComponentsAccessor {

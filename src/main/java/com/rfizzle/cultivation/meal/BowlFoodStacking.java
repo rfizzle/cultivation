@@ -37,6 +37,19 @@ public final class BowlFoodStacking {
             Items.MUSHROOM_STEW,
             Items.SUSPICIOUS_STEW);
 
+    /**
+     * Raises the bowl foods only when meal buffs are enabled — the gate for the
+     * whole feature (SPEC §4). Stack size is baked into the item at startup, so
+     * {@code enabled} is the value read once at init; a later toggle takes effect
+     * on restart. A no-op when disabled, leaving the four stews at their vanilla
+     * stack of one.
+     */
+    public static void applyIfEnabled(boolean enabled) {
+        if (enabled) {
+            apply();
+        }
+    }
+
     /** Raises every bowl food's max stack size to {@link #STACK_SIZE}. Idempotent. */
     public static void apply() {
         for (Item food : BOWL_FOODS) {

@@ -30,9 +30,7 @@ public class Cultivation implements ModInitializer {
         CultivationItems.register();
         // Bowl foods stack to a real shelf (SPEC §4). Part of the meal-buff feature, so it
         // rides enableMealBuffs; stack size is baked into the item at startup, read once here.
-        if (CultivationConfig.get().enableMealBuffs) {
-            BowlFoodStacking.apply();
-        }
+        BowlFoodStacking.applyIfEnabled(CultivationConfig.get().enableMealBuffs);
         CultivationEffects.register();
         CultivationCriteria.register();
         CultivationAttachments.init();

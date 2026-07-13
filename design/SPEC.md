@@ -296,7 +296,7 @@ Pumpkin pie and cookies sit below the stews: they reuse the stews' effects at le
 
 **One meal at a time:** consuming any of these buffed foods first removes all three Cultivation effects, then applies the new grant (the stews and snacks a single buff, cake its trio together). Buffs replace; they never stack or extend.
 
-**Stacking:** the four crafted bowl foods — rabbit stew, beetroot soup, mushroom stew, suspicious stew — stack to **16**, so a shelf of meals fits a hotbar. Eating one returns its empty bowl exactly as vanilla; bowls already stack. Suspicious stew stacks only across identical rolled effects, per component equality — distinct rolls never merge. Stacking is part of the meal-buff feature and rides the `enableMealBuffs` toggle; because stack size is baked into the item at startup, the toggle is read once at init and takes effect on restart.
+**Stacking:** the four crafted bowl foods — rabbit stew, beetroot soup, mushroom stew, suspicious stew — stack to **16**, so a shelf of meals fits a hotbar. Eating one returns its empty bowl exactly as vanilla; bowls already stack. Suspicious stew stacks only across identical rolled effects, per component equality — distinct rolls never merge. Stacking is part of the meal-buff feature and rides the `enableMealBuffs` toggle; because stack size is baked into the item at startup, the toggle is read once at init and takes effect on restart. Stack size is an item-prototype property both physical sides read locally, so client and server should run matching `enableMealBuffs` — a mismatch is cosmetic (the server stays authoritative and vanilla already tolerates over-max stacks), not a save or crash concern.
 
 ### Edge Cases
 
