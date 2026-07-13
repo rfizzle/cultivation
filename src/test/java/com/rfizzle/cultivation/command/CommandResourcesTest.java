@@ -30,7 +30,7 @@ class CommandResourcesTest {
             "command.cultivation.soil.band.fair",
             "command.cultivation.soil.band.tired",
             "command.cultivation.soil.band.exhausted",
-            "command.cultivation.soil.not_farmland",
+            "command.cultivation.soil.not_soil",
             "command.cultivation.soil.set",
             "command.cultivation.field.report",
             "command.cultivation.field.counts",

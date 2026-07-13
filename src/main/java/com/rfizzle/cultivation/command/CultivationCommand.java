@@ -18,6 +18,7 @@ import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.network.ConfigNetworking;
 import com.rfizzle.cultivation.soil.SoilBand;
 import com.rfizzle.cultivation.soil.SoilMath;
+import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -29,7 +30,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -98,10 +98,10 @@ public final class CultivationCommand {
     private static int runSoilReport(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ServerLevel level = player.serverLevel();
-        Optional<BlockPos> target = lookedAtFarmland(player);
+        Optional<BlockPos> target = lookedAtSoil(player);
         if (target.isEmpty()) {
             ctx.getSource().sendFailure(Component.translatable(
-                    "command.cultivation.soil.not_farmland", (int) SOIL_REACH));
+                    "command.cultivation.soil.not_soil", (int) SOIL_REACH));
             return 0;
         }
         SoilInfo info = CultivationAPI.getSoilInfo(level, target.get()).orElseThrow();
@@ -125,10 +125,10 @@ public final class CultivationCommand {
     private static int runSoilSet(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ServerLevel level = player.serverLevel();
-        Optional<BlockPos> target = lookedAtFarmland(player);
+        Optional<BlockPos> target = lookedAtSoil(player);
         if (target.isEmpty()) {
             ctx.getSource().sendFailure(Component.translatable(
-                    "command.cultivation.soil.not_farmland", (int) SOIL_REACH));
+                    "command.cultivation.soil.not_soil", (int) SOIL_REACH));
             return 0;
         }
         BlockPos pos = target.get();
@@ -150,10 +150,10 @@ public final class CultivationCommand {
     private static int runFieldReport(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
         ServerLevel level = player.serverLevel();
-        Optional<BlockPos> target = lookedAtFarmland(player);
+        Optional<BlockPos> target = lookedAtSoil(player);
         if (target.isEmpty()) {
             ctx.getSource().sendFailure(Component.translatable(
-                    "command.cultivation.soil.not_farmland", (int) SOIL_REACH));
+                    "command.cultivation.soil.not_soil", (int) SOIL_REACH));
             return 0;
         }
         FieldReport report = surveyField(level, target.get());
@@ -204,12 +204,14 @@ public final class CultivationCommand {
     private static void surveyPlot(ServerLevel level, BlockPos center,
                                    List<CommandText.FieldBlock> blocks, List<ResourceLocation> crops) {
         int y = center.getY();
+        boolean toggle = CultivationConfig.get().enableNonFarmlandSoil;
         BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
         for (int dx = -FIELD_RADIUS; dx <= FIELD_RADIUS; dx++) {
             for (int dz = -FIELD_RADIUS; dz <= FIELD_RADIUS; dz++) {
                 pos.set(center.getX() + dx, y, center.getZ() + dz);
                 LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
-                if (chunk == null || !chunk.getBlockState(pos).is(Blocks.FARMLAND)) {
+                if (chunk == null || !SupportedCrops.isTrackedSoilGround(
+                        chunk.getBlockState(pos), chunk.getBlockState(pos.above()), toggle)) {
                     continue;
                 }
                 SoilStore store = chunk.getAttached(CultivationAttachments.SOIL);
@@ -238,16 +240,30 @@ public final class CultivationCommand {
         return out;
     }
 
-    private static Optional<BlockPos> lookedAtFarmland(ServerPlayer player) {
+    /**
+     * The soil position the player is looking at: farmland or a second-wave crop's
+     * ground, whether the crosshair is on the soil block itself or on the crop
+     * standing on it. Empty when neither the looked-at block nor the block below it
+     * is tracked soil.
+     */
+    private static Optional<BlockPos> lookedAtSoil(ServerPlayer player) {
         HitResult hit = player.pick(SOIL_REACH, 1.0F, false);
         if (hit.getType() != HitResult.Type.BLOCK) {
             return Optional.empty();
         }
+        ServerLevel level = player.serverLevel();
+        boolean toggle = CultivationConfig.get().enableNonFarmlandSoil;
         BlockPos pos = ((BlockHitResult) hit).getBlockPos();
-        if (!player.serverLevel().getBlockState(pos).is(Blocks.FARMLAND)) {
-            return Optional.empty();
+        // Looking straight at the soil (farmland, or a crop's ground with the crop above).
+        if (SupportedCrops.isTrackedSoilGround(level.getBlockState(pos), level.getBlockState(pos.above()), toggle)) {
+            return Optional.of(pos);
         }
-        return Optional.of(pos);
+        // Looking at the crop itself — read the tracked ground directly below it.
+        BlockPos below = pos.below();
+        if (SupportedCrops.isTrackedSoilGround(level.getBlockState(below), level.getBlockState(pos), toggle)) {
+            return Optional.of(below);
+        }
+        return Optional.empty();
     }
 
     // --- diet ---

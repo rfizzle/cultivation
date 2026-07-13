@@ -11,7 +11,10 @@ import net.minecraft.world.level.block.Blocks;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.CROP;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.FARM;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.TEMPLATE;
+import static com.rfizzle.cultivation.gametest.SoilFixtures.berryBush;
+import static com.rfizzle.cultivation.gametest.SoilFixtures.matureWart;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland;
+import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedGround;
 
 /**
  * Drives the Jade/WTHIT shared writers against real world state — the wiring the
@@ -38,6 +41,29 @@ public class ProbeTooltipGameTest implements FabricGameTest {
         FarmlandProbeTooltip.writeServerData(tag, helper.getLevel(), helper.absolutePos(FARM));
         helper.assertTrue(FarmlandProbeTooltip.buildLines(tag).isEmpty(),
                 "a non-farmland block leaves the soil tooltip empty");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void soilWriterCoversNetherWartGround(GameTestHelper helper) {
+        placeTrackedGround(helper, FARM, Blocks.SOUL_SAND, 40.0F, Blocks.NETHER_WART);
+        helper.setBlock(CROP, matureWart());
+        CompoundTag tag = new CompoundTag();
+        // Looking at the wart resolves the soul sand tracked below it.
+        FarmlandProbeTooltip.writeServerData(tag, helper.getLevel(), helper.absolutePos(CROP));
+        helper.assertTrue(!FarmlandProbeTooltip.buildLines(tag).isEmpty(),
+                "looking at nether wart yields its soul sand's soil lines");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void soilWriterCoversSweetBerryGround(GameTestHelper helper) {
+        placeTrackedGround(helper, FARM, Blocks.DIRT, 40.0F, Blocks.SWEET_BERRY_BUSH);
+        helper.setBlock(CROP, berryBush(3));
+        CompoundTag tag = new CompoundTag();
+        FarmlandProbeTooltip.writeServerData(tag, helper.getLevel(), helper.absolutePos(CROP));
+        helper.assertTrue(!FarmlandProbeTooltip.buildLines(tag).isEmpty(),
+                "looking at a berry bush yields its dirt's soil lines");
         helper.succeed();
     }
 

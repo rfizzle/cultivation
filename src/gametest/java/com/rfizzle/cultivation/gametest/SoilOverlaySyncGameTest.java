@@ -18,9 +18,12 @@ import net.minecraft.world.level.block.Blocks;
 
 import java.util.List;
 
+import static com.rfizzle.cultivation.gametest.SoilFixtures.CROP;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.FARM;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.TEMPLATE;
+import static com.rfizzle.cultivation.gametest.SoilFixtures.berryBush;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland;
+import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedGround;
 
 /**
  * The server side of soil overlay sync (SPEC §1): the deviating-position set that
@@ -91,6 +94,27 @@ public class SoilOverlaySyncGameTest implements FabricGameTest {
         } finally {
             config.enableSoilFertility = saved;
         }
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void secondWaveGroundDeviatesUnderItsCrop(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos farmAbs = helper.absolutePos(FARM);
+        ChunkPos chunkPos = new ChunkPos(farmAbs);
+        int key = SoilStore.pack(farmAbs);
+
+        // Tired dirt beneath a sweet berry bush deviates just like farmland.
+        placeTrackedGround(helper, FARM, Blocks.DIRT, 10.0F, Blocks.SWEET_BERRY_BUSH);
+        helper.setBlock(CROP, berryBush(3));
+        Byte tired = flagsFor(level, chunkPos, key);
+        helper.assertTrue(tired != null && SoilOverlayFlags.band(tired) == SoilBand.TIRED,
+                "tired dirt under a berry bush is a deviating overlay position");
+
+        // Clear the bush: bare dirt is not soil, so the position drops from the set.
+        helper.setBlock(CROP, Blocks.AIR);
+        helper.assertTrue(flagsFor(level, chunkPos, key) == null,
+                "bare dirt is not soil even with lingering soil memory");
+        helper.succeed();
     }
 
     private static Byte flagsFor(ServerLevel level, ChunkPos chunkPos, int key) {
