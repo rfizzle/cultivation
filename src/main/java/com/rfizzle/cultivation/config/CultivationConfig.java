@@ -85,6 +85,9 @@ public class CultivationConfig {
     // Scythe (§7)
     public boolean enableScytheHarvest = true;
 
+    // Right-click harvest (§7)
+    public boolean enableRightClickHarvest = true;
+
     // Villager stewardship (§8)
     public boolean enableVillagerStewardship = true;
     public boolean enableVillagerFertilizing = true;
