@@ -47,7 +47,7 @@ When a **mature crop is harvested** (its block is destroyed with drops — see S
 2. Drain: `fertility -= (X == lastCrop) ? harvestDrain : harvestDrain * rotationDrainMultiplier` — defaults **3.0** same-crop, **1.5** rotated (a first-ever harvest counts as rotated). Clamp at 0.
 3. Set `lastCrop = X`.
 
-Drain is **actor-agnostic**: player breaks, scythe sweeps (§7), villager harvests (§8), pistons, water, and explosions that destroy a mature crop with drops all drain identically. Breaking an **immature** crop never drains. Creative-mode breaks produce no drops and never drain.
+Drain is **actor-agnostic**: player breaks, scythe sweeps (§7), bare-hand right-click harvests (§7), villager harvests (§8), pistons, water, and explosions that destroy a mature crop with drops all drain identically. Breaking an **immature** crop never drains. Creative-mode breaks produce no drops and never drain.
 
 At default values, a monoculture block sustains 33 harvests from full to exhausted; strict two-crop rotation doubles that.
 
@@ -454,6 +454,36 @@ Breaking an immature crop with a scythe is a plain vanilla break. The scythe has
 - Intercept at `PlayerBlockBreakEvents.BEFORE` on the center block: cancel vanilla, run the unified sweep through §1's harvest helper per block (one code path for drops/drain/bonuses/callback), replant, apply durability.
 - Item tags: all three scythes join `#minecraft:enchantable/durability` and `#minecraft:enchantable/mining` (Fortune/Unbreaking/Mending availability, and the surface sibling enchantment mods key off), plus a `#cultivation:scythes` tag.
 
+### Right-Click Harvest
+
+The single-block sibling of the sweep. A **bare-hand right-click** on a mature supported crop harvests that one block and replants it — the same reap-and-replant the scythe performs, without the tool.
+
+#### Behavior
+
+When a player right-clicks a **mature supported crop** (§1 table) with an **empty main hand**:
+
+1. The crop's drops resolve through the one harvest choke point (§1: drain → exhausted clamp → §5/§6 bonuses → `CultivationHarvestCallback`) — there is no tool in hand, so **no Fortune** applies.
+2. One of the crop's seed items is withdrawn from those drops to replant the block at age 0 (the shared replant seam the scythe uses). If the drops contain no seed, the block is left empty, farmland intact.
+3. The remaining drops spawn at the block, and the crop's own break sound plays.
+
+Immature crops, stems, and non-crop blocks are left as vanilla right-click behavior (which, on a crop, is nothing). A non-empty main hand takes its own use — only a bare main hand harvests; the off-hand never triggers it. Creative harvests identically (there is no tool to spare durability on). It is server-authoritative: the actor is the interacting player for statistics and API callbacks.
+
+#### Differentiation from the Scythe
+
+The scythe stays the tool for scale: one swing reaps and replants the full 3×3, carries Fortune and other enchantments, and costs durability per crop. The bare-hand gesture is one block, no Fortune, no cost — the quality-of-life pick for a stray crop, not a field.
+
+#### Config
+
+| Key | Type | Default | Range |
+|---|---|---|---|
+| `enableRightClickHarvest` | bool | true | — |
+
+`false` returns a bare-hand right-click on a crop to vanilla (no effect).
+
+#### Implementation Notes
+
+- A `UseBlockCallback` listener, server-side only, gated on an empty main hand and a mature supported crop; it reaps through §1's harvest helper (the one code path for drops/drain/bonuses/callback) and the shared replant seam, then returns `SUCCESS`.
+
 ---
 
 ## 8. Villager Field Stewardship
@@ -566,6 +596,7 @@ All features are independently toggleable via a ModMenu / Cloth Config screen an
 | `composterProducesFertilizer` | bool | true | Composter yields Fertilizer instead of bone meal |
 | `fertilizerDoseHarvests` | int | 15 | Harvests granted +1 product per Fertilizer dose |
 | `enableScytheHarvest` | bool | true | Toggle the scythe 3×3 sweep (§7) |
+| `enableRightClickHarvest` | bool | true | Toggle the bare-hand single-block right-click harvest (§7) |
 | `enableVillagerStewardship` | bool | true | Toggle farmer rotation/fallow behavior (§8) |
 | `enableVillagerFertilizing` | bool | true | Farmers apply Fertilizer to spent field blocks (§8) |
 | `villagerFallowThreshold` | float | 25.0 | Fertility below which farmers stop replanting |

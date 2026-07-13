@@ -39,7 +39,7 @@ In your first hours nothing is unfamiliar: you till, you plant, you eat. Then th
 
 ### The Scythe
 - **What it is** — A new harvesting tool in iron, diamond, and netherite, crafted from the same materials as any tool.
-- **How you use it** — Swing it at a fully grown crop and it harvests the full 3×3 around it and replants each block from its own drops, one seed per block. Immature crops are skipped, and each block harvested costs one durability.
+- **How you use it** — Swing it at a fully grown crop and it harvests the full 3×3 around it and replants each block from its own drops, one seed per block. Immature crops are skipped, and each block harvested costs one durability. When you just want a single crop, a bare-hand right-click harvests and replants that one block — no tool, no Fortune, no scale, so the scythe stays the tool for whole rows.
 - **What changes for you** — Large-scale manual farming becomes rhythm instead of tedium: walk the rows, swing, and the field is picked and replanted behind you. It harvests; it never plows, fights, or replaces your sword.
 
 ### Farmers who farm

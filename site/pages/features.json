@@ -99,6 +99,12 @@
           "html": [
             "Break a fully grown crop with a scythe and it harvests the full 3×3 around it, withdraws one seed per block from the drops, and replants each block at age zero. Immature crops are skipped; each block harvested costs one durability; Fortune on the scythe applies per block. Crafted from three ingots (or diamonds) and two sticks, with the netherite tier through the vanilla smithing upgrade. It harvests — it never plows or fights beyond an ordinary tool."
           ]
+        },
+        {
+          "type": "prose",
+          "html": [
+            "For a stray crop rather than a field, right-click a fully grown crop with an empty hand: it harvests that one block and replants a seed from its own drops — the single-block sibling of the sweep. There's no tool in hand, so no Fortune, no durability, no scale; the scythe stays the tool for harvesting rows at a time. Immature crops are left alone, and the toggle turns the gesture off for anyone who'd rather break and replant by hand."
+          ]
         }
       ]
     },
