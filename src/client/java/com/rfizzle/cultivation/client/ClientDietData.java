@@ -14,9 +14,9 @@ import java.util.Map;
  * into the next server.
  */
 public final class ClientDietData {
-    /** An atomic, immutable view of the synced diet state. */
-    public record Snapshot(Map<ResourceLocation, Integer> stacks, float fatiguePerRepeat, float fatigueFloor) {
-        static final Snapshot EMPTY = new Snapshot(Map.of(), 0.0F, 0.0F);
+    /** An atomic, immutable view of the synced diet stacks. */
+    public record Snapshot(Map<ResourceLocation, Integer> stacks) {
+        static final Snapshot EMPTY = new Snapshot(Map.of());
 
         public boolean isEmpty() {
             return stacks.isEmpty();
@@ -33,7 +33,7 @@ public final class ClientDietData {
     }
 
     public static void accept(DietSyncS2CPayload payload) {
-        snapshot = new Snapshot(Map.copyOf(payload.stacks()), payload.fatiguePerRepeat(), payload.fatigueFloor());
+        snapshot = new Snapshot(Map.copyOf(payload.stacks()));
     }
 
     public static void clear() {

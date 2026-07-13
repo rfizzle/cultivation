@@ -12,16 +12,17 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Pushes the owning player's dietary fatigue to their client for tooltip
- * feedback ({@code design/SPEC.md} §3). Carries the per-food stack map plus the
- * two config knobs the client needs so it recomputes effectiveness with the same
- * formula the server used — no restoration math ever runs on the client.
+ * Pushes the owning player's dietary-fatigue stacks to their client for tooltip
+ * feedback ({@code design/SPEC.md} §3). The fatigue formula's knobs
+ * ({@code fatiguePerRepeat}, {@code fatigueFloor}) ride the server→client config
+ * sync ({@link ConfigSyncS2CPayload}), so this payload carries only the per-food
+ * stack counts — the client recomputes effectiveness with the same formula the
+ * server uses. No restoration math ever runs on the client.
  *
  * <p>The stack map is empty when the server has dietary fatigue disabled, so the
  * client's tooltips go quiet without the client needing to know the server flag.
  */
-public record DietSyncS2CPayload(Map<ResourceLocation, Integer> stacks, float fatiguePerRepeat, float fatigueFloor)
-        implements CustomPacketPayload {
+public record DietSyncS2CPayload(Map<ResourceLocation, Integer> stacks) implements CustomPacketPayload {
     public static final Type<DietSyncS2CPayload> TYPE = new Type<>(Cultivation.id("diet_sync"));
 
     // A player tracks at most DietData.MAX_STACK_ENTRIES foods; reject anything past a safe ceiling.
@@ -36,8 +37,6 @@ public record DietSyncS2CPayload(Map<ResourceLocation, Integer> stacks, float fa
             ResourceLocation.STREAM_CODEC.encode(buf, entry.getKey());
             ByteBufCodecs.VAR_INT.encode(buf, entry.getValue());
         }
-        buf.writeFloat(payload.fatiguePerRepeat);
-        buf.writeFloat(payload.fatigueFloor);
     }
 
     private static DietSyncS2CPayload decode(RegistryFriendlyByteBuf buf) {
@@ -51,9 +50,7 @@ public record DietSyncS2CPayload(Map<ResourceLocation, Integer> stacks, float fa
             int count = ByteBufCodecs.VAR_INT.decode(buf);
             stacks.put(id, count);
         }
-        float fatiguePerRepeat = buf.readFloat();
-        float fatigueFloor = buf.readFloat();
-        return new DietSyncS2CPayload(stacks, fatiguePerRepeat, fatigueFloor);
+        return new DietSyncS2CPayload(stacks);
     }
 
     @Override

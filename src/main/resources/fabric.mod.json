@@ -33,11 +33,18 @@
             "com.rfizzle.cultivation.gametest.VillagerStewardshipGameTest",
             "com.rfizzle.cultivation.gametest.SoilOverlaySyncGameTest",
             "com.rfizzle.cultivation.gametest.CultivationCommandGameTest",
-            "com.rfizzle.cultivation.gametest.AdvancementGameTest"
-        ]
+            "com.rfizzle.cultivation.gametest.AdvancementGameTest",
+            "com.rfizzle.cultivation.gametest.ProbeTooltipGameTest"
+        ],
+        "modmenu": ["com.rfizzle.cultivation.compat.modmenu.CultivationModMenu"],
+        "jade": ["com.rfizzle.cultivation.compat.jade.CultivationJadePlugin"],
+        "emi": ["com.rfizzle.cultivation.compat.emi.CultivationEmiPlugin"],
+        "jei_mod_plugin": ["com.rfizzle.cultivation.compat.jei.CultivationJeiPlugin"],
+        "rei_client": ["com.rfizzle.cultivation.compat.rei.CultivationReiPlugin"]
     },
     "suggests": {
         "modmenu": "*",
+        "cloth-config": "*",
         "jade": "*",
         "wthit": "*",
         "emi": "*",

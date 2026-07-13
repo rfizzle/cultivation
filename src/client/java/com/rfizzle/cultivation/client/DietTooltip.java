@@ -36,8 +36,11 @@ public final class DietTooltip {
         if (stacks <= 0) {
             return;
         }
-        float perRepeat = snapshot.fatiguePerRepeat();
-        float floor = snapshot.fatigueFloor();
+        // The fatigue formula is server-authoritative: read its knobs from the synced
+        // server config, falling back to the local file only when standalone.
+        CultivationConfig config = ClientCultivationConfig.effective();
+        float perRepeat = (float) config.fatiguePerRepeat;
+        float floor = (float) config.fatigueFloor;
         double effectiveness = DietData.effectiveness(stacks, perRepeat, floor);
         int percent = DietData.reductionPercent(effectiveness);
         String key = DietData.atFloor(stacks, perRepeat, floor)

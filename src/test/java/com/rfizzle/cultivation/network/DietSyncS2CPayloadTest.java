@@ -30,25 +30,23 @@ class DietSyncS2CPayloadTest {
     }
 
     @Test
-    void roundTripsStacksAndConfig() {
+    void roundTripsStacks() {
         Map<ResourceLocation, Integer> stacks = new LinkedHashMap<>();
         stacks.put(ResourceLocation.withDefaultNamespace("carrot"), 3);
         stacks.put(ResourceLocation.withDefaultNamespace("cake"), 5);
-        DietSyncS2CPayload payload = new DietSyncS2CPayload(stacks, 0.1F, 0.5F);
+        DietSyncS2CPayload payload = new DietSyncS2CPayload(stacks);
 
         RegistryFriendlyByteBuf buf = buffer();
         DietSyncS2CPayload.CODEC.encode(buf, payload);
         DietSyncS2CPayload decoded = DietSyncS2CPayload.CODEC.decode(buf);
 
         assertEquals(stacks, decoded.stacks());
-        assertEquals(0.1F, decoded.fatiguePerRepeat());
-        assertEquals(0.5F, decoded.fatigueFloor());
     }
 
     @Test
     void emptyStacksRoundTrip() {
         RegistryFriendlyByteBuf buf = buffer();
-        DietSyncS2CPayload.CODEC.encode(buf, new DietSyncS2CPayload(Map.of(), 0.1F, 0.5F));
+        DietSyncS2CPayload.CODEC.encode(buf, new DietSyncS2CPayload(Map.of()));
         DietSyncS2CPayload decoded = DietSyncS2CPayload.CODEC.decode(buf);
         assertTrue(decoded.stacks().isEmpty());
     }

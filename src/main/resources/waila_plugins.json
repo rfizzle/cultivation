@@ -1,0 +1,12 @@
+{
+    "cultivation:wthit": {
+        "entrypoints": {
+            "common": "com.rfizzle.cultivation.compat.wthit.CultivationWthitCommonPlugin",
+            "client": "com.rfizzle.cultivation.compat.wthit.CultivationWthitClientPlugin"
+        },
+        "side": "*",
+        "required": {
+            "wthit": "*"
+        }
+    }
+}

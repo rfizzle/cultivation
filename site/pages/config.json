@@ -3,7 +3,7 @@
   "metaTitle": "Config — Cultivation",
   "metaDescription": "Cultivation's full configuration reference as specced: soil fertility, polyculture, dietary fatigue, meal buffs, tilling, Fertilizer, scythe, and villager stewardship options.",
   "title": "Configuration",
-  "lede": "Every option, as specced in <a href='https://github.com/rfizzle/cultivation/blob/master/design/SPEC.md' class='text-accent hover:text-accent2 underline'>design/SPEC.md</a> — the file is <code>config/cultivation.json</code>, created with defaults on first launch and hot-reloaded with <code>/cultivation reload</code>. Cultivation is in development; this table is the contract the implementation will ship against.",
+  "lede": "Every option, as specced in <a href='https://github.com/rfizzle/cultivation/blob/master/design/SPEC.md' class='text-accent hover:text-accent2 underline'>design/SPEC.md</a> — the file is <code>config/cultivation.json</code>, created with defaults on first launch and hot-reloaded with <code>/cultivation reload</code>. With Mod Menu and Cloth Config installed, every option is also editable in-game from a settings screen. Cultivation is in development; this table is the contract the implementation will ship against.",
   "width": "5xl",
   "sections": [
     {
