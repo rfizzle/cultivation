@@ -25,10 +25,15 @@ class CropProbeTooltipTest {
     }
 
     private static CompoundTag tag(float growth, boolean polyculture) {
+        return tag(growth, polyculture, false);
+    }
+
+    private static CompoundTag tag(float growth, boolean polyculture, boolean bees) {
         CompoundTag tag = new CompoundTag();
         tag.putBoolean(CropProbeTooltip.KEY_PRESENT, true);
         tag.putFloat(CropProbeTooltip.KEY_GROWTH, growth);
         tag.putBoolean(CropProbeTooltip.KEY_POLYCULTURE, polyculture);
+        tag.putBoolean(CropProbeTooltip.KEY_BEE, bees);
         return tag;
     }
 
@@ -55,5 +60,22 @@ class CropProbeTooltipTest {
         List<Component> active = CropProbeTooltip.buildLines(tag(1.2F, true));
         assertEquals(2, active.size());
         assertEquals("tooltip.cultivation.crop.polyculture", key(active.get(1)));
+    }
+
+    @Test
+    void beesLineOnlyWhenActive() {
+        assertEquals(1, CropProbeTooltip.buildLines(tag(1.1F, false, false)).size());
+        List<Component> active = CropProbeTooltip.buildLines(tag(1.1F, false, true));
+        assertEquals(2, active.size());
+        assertEquals("tooltip.cultivation.crop.bees", key(active.get(1)));
+    }
+
+    @Test
+    void polycultureAndBeesLinesBothAppend() {
+        List<Component> lines = CropProbeTooltip.buildLines(tag(1.32F, true, true));
+        assertEquals(3, lines.size());
+        assertEquals("tooltip.cultivation.crop.growth", key(lines.get(0)));
+        assertEquals("tooltip.cultivation.crop.polyculture", key(lines.get(1)));
+        assertEquals("tooltip.cultivation.crop.bees", key(lines.get(2)));
     }
 }

@@ -86,6 +86,9 @@ public final class ConfigFields {
             bool("enablePolyculture", CAT_POLYCULTURE, c -> c.enablePolyculture, (c, v) -> c.enablePolyculture = v),
             dbl("polycultureGrowthMultiplier", CAT_POLYCULTURE, 1.0, 5.0, c -> c.polycultureGrowthMultiplier, (c, v) -> c.polycultureGrowthMultiplier = v),
             intg("polycultureMinDifferentNeighbors", CAT_POLYCULTURE, 1, 4, c -> c.polycultureMinDifferentNeighbors, (c, v) -> c.polycultureMinDifferentNeighbors = v),
+            bool("enableBeePollination", CAT_POLYCULTURE, c -> c.enableBeePollination, (c, v) -> c.enableBeePollination = v),
+            dbl("beePollinationGrowthMultiplier", CAT_POLYCULTURE, 1.0, 5.0, c -> c.beePollinationGrowthMultiplier, (c, v) -> c.beePollinationGrowthMultiplier = v),
+            intg("beePollinationRange", CAT_POLYCULTURE, 1, 16, c -> c.beePollinationRange, (c, v) -> c.beePollinationRange = v),
 
             // Dietary fatigue (§3)
             bool("enableDietaryFatigue", CAT_DIET, c -> c.enableDietaryFatigue, (c, v) -> c.enableDietaryFatigue = v),

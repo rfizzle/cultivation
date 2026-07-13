@@ -10,12 +10,11 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * The growth-speed modifier applied inside the crop/stem/pitcher randomTick
  * mixins: the fertility band multiplier ({@code design/SPEC.md} §1) combined
- * multiplicatively with the polyculture bonus (SPEC §2). Tired soil grows crops
- * at {@code tiredGrowthMultiplier}, Exhausted at
- * {@code exhaustedGrowthMultiplier}, everything else at exactly 1.0 —
- * monoculture and healthy soil are never penalized. The two parts are gated by
- * their own config toggles: disabling soil fertility leaves the polyculture
- * bonus running, and vice versa.
+ * multiplicatively with the polyculture bonus and the bee-pollination bonus
+ * (SPEC §2). Tired soil grows crops at {@code tiredGrowthMultiplier}, Exhausted
+ * at {@code exhaustedGrowthMultiplier}, everything else at exactly 1.0 —
+ * monoculture and healthy soil are never penalized. Each part is gated by its
+ * own config toggle: disabling one leaves the others running.
  */
 public final class SoilGrowth {
     private SoilGrowth() {
@@ -23,7 +22,9 @@ public final class SoilGrowth {
 
     /** The combined growth multiplier for the crop {@code state} at {@code cropPos} (farmland below it). */
     public static float multiplierAt(ServerLevel level, BlockPos cropPos, BlockState state) {
-        return fertilityMultiplierAt(level, cropPos) * Polyculture.multiplierAt(level, cropPos, state);
+        return fertilityMultiplierAt(level, cropPos)
+                * Polyculture.multiplierAt(level, cropPos, state)
+                * BeePollination.multiplierAt(level, cropPos);
     }
 
     /** The fertility band's multiplier alone (§1) — 1.0 while the soil system is disabled. */
