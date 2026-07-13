@@ -70,6 +70,8 @@
   "config.cultivation.tired_growth_multiplier.tooltip": "Crop growth-speed multiplier on Tired soil.",
   "config.cultivation.exhausted_growth_multiplier": "Exhausted Growth Multiplier",
   "config.cultivation.exhausted_growth_multiplier.tooltip": "Crop growth-speed multiplier on Exhausted, zero-fertility soil.",
+  "config.cultivation.enable_non_farmland_soil": "Living Soil Off Farmland",
+  "config.cultivation.enable_non_farmland_soil.tooltip": "Extend soil fertility to sweet berries (on dirt) and nether wart (on soul sand). Off leaves those two crops vanilla.",
   "config.cultivation.enable_polyculture": "Enable Polyculture",
   "config.cultivation.enable_polyculture.tooltip": "Toggle the mixed-field growth bonus.",
   "config.cultivation.polyculture_growth_multiplier": "Polyculture Growth Multiplier",

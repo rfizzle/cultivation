@@ -15,7 +15,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,16 +42,17 @@ public final class HarvestHandler {
      */
     public static List<ItemStack> onDropsResolved(
             BlockState state, ServerLevel level, BlockPos pos, @Nullable Entity harvester, List<ItemStack> drops) {
-        SupportedCrops.CropProfile profile = SupportedCrops.matureProfile(state);
+        SupportedCrops.CropProfile profile = SupportedCrops.soilProfile(state);
         if (profile == null) {
             return drops;
         }
+        CultivationConfig config = CultivationConfig.get();
         BlockPos soilPos = pos.below();
-        if (!level.getBlockState(soilPos).is(Blocks.FARMLAND)) {
+        if (!SupportedCrops.isTrackedSoilGround(
+                level.getBlockState(soilPos), state, config.enableNonFarmlandSoil)) {
             return drops;
         }
 
-        CultivationConfig config = CultivationConfig.get();
         if (config.enableSoilFertility) {
             ResourceLocation cropId = profile.cropId();
             SoilStores.update(level, soilPos, true, data -> {

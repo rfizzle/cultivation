@@ -82,6 +82,7 @@ public final class ConfigFields {
             dbl("tiredThreshold", CAT_SOIL, 0.0, 100.0, c -> c.tiredThreshold, (c, v) -> c.tiredThreshold = v),
             dbl("tiredGrowthMultiplier", CAT_SOIL, 0.0, 1.0, c -> c.tiredGrowthMultiplier, (c, v) -> c.tiredGrowthMultiplier = v),
             dbl("exhaustedGrowthMultiplier", CAT_SOIL, 0.0, 1.0, c -> c.exhaustedGrowthMultiplier, (c, v) -> c.exhaustedGrowthMultiplier = v),
+            bool("enableNonFarmlandSoil", CAT_SOIL, c -> c.enableNonFarmlandSoil, (c, v) -> c.enableNonFarmlandSoil = v),
 
             // Polyculture (§2)
             bool("enablePolyculture", CAT_POLYCULTURE, c -> c.enablePolyculture, (c, v) -> c.enablePolyculture = v),
