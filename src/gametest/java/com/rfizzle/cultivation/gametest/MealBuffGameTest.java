@@ -98,6 +98,28 @@ public class MealBuffGameTest implements FabricGameTest {
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void snackFoodsGrantOneBuffForTheSnackDuration(GameTestHelper helper) {
+        int snackDuration = CultivationConfig.get().snackBuffDurationTicks;
+
+        ServerPlayer cookieEater = MockPlayers.serverPlayerInLevel(helper);
+        eat(helper, cookieEater, Items.COOKIE);
+        MobEffectInstance nimble = cookieEater.getEffect(CultivationEffects.NIMBLE);
+        helper.assertTrue(nimble != null && nimble.getAmplifier() == 0, "cookie grants Nimble I");
+        helper.assertTrue(nimble.getDuration() == snackDuration,
+                "cookie's Nimble lasts snackBuffDurationTicks, got " + nimble.getDuration());
+        helper.assertTrue(activeBuffCount(cookieEater) == 1, "cookie grants exactly one buff, not the trio");
+
+        ServerPlayer pieEater = MockPlayers.serverPlayerInLevel(helper);
+        eat(helper, pieEater, Items.PUMPKIN_PIE);
+        MobEffectInstance sated = pieEater.getEffect(CultivationEffects.SATED);
+        helper.assertTrue(sated != null && sated.getAmplifier() == 0, "pumpkin pie grants Sated I");
+        helper.assertTrue(sated.getDuration() == snackDuration,
+                "pie's Sated lasts snackBuffDurationTicks, got " + sated.getDuration());
+        helper.assertTrue(activeBuffCount(pieEater) == 1, "pumpkin pie grants exactly one buff, not the trio");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void cakeSliceGrantsTheWholeTrio(GameTestHelper helper) {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
         player.getFoodData().setFoodLevel(6); // must be hungry to eat cake

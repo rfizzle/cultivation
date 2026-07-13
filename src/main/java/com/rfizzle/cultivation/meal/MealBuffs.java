@@ -9,21 +9,22 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 
 import java.util.List;
 import java.util.function.IntSupplier;
 
 /**
- * The meal-buff grant choke point ({@code design/SPEC.md} §4). The five buffed
- * foods each replace the whole meal-buff trio: consuming any of them first
- * removes all three Cultivation effects, then applies the food's grant. The
- * grant is gated only by {@code enableMealBuffs} — never by the dietary-fatigue
- * toggle, whose seam ({@code DietHandler#consume}) early-returns when disabled.
+ * The meal-buff grant choke point ({@code design/SPEC.md} §4). Every buffed food
+ * replaces whatever Cultivation buff the player holds: consuming any of them
+ * first removes all three Cultivation effects, then applies the food's grant
+ * (the stews and snacks a single buff, cake the whole trio). The grant is gated
+ * only by {@code enableMealBuffs} — never by the dietary-fatigue toggle, whose
+ * seam ({@code DietHandler#consume}) early-returns when disabled.
  *
  * <p>The selection and scaling logic is a pure, {@code net.minecraft}-free core
- * ({@link #grants}, {@link #satedMultiplier}); {@link #grant} is the thin shell
- * that maps it onto real effect grants at the config's meal/cake duration.
+ * ({@link #grants}, {@link #durationTicks}, {@link #satedMultiplier}); {@link
+ * #grant} is the thin shell that maps it onto real effect grants at the config's
+ * meal/cake/snack duration.
  */
 public final class MealBuffs {
     private MealBuffs() {
@@ -47,13 +48,17 @@ public final class MealBuffs {
     private static final ResourceLocation MUSHROOM_STEW = ResourceLocation.withDefaultNamespace("mushroom_stew");
     private static final ResourceLocation SUSPICIOUS_STEW = ResourceLocation.withDefaultNamespace("suspicious_stew");
     private static final ResourceLocation CAKE = ResourceLocation.withDefaultNamespace("cake");
+    private static final ResourceLocation PUMPKIN_PIE = ResourceLocation.withDefaultNamespace("pumpkin_pie");
+    private static final ResourceLocation COOKIE = ResourceLocation.withDefaultNamespace("cookie");
 
     /**
      * The meal buffs {@code itemId} grants, or an empty list if it is not one of
-     * the five buffed foods. Only Suspicious Stew consults {@code suspiciousRoll}
-     * — it picks one buff at level II keyed by the supplied int (any value;
-     * reduced mod 3) — so the roll is drawn lazily and never for the other four
-     * foods, keeping this a pure function of its inputs.
+     * the buffed foods. Pumpkin pie and cookies each carry a single snack-tier
+     * buff sized below the stews by its shorter register ({@link #durationTicks});
+     * they reuse the stews' effects at level I. Only Suspicious Stew consults
+     * {@code suspiciousRoll} — it picks one buff at level II keyed by the supplied
+     * int (any value; reduced mod 3) — so the roll is drawn lazily and never for
+     * the other foods, keeping this a pure function of its inputs.
      */
     public static List<Grant> grants(ResourceLocation itemId, IntSupplier suspiciousRoll) {
         if (RABBIT_STEW.equals(itemId)) {
@@ -65,6 +70,12 @@ public final class MealBuffs {
         if (MUSHROOM_STEW.equals(itemId)) {
             return List.of(new Grant(Buff.SATED, 0));
         }
+        if (COOKIE.equals(itemId)) {
+            return List.of(new Grant(Buff.NIMBLE, 0));
+        }
+        if (PUMPKIN_PIE.equals(itemId)) {
+            return List.of(new Grant(Buff.SATED, 0));
+        }
         if (CAKE.equals(itemId)) {
             return List.of(new Grant(Buff.NIMBLE, 0), new Grant(Buff.DILIGENT, 0), new Grant(Buff.SATED, 0));
         }
@@ -73,6 +84,23 @@ public final class MealBuffs {
             return List.of(new Grant(picked, 1));
         }
         return List.of();
+    }
+
+    /**
+     * The buff duration, in ticks, that food {@code itemId} grants — the three
+     * registers a buffed food draws from: cake's send-off, pumpkin pie and
+     * cookies' snack, and the stews' meal (also the default, harmless for an
+     * unbuffed id since {@link #grant} never reads it when {@link #grants} is
+     * empty). A pure function of its inputs.
+     */
+    public static int durationTicks(ResourceLocation itemId, int mealTicks, int cakeTicks, int snackTicks) {
+        if (CAKE.equals(itemId)) {
+            return cakeTicks;
+        }
+        if (PUMPKIN_PIE.equals(itemId) || COOKIE.equals(itemId)) {
+            return snackTicks;
+        }
+        return mealTicks;
     }
 
     /**
@@ -102,7 +130,8 @@ public final class MealBuffs {
         player.removeEffect(CultivationEffects.NIMBLE);
         player.removeEffect(CultivationEffects.DILIGENT);
         player.removeEffect(CultivationEffects.SATED);
-        int duration = item == Items.CAKE ? config.cakeBuffDurationTicks : config.mealBuffDurationTicks;
+        int duration = durationTicks(id, config.mealBuffDurationTicks, config.cakeBuffDurationTicks,
+                config.snackBuffDurationTicks);
         for (Grant g : grants) {
             player.addEffect(new MobEffectInstance(holderFor(g.buff()), duration, g.amplifier()));
         }

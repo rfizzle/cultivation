@@ -65,6 +65,7 @@ public class CultivationConfig {
     public boolean enableMealBuffs = true;
     public int mealBuffDurationTicks = 2400;
     public int cakeBuffDurationTicks = 1200;
+    public int snackBuffDurationTicks = 1200;
 
     // Enriched tilling (§5)
     public boolean enableEnrichedTilling = true;
@@ -108,6 +109,7 @@ public class CultivationConfig {
         fatigueResetDistinctFoods = clampInt("fatigueResetDistinctFoods", fatigueResetDistinctFoods, 2, 5);
         mealBuffDurationTicks = clampInt("mealBuffDurationTicks", mealBuffDurationTicks, 200, 72000);
         cakeBuffDurationTicks = clampInt("cakeBuffDurationTicks", cakeBuffDurationTicks, 200, 72000);
+        snackBuffDurationTicks = clampInt("snackBuffDurationTicks", snackBuffDurationTicks, 200, 72000);
         diamondHoeEnrichChance = clampInt("diamondHoeEnrichChance", diamondHoeEnrichChance, 0, 100);
         netheriteHoeEnrichChance = clampInt("netheriteHoeEnrichChance", netheriteHoeEnrichChance, 0, 100);
         fertilizerDoseHarvests = clampInt("fertilizerDoseHarvests", fertilizerDoseHarvests, 1, 1000);
