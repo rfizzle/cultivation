@@ -74,9 +74,9 @@ public final class SoilOverlayServer {
      * No-op when soil is disabled, the position is not soil (farmland removal is
      * handled by {@link #notifyFarmlandRemoved}), or the visible representation is
      * unchanged. A second-wave ground harvested by the break (nether wart) writes
-     * its drain after the crop is already gone, so that position's live overlay
-     * lands on the next chunk-load pull rather than as a delta — {@link
-     * #collectChunkEntries} keys on the current crop above.
+     * its drain after the crop is already gone, so no delta fires; {@link
+     * #collectChunkEntries} keys on the current crop above, so that position's
+     * overlay reappears on a chunk-load pull only once wart is replanted there.
      */
     public static void notifyFlagChange(ServerLevel level, BlockPos pos, SoilData before, SoilData after) {
         CultivationConfig config = CultivationConfig.get();

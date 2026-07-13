@@ -161,7 +161,7 @@ public final class CultivationCommand {
         int diameter = FIELD_RADIUS * 2 + 1;
 
         ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.report",
-                diameter, summary.farmland(), summary.avgPercent(),
+                diameter, summary.soil(), summary.avgPercent(),
                 Component.translatable(CommandText.bandKey(summary.band()))), false);
         ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.counts",
                 summary.exhausted(), summary.enriched(), summary.fertilized()), false);

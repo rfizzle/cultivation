@@ -53,8 +53,8 @@ public final class CommandText {
     }
 
     /**
-     * One surveyed farmland block's soil state, as the aggregate needs it — the
-     * MC-free slice of {@code SoilData} so {@link #summarize} unit-tests at Tier 1.
+     * One surveyed soil block's state, as the aggregate needs it — the MC-free
+     * slice of {@code SoilData} so {@link #summarize} unit-tests at Tier 1.
      * Untracked (pristine) columns feed a {@code fertility} of {@link SoilMath#MAX_FERTILITY}
      * and zero bonuses.
      */
@@ -62,11 +62,12 @@ public final class CommandText {
     }
 
     /**
-     * The aggregate of a field survey: how many farmland blocks it covered, the
-     * mean fertility as a whole percent and its band, and the count of blocks that
-     * are exhausted, enriched, or hold a Fertilizer dose.
+     * The aggregate of a field survey: how many soil blocks it covered (farmland,
+     * or a second-wave crop's ground), the mean fertility as a whole percent and
+     * its band, and the count of blocks that are exhausted, enriched, or hold a
+     * Fertilizer dose.
      */
-    public record FieldSummary(int farmland, int avgPercent, SoilBand band,
+    public record FieldSummary(int soil, int avgPercent, SoilBand band,
                                int exhausted, int enriched, int fertilized) {
     }
 
@@ -75,11 +76,11 @@ public final class CommandText {
      * the mean fertility through the same {@link SoilMath#band} the single-block
      * report uses; exhausted is counted by that band so the rule stays single-sourced.
      * An empty survey yields all zeros (the command never calls it empty — the
-     * looked-at center is always farmland).
+     * looked-at center is always tracked soil).
      */
     public static FieldSummary summarize(List<FieldBlock> blocks, double tiredThreshold) {
-        int farmland = blocks.size();
-        if (farmland == 0) {
+        int soil = blocks.size();
+        if (soil == 0) {
             return new FieldSummary(0, 0, SoilBand.EXHAUSTED, 0, 0, 0);
         }
         float sum = 0.0F;
@@ -98,8 +99,8 @@ public final class CommandText {
                 fertilized++;
             }
         }
-        float mean = sum / farmland;
-        return new FieldSummary(farmland, percent(mean), SoilMath.band(mean, tiredThreshold),
+        float mean = sum / soil;
+        return new FieldSummary(soil, percent(mean), SoilMath.band(mean, tiredThreshold),
                 exhausted, enriched, fertilized);
     }
 }

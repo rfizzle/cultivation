@@ -154,7 +154,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
         // both remembered crops in spatial encounter order (wheat before carrots).
         CultivationCommand.FieldReport report = CultivationCommand.surveyField(level, center);
         CommandText.FieldSummary summary = report.summary();
-        helper.assertTrue(summary.farmland() == 9, "survey covers all 9 farmland blocks, got " + summary.farmland());
+        helper.assertTrue(summary.soil() == 9, "survey covers all 9 soil blocks, got " + summary.soil());
         helper.assertTrue(summary.exhausted() == 1, "one block is exhausted, got " + summary.exhausted());
         helper.assertTrue(summary.enriched() == 1, "one block is enriched, got " + summary.enriched());
         helper.assertTrue(summary.fertilized() == 0, "no blocks are fertilized, got " + summary.fertilized());
