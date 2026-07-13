@@ -530,7 +530,7 @@ The scythe reaps and replants a standing 3×3; broadcast sowing seeds a bare 3×
 
 #### Implementation Notes
 
-- A `UseBlockCallback` listener, server-side only, gated on the sneak modifier, an in-scope crop seed in the main hand (`SupportedCrops.plantableCropForSeed`), and a farmland anchor. It validates each of the 3×3 positions exactly as vanilla placement would (`canBeReplaced` for emptiness, `canSurvive` for farmland-below and light), places the crop at age 0 (the pitcher's single-block pod handled like the shared replant seam), spends one seed per planted block, and returns `SUCCESS` when at least one block is sown (else `PASS`, so a lone seed can still land by vanilla).
+- A `UseBlockCallback` listener gated on the sneak modifier, an in-scope crop seed in the main hand (`SupportedCrops.plantableCropForSeed`), and a farmland anchor. It checks each of the 3×3 positions for whether a seed could survive there — `canBeReplaced` for emptiness and `canSurvive` for farmland-below and light, a survivability test rather than full placement-permission parity (the off-center blocks are set directly, not replayed through a placement event) — then places the crop at age 0 (the pitcher's single-block pod handled like the shared replant seam), spends one seed per planted block, and plays the crop's place sound once at the center. The sow runs server-side; on the client a valid gesture returns `SUCCESS` so Fabric cancels vanilla's predicted single-seed placement and forwards the interaction, so the 3×3 and its sound are authored once by the server. It returns `SUCCESS` when the gesture applies (else `PASS`, so a lone seed can still land by vanilla when the whole 3×3 is occupied).
 
 ---
 

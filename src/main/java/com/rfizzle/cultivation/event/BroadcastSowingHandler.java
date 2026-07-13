@@ -31,7 +31,10 @@ import org.jetbrains.annotations.Nullable;
  * ({@link SupportedCrops#plantableCropForSeed}), so nether wart and sweet berries
  * are passed through untouched.
  *
- * <p>A plain {@code UseBlockCallback} listener, server-side only. It stands down
+ * <p>A plain {@code UseBlockCallback} listener. The sow runs only on the server;
+ * on the client a valid gesture returns {@code SUCCESS} so Fabric suppresses
+ * vanilla's predicted single-seed placement (and its local sound) while still
+ * forwarding the interaction to the server, which owns the effect. It stands down
  * — returning {@code PASS}, which leaves vanilla's single-seed placement intact —
  * when {@code enableBroadcastSowing} is off, the player is not sneaking, the main
  * hand is not an in-scope seed, or the click does not resolve to a farmland
@@ -58,11 +61,7 @@ public final class BroadcastSowingHandler implements UseBlockCallback {
         if (hand != InteractionHand.MAIN_HAND) {
             return InteractionResult.PASS; // the seed is held in the main hand; never sow off the off-hand
         }
-        if (!(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)
-                || player.isSpectator()) {
-            return InteractionResult.PASS;
-        }
-        if (!CultivationConfig.get().enableBroadcastSowing) {
+        if (player.isSpectator() || !CultivationConfig.get().enableBroadcastSowing) {
             return InteractionResult.PASS; // disabled: a sneak-right-click plants one seed, as in vanilla
         }
         if (!player.isShiftKeyDown()) {
@@ -73,13 +72,19 @@ public final class BroadcastSowingHandler implements UseBlockCallback {
         if (crop == null) {
             return InteractionResult.PASS; // not an in-scope crop seed: vanilla use
         }
-        BlockPos center = farmlandAnchor(serverLevel, hit.getBlockPos());
+        BlockPos center = farmlandAnchor(level, hit.getBlockPos());
         if (center == null) {
             return InteractionResult.PASS; // the click did not land on (or above) farmland
         }
+        // The gesture applies. These checks run identically on the client, where
+        // returning SUCCESS makes Fabric cancel vanilla's predicted single-seed
+        // placement and forward the interaction to the server — the only place the
+        // 3×3 is actually sown, so the effect and its one sound happen exactly once.
+        if (!(level instanceof ServerLevel serverLevel) || !(player instanceof ServerPlayer serverPlayer)) {
+            return InteractionResult.SUCCESS;
+        }
         int planted = sow(serverLevel, serverPlayer, seed, crop, center);
-        // SUCCESS consumes the interaction and suppresses the vanilla single plant;
-        // when nothing could be sown (the whole 3×3 was occupied) fall back to
+        // When nothing could be sown (the whole 3×3 was occupied) fall back to
         // vanilla so a lone seed can still land on the clicked block.
         return planted > 0 ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
@@ -90,7 +95,7 @@ public final class BroadcastSowingHandler implements UseBlockCallback {
      * clicked crop, else null.
      */
     @Nullable
-    private static BlockPos farmlandAnchor(ServerLevel level, BlockPos hitPos) {
+    private static BlockPos farmlandAnchor(Level level, BlockPos hitPos) {
         if (level.getBlockState(hitPos).is(Blocks.FARMLAND)) {
             return hitPos;
         }
