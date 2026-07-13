@@ -24,7 +24,7 @@ class MealBuffsTest {
         return ResourceLocation.withDefaultNamespace(path);
     }
 
-    /** A roll supplier that fails if consulted — proves the four fixed foods never draw. */
+    /** A roll supplier that fails if consulted — proves the fixed foods never draw. */
     private static IntSupplier noRoll() {
         return () -> {
             fail("the roll must not be drawn for a non-suspicious food");
