@@ -97,6 +97,7 @@ public final class ConfigFields {
             bool("enableMealBuffs", CAT_MEALS, c -> c.enableMealBuffs, (c, v) -> c.enableMealBuffs = v),
             intg("mealBuffDurationTicks", CAT_MEALS, 200, 72000, c -> c.mealBuffDurationTicks, (c, v) -> c.mealBuffDurationTicks = v),
             intg("cakeBuffDurationTicks", CAT_MEALS, 200, 72000, c -> c.cakeBuffDurationTicks, (c, v) -> c.cakeBuffDurationTicks = v),
+            intg("snackBuffDurationTicks", CAT_MEALS, 200, 72000, c -> c.snackBuffDurationTicks, (c, v) -> c.snackBuffDurationTicks = v),
 
             // Enriched tilling (§5)
             bool("enableEnrichedTilling", CAT_TILLING, c -> c.enableEnrichedTilling, (c, v) -> c.enableEnrichedTilling = v),

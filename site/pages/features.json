@@ -56,7 +56,7 @@
         {
           "type": "prose",
           "html": [
-            "Each bowl food carries a 2-minute buff: Rabbit Stew grants 5% movement speed (Nimble), Beetroot Soup grants 10% faster block breaking (Diligent), Mushroom Stew slows your hunger drain by 10% (Sated), and Suspicious Stew gambles as always — but grants one of the three at double strength alongside its usual rolled effect. Cake is the celebration meal: each slice grants all three buffs at once for 1 minute — the only meal that hands you the whole trio. Every meal replaces your current buff rather than stacking it."
+            "Each bowl food carries a 2-minute buff: Rabbit Stew grants 5% movement speed (Nimble), Beetroot Soup grants 10% faster block breaking (Diligent), Mushroom Stew slows your hunger drain by 10% (Sated), and Suspicious Stew gambles as always — but grants one of the three at double strength alongside its usual rolled effect. Pumpkin pie and cookies join in smaller: each carries one of those buffs for a single minute — a cookie quickens your step like Rabbit Stew, a slice of pie curbs hunger like Mushroom Stew — sized below the crafted bowls. Cake is the celebration meal: each slice grants all three buffs at once for 1 minute — the only meal that hands you the whole trio. Every meal replaces your current buff rather than stacking it."
           ]
         }
       ]

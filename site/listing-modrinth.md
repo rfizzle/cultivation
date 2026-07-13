@@ -58,8 +58,10 @@ touched, and the tooltip tells you plainly when a food is losing its appeal.
 The unstackable meals finally repay the bowl: **Rabbit Stew** grants 5%
 movement speed, **Beetroot Soup** 10% faster block breaking, **Mushroom Stew**
 10% slower hunger drain — each for 2 minutes — and **Suspicious Stew** rolls
-one of the three at double strength on top of its usual gamble. **Cake** is
-the celebration meal: each slice grants all three buffs at once for a minute.
+one of the three at double strength on top of its usual gamble. **Pumpkin
+pie** and **cookies** join in smaller — each carries one of those buffs for a
+single minute, sized below the crafted bowls. **Cake** is the celebration
+meal: each slice grants all three buffs at once for a minute.
 
 ### Enriched Tilling & Fertilizer
 

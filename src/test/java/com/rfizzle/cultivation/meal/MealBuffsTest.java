@@ -24,7 +24,7 @@ class MealBuffsTest {
         return ResourceLocation.withDefaultNamespace(path);
     }
 
-    /** A roll supplier that fails if consulted — proves the four fixed foods never draw. */
+    /** A roll supplier that fails if consulted — proves the fixed foods never draw. */
     private static IntSupplier noRoll() {
         return () -> {
             fail("the roll must not be drawn for a non-suspicious food");
@@ -41,6 +41,14 @@ class MealBuffsTest {
         assertEquals(List.of(new Grant(Buff.NIMBLE, 0)), MealBuffs.grants(mc("rabbit_stew"), noRoll()));
         assertEquals(List.of(new Grant(Buff.DILIGENT, 0)), MealBuffs.grants(mc("beetroot_soup"), noRoll()));
         assertEquals(List.of(new Grant(Buff.SATED, 0)), MealBuffs.grants(mc("mushroom_stew"), noRoll()));
+    }
+
+    @Test
+    void snackFoodsGrantOneStewEffectAtLevelOne() {
+        // Pumpkin pie and cookies reuse the stews' effects at level I; the snack tier
+        // sits below the stews through its shorter duration register, not a weaker level.
+        assertEquals(List.of(new Grant(Buff.NIMBLE, 0)), MealBuffs.grants(mc("cookie"), noRoll()));
+        assertEquals(List.of(new Grant(Buff.SATED, 0)), MealBuffs.grants(mc("pumpkin_pie"), noRoll()));
     }
 
     @Test
@@ -69,6 +77,21 @@ class MealBuffsTest {
         assertTrue(MealBuffs.grants(mc("carrot"), noRoll()).isEmpty());
         assertTrue(MealBuffs.grants(mc("cooked_beef"), noRoll()).isEmpty());
         assertTrue(MealBuffs.grants(ResourceLocation.fromNamespaceAndPath("cultivation", "fertilizer"), noRoll()).isEmpty());
+    }
+
+    @Test
+    void durationTicksSelectsTheRightRegister() {
+        // Distinct sentinels so a swapped argument would surface as the wrong value.
+        int meal = 2400;
+        int cake = 1200;
+        int snack = 600;
+        assertEquals(cake, MealBuffs.durationTicks(mc("cake"), meal, cake, snack));
+        assertEquals(snack, MealBuffs.durationTicks(mc("cookie"), meal, cake, snack));
+        assertEquals(snack, MealBuffs.durationTicks(mc("pumpkin_pie"), meal, cake, snack));
+        assertEquals(meal, MealBuffs.durationTicks(mc("rabbit_stew"), meal, cake, snack));
+        assertEquals(meal, MealBuffs.durationTicks(mc("suspicious_stew"), meal, cake, snack));
+        // An unbuffed id falls to the meal default; grant() never reads it (grants is empty).
+        assertEquals(meal, MealBuffs.durationTicks(mc("carrot"), meal, cake, snack));
     }
 
     @Test

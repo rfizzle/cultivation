@@ -235,17 +235,21 @@ Three new status effects, all beneficial, with custom 18×18 icons (see `design/
 | **Diligent** | `cultivation:diligent` | +10% block breaking speed | `player.block_break_speed` attribute modifier, multiply-total |
 | **Sated** | `cultivation:sated` | −10% hunger drain | exhaustion accrual scaled by `1 − 0.10 × (amplifier + 1)` |
 
-Granted on consumption, duration `mealBuffDurationTicks` (default **2400** = 2 minutes) for the stews and `cakeBuffDurationTicks` (default **1200** = 1 minute) for cake:
+Granted on consumption, duration `mealBuffDurationTicks` (default **2400** = 2 minutes) for the stews, `snackBuffDurationTicks` (default **1200** = 1 minute) for pumpkin pie and cookies, and `cakeBuffDurationTicks` (default **1200** = 1 minute) for cake:
 
 | Food | Buff |
 |---|---|
 | Rabbit Stew | Nimble I (+5% speed) |
 | Beetroot Soup | Diligent I (+10% break speed) |
 | Mushroom Stew | Sated I (−10% hunger drain) |
+| Cookie | Nimble I (+5% speed) — snack duration; a lighter, briefer Rabbit Stew |
+| Pumpkin Pie | Sated I (−10% hunger drain) — snack duration; a lighter, briefer Mushroom Stew |
 | Suspicious Stew | one of the three, uniformly random, at level II (double strength) — in addition to its vanilla rolled effect, which is untouched |
 | Cake (each slice) | all three — Nimble I + Diligent I + Sated I — the celebration meal; placed, sliced, shared |
 
-**One meal at a time:** consuming any of these five foods first removes all three Cultivation effects, then applies the new grant (cake applies its trio together). Buffs replace; they never stack or extend.
+Pumpkin pie and cookies sit below the stews: they reuse the stews' effects at level I but on the shorter snack register, so a stew stays the premium source of its buff. Cake keeps the crown as the only meal that hands over the whole trio.
+
+**One meal at a time:** consuming any of these buffed foods first removes all three Cultivation effects, then applies the new grant (the stews and snacks a single buff, cake its trio together). Buffs replace; they never stack or extend.
 
 ### Edge Cases
 
@@ -262,11 +266,12 @@ Granted on consumption, duration `mealBuffDurationTicks` (default **2400** = 2 m
 | `enableMealBuffs` | bool | true | — |
 | `mealBuffDurationTicks` | int | 2400 | 200–72000 |
 | `cakeBuffDurationTicks` | int | 1200 | 200–72000 |
+| `snackBuffDurationTicks` | int | 1200 | 200–72000 |
 
 ### Implementation Notes
 
-- Three `MobEffect` registrations (attribute-backed for Nimble/Diligent; Sated hooks `FoodData#addExhaustion` via a small mixin checking the effect).
-- Grant hook rides §3's consumption seam (same mixin, after fatigue application), keyed by item id — no food-component data manipulation, so datapack changes to the stews' nutrition don't interact. The cake-block slice path routes through the same helper (it already must, for §3), so cake grants ride the identical seam.
+- Three `MobEffect` registrations (attribute-backed for Nimble/Diligent; Sated hooks `FoodData#addExhaustion` via a small mixin checking the effect). Pumpkin pie and cookies add no effects — they reuse the three, distinguished only by the shorter snack duration register.
+- Grant hook rides §3's consumption seam (same mixin, after fatigue application), keyed by item id — no food-component data manipulation, so datapack changes to the foods' nutrition don't interact. Pumpkin pie and cookies are ordinary food-component items, so they ride the generic `Player#eat` seam with the stews (no block path). The cake-block slice path routes through the same helper (it already must, for §3), so cake grants ride the identical seam. The item id also selects the duration register (meal / snack / cake).
 
 ---
 

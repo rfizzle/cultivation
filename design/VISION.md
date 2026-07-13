@@ -29,8 +29,8 @@ In your first hours nothing is unfamiliar: you till, you plant, you eat. Then th
 
 ### Worth the bowl
 - **What it is** — The crafted meals finally repay their cost. Each bowl food carries a small buff for 2 minutes, and cake — the meal you have to sit down for — briefly carries them all.
-- **How you use it** — Eat the stew: Rabbit Stew grants 5% movement speed, Beetroot Soup grants 10% faster block breaking, Mushroom Stew slows your hunger drain by 10%, and Suspicious Stew gambles as always — but grants one of the other three buffs at double strength alongside its usual effect. Bake a cake for the send-off: every slice grants all three buffs at once for 60 seconds — seven slices, one party.
-- **What changes for you** — The recipes vanilla shipped and nobody crafted become the traveler's meal, the miner's breakfast, the gambler's dare, and the feast a group shares before a big job. One meal at a time; eating another stew or slice replaces what you had rather than stacking it.
+- **How you use it** — Eat the stew: Rabbit Stew grants 5% movement speed, Beetroot Soup grants 10% faster block breaking, Mushroom Stew slows your hunger drain by 10%, and Suspicious Stew gambles as always — but grants one of the other three buffs at double strength alongside its usual effect. A cookie or a slice of pumpkin pie carries one of those same buffs briefly, sized below the bowls. Bake a cake for the send-off: every slice grants all three buffs at once for 60 seconds — seven slices, one party.
+- **What changes for you** — The recipes vanilla shipped and nobody crafted become the traveler's meal, the miner's breakfast, the gambler's dare, the pocket snack, and the feast a group shares before a big job. One meal at a time; eating another stew, snack, or slice replaces what you had rather than stacking it.
 
 ### Farmland you invest in
 - **What it is** — Two ways to build a plot worth keeping: permanent craftsmanship from late-game hoes, and Fertilizer — a renewable amendment the composter produces instead of bone meal. Both show on the ground itself.
