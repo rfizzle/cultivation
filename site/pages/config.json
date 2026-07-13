@@ -33,6 +33,7 @@
             ["<code>enableMealBuffs</code>", "bool", "<code>true</code>", "—", "Meal buffs"],
             ["<code>mealBuffDurationTicks</code>", "int", "<code>2400</code>", "200–72000", "Meal buffs"],
             ["<code>cakeBuffDurationTicks</code>", "int", "<code>1200</code>", "200–72000", "Meal buffs"],
+            ["<code>snackBuffDurationTicks</code>", "int", "<code>1200</code>", "200–72000", "Meal buffs"],
             ["<code>enableEnrichedTilling</code>", "bool", "<code>true</code>", "—", "Enriched tilling"],
             ["<code>diamondHoeEnrichChance</code>", "int", "<code>10</code>", "0–100", "Enriched tilling"],
             ["<code>netheriteHoeEnrichChance</code>", "int", "<code>15</code>", "0–100", "Enriched tilling"],
