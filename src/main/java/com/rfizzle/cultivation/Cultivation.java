@@ -9,6 +9,7 @@ import com.rfizzle.cultivation.event.RightClickHarvestHandler;
 import com.rfizzle.cultivation.event.ScytheHarvestHandler;
 import com.rfizzle.cultivation.event.SoilInteractionHandler;
 import com.rfizzle.cultivation.item.CultivationItems;
+import com.rfizzle.cultivation.meal.BowlFoodStacking;
 import com.rfizzle.cultivation.network.ConfigNetworking;
 import com.rfizzle.cultivation.network.DietNetworking;
 import com.rfizzle.cultivation.network.SoilOverlayNetworking;
@@ -27,6 +28,9 @@ public class Cultivation implements ModInitializer {
         // Materializes config/cultivation.json with defaults on first launch.
         CultivationConfig.get();
         CultivationItems.register();
+        // Bowl foods stack to a real shelf (SPEC §4). Part of the meal-buff feature, so it
+        // rides enableMealBuffs; stack size is baked into the item at startup, read once here.
+        BowlFoodStacking.applyIfEnabled(CultivationConfig.get().enableMealBuffs);
         CultivationEffects.register();
         CultivationCriteria.register();
         CultivationAttachments.init();

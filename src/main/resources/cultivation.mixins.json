@@ -13,6 +13,7 @@
         "FarmBlockMixin",
         "HarvestFarmlandMixin",
         "HoeItemMixin",
+        "ItemComponentsAccessor",
         "NetherWartBlockMixin",
         "PitcherCropBlockMixin",
         "PlayerEatMixin",
