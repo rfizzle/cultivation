@@ -2,13 +2,13 @@ package com.rfizzle.cultivation.event;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.criteria.CultivationCriteria;
+import com.rfizzle.cultivation.harvest.CropReplanter;
 import com.rfizzle.cultivation.harvest.HarvestHandler;
 import com.rfizzle.cultivation.harvest.SeedWithdrawal;
 import com.rfizzle.cultivation.item.ScytheItem;
 import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -19,9 +19,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.PitcherCropBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
@@ -50,10 +47,6 @@ public final class ScytheHarvestHandler implements PlayerBlockBreakEvents.Before
     // Server break events run on the server thread; the guard is thread-local so
     // the replayed off-center probes never re-enter the sweep on that thread.
     private static final ThreadLocal<Boolean> SWEEPING = ThreadLocal.withInitial(() -> false);
-
-    // Clear/replant without letting the two pitcher halves react to each other or
-    // to a stale neighbor shape — the sweep has already resolved every drop.
-    private static final int REPLANT_FLAGS = Block.UPDATE_CLIENTS | Block.UPDATE_KNOWN_SHAPE;
 
     private ScytheHarvestHandler() {
     }
@@ -134,31 +127,12 @@ public final class ScytheHarvestHandler implements PlayerBlockBreakEvents.Before
         drops = HarvestHandler.onDropsResolved(state, level, pos, player, drops);
 
         boolean seedFound = SeedWithdrawal.withdrawOne(drops, profile.seed());
-        replant(level, pos, state, profile, seedFound);
+        CropReplanter.replant(level, pos, state, profile, seedFound);
         for (ItemStack stack : drops) {
             Block.popResource(level, pos, stack);
         }
 
         tool.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
         player.awardStat(Stats.BLOCK_MINED.get(state.getBlock()));
-    }
-
-    private static void replant(ServerLevel level, BlockPos pos, BlockState state,
-            SupportedCrops.CropProfile profile, boolean seedFound) {
-        if (state.getBlock() instanceof PitcherCropBlock) {
-            // §7: the pitcher harvests both halves and replants a pod at age 0.
-            // Its mature drop is the plant, never a pod, so the replant is
-            // unconditional; the orphaned upper half must be cleared explicitly.
-            level.setBlock(pos.above(), Blocks.AIR.defaultBlockState(), REPLANT_FLAGS);
-            level.setBlock(pos, Blocks.PITCHER_CROP.defaultBlockState(), REPLANT_FLAGS);
-            return;
-        }
-        if (seedFound && BuiltInRegistries.BLOCK.get(profile.cropId()) instanceof CropBlock crop) {
-            level.setBlock(pos, crop.getStateForAge(0), REPLANT_FLAGS);
-        } else {
-            // No seed to sow (an unlucky roll, or a crop whose mature drop is not
-            // its seed): the block is left empty, farmland intact.
-            level.setBlock(pos, Blocks.AIR.defaultBlockState(), REPLANT_FLAGS);
-        }
     }
 }
