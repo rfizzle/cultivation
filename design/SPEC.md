@@ -268,7 +268,7 @@ Crafted bowl foods grant a short passive buff.
 
 ### Problem
 
-Vanilla's crafted, unstackable meals (stews and soups) cost inventory space and crafting effort but restore no more than cheap stackables — so nobody crafts them. The recipes exist; the reason doesn't.
+Vanilla's crafted meals (stews and soups) cost crafting effort but restore no more than cheap stackables, and each one hogs a full inventory slot — so nobody crafts them. The recipes exist; the reason doesn't.
 
 ### Behavior
 
@@ -296,8 +296,11 @@ Pumpkin pie and cookies sit below the stews: they reuse the stews' effects at le
 
 **One meal at a time:** consuming any of these buffed foods first removes all three Cultivation effects, then applies the new grant (the stews and snacks a single buff, cake its trio together). Buffs replace; they never stack or extend.
 
+**Stacking:** the four crafted bowl foods — rabbit stew, beetroot soup, mushroom stew, suspicious stew — stack to **16**, so a shelf of meals fits a hotbar. Eating one returns its empty bowl exactly as vanilla; bowls already stack. Suspicious stew stacks only across identical rolled effects, per component equality — distinct rolls never merge. Stacking is part of the meal-buff feature and rides the `enableMealBuffs` toggle; because stack size is baked into the item at startup, the toggle is read once at init and takes effect on restart.
+
 ### Edge Cases
 
+- **Returned bowl on a full inventory:** eating a stew from a stack of two or more with no inventory room drops the empty bowl at the player's feet rather than discarding it — a targeted wrap on `Player#eat`'s inventory-add, mirroring vanilla `HoneyBottleItem` (vanilla silently loses the bowl in this newly reachable stack-`>1` path).
 - **Milk** clears the effects (vanilla behavior, accepted).
 - **Cake** is eaten by the slice from the placed block; each slice grants the full trio to whoever ate it. Candle-cake variants count as cake. The slice-eat path and §3's cake-fatigue handling share one seam.
 - **Dietary fatigue** (§3) reduces the meal's hunger/saturation but never the buff.
@@ -316,6 +319,7 @@ Pumpkin pie and cookies sit below the stews: they reuse the stews' effects at le
 ### Implementation Notes
 
 - Three `MobEffect` registrations (attribute-backed for Nimble/Diligent; Sated hooks `FoodData#addExhaustion` via a small mixin checking the effect). Pumpkin pie and cookies add no effects — they reuse the three, distinguished only by the shorter snack duration register.
+- Stack size is raised by rebuilding the four stews' default component maps (`MAX_STACK_SIZE = 16`, every other component preserved) once at init through an `Item.components` accessor — no per-stack data, no datapack interaction. The full-inventory bowl drop is a targeted wrap on `Player#eat`'s inventory-add.
 - Grant hook rides §3's consumption seam (same mixin, after fatigue application), keyed by item id — no food-component data manipulation, so datapack changes to the foods' nutrition don't interact. Pumpkin pie and cookies are ordinary food-component items, so they ride the generic `Player#eat` seam with the stews (no block path). The cake-block slice path routes through the same helper (it already must, for §3), so cake grants ride the identical seam. The item id also selects the duration register (meal / snack / cake).
 
 ---
