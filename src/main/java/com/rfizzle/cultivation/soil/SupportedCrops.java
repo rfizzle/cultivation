@@ -19,6 +19,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Set;
+
 /**
  * The supported-crop table from {@code design/SPEC.md} §1: which block states
  * count as a mature harvest, the crop identity recorded as rotation memory,
@@ -178,6 +180,29 @@ public final class SupportedCrops {
         return seed.getItem() instanceof BlockItem blockItem
                 ? BuiltInRegistries.BLOCK.getKey(blockItem.getBlock())
                 : null;
+    }
+
+    /** The farmland replant crops' block ids — the in-scope set for broadcast sowing (SPEC §7). */
+    private static final Set<ResourceLocation> FARMLAND_REPLANT_CROP_IDS = Set.of(
+            WHEAT.cropId(), CARROTS.cropId(), POTATOES.cropId(),
+            BEETROOTS.cropId(), TORCHFLOWER.cropId(), PITCHER.cropId());
+
+    /**
+     * The crop block a seed sows in the broadcast-sowing 3×3 gesture (SPEC §7), or
+     * null when {@code seed} is not one of the six farmland replant crops' seeds.
+     * Built on {@link #cropIdForSeed}: every plantable seed names its crop block,
+     * and the result is kept to the {@link #matureProfile replant registry} so the
+     * gesture mirrors the scythe and right-click harvest — nether wart, sweet
+     * berries, and any non-seed item resolve to null. The returned block is always
+     * a {@link CropBlock} or {@link PitcherCropBlock}.
+     */
+    @Nullable
+    public static Block plantableCropForSeed(ItemStack seed) {
+        ResourceLocation cropId = cropIdForSeed(seed);
+        if (cropId == null || !FARMLAND_REPLANT_CROP_IDS.contains(cropId)) {
+            return null;
+        }
+        return BuiltInRegistries.BLOCK.get(cropId);
     }
 
     @Nullable

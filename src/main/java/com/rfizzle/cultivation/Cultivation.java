@@ -5,6 +5,7 @@ import com.rfizzle.cultivation.command.CultivationCommand;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.criteria.CultivationCriteria;
 import com.rfizzle.cultivation.effect.CultivationEffects;
+import com.rfizzle.cultivation.event.BroadcastSowingHandler;
 import com.rfizzle.cultivation.event.RightClickHarvestHandler;
 import com.rfizzle.cultivation.event.ScytheHarvestHandler;
 import com.rfizzle.cultivation.event.SoilInteractionHandler;
@@ -38,6 +39,7 @@ public class Cultivation implements ModInitializer {
         SoilInteractionHandler.register();
         ScytheHarvestHandler.register();
         RightClickHarvestHandler.register();
+        BroadcastSowingHandler.register();
         ConfigNetworking.register();
         DietNetworking.register();
         SoilOverlayNetworking.register();
