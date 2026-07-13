@@ -111,7 +111,7 @@
         {
           "type": "prose",
           "html": [
-            "To lay a fresh field, sneak-right-click farmland with a stack of seeds: the surrounding 3×3 is sown at once, one seed per block, skipping any block already planted or unsuitable. It's the planting bookend to the harvest — the scythe replants what it reaps, and this seeds the bare ground it can't. A plain right-click still plants a single seed the vanilla way; only the sneak broadcasts. Wheat, carrots, potatoes, beetroots, torchflower, and pitcher are in scope, one seed type per gesture, so alternating polyculture rows stay a deliberate layout act."
+            "To lay a fresh field there's a companion tool, the iron rake: hold it, keep a stack of seeds in your off-hand, and right-click farmland to sow the surrounding 3×3 at once — one seed and one durability per block, skipping any block already planted or unsuitable. It's the planting half of the field tool pair — the scythe replants what it reaps, and the rake seeds the bare ground it can't. Without a rake, seeds plant one block the vanilla way. Wheat, carrots, potatoes, beetroots, torchflower, and pitcher are in scope, one seed type per pass, so alternating polyculture rows stay a deliberate layout act. Crafted from three iron ingots and two sticks."
           ]
         }
       ]
