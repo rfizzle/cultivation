@@ -156,11 +156,8 @@ public final class CultivationCommand {
                     "command.cultivation.soil.not_farmland", (int) SOIL_REACH));
             return 0;
         }
-        List<CommandText.FieldBlock> blocks = new ArrayList<>();
-        List<ResourceLocation> crops = new ArrayList<>();
-        surveyPlot(level, target.get(), blocks, crops);
-        CommandText.FieldSummary summary =
-                CommandText.summarize(blocks, CultivationConfig.get().tiredThreshold);
+        FieldReport report = surveyField(level, target.get());
+        CommandText.FieldSummary summary = report.summary();
         int diameter = FIELD_RADIUS * 2 + 1;
 
         ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.report",
@@ -168,7 +165,7 @@ public final class CultivationCommand {
                 Component.translatable(CommandText.bandKey(summary.band()))), false);
         ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.counts",
                 summary.exhausted(), summary.enriched(), summary.fertilized()), false);
-        List<ResourceLocation> distinctCrops = CommandText.distinct(crops);
+        List<ResourceLocation> distinctCrops = report.crops();
         if (distinctCrops.isEmpty()) {
             ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.crops.none"), false);
         } else {
@@ -176,6 +173,25 @@ public final class CultivationCommand {
             ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.crops", names), false);
         }
         return Command.SINGLE_SUCCESS;
+    }
+
+    /**
+     * The testable core of {@code /cultivation field}: surveys the plot around
+     * {@code center} and returns its aggregate. Read-only — walks only loaded
+     * chunks and never touches the soil write choke point. The Brigadier handler
+     * is the thin shell over this; gametests call it directly to assert the
+     * aggregated numbers.
+     */
+    public static FieldReport surveyField(ServerLevel level, BlockPos center) {
+        List<CommandText.FieldBlock> blocks = new ArrayList<>();
+        List<ResourceLocation> crops = new ArrayList<>();
+        surveyPlot(level, center, blocks, crops);
+        CommandText.FieldSummary summary = CommandText.summarize(blocks, CultivationConfig.get().tiredThreshold);
+        return new FieldReport(summary, CommandText.distinct(crops));
+    }
+
+    /** The aggregate a field survey produces: the numeric summary plus the distinct crops in rotation. */
+    public record FieldReport(CommandText.FieldSummary summary, List<ResourceLocation> crops) {
     }
 
     /**

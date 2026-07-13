@@ -3,6 +3,8 @@ package com.rfizzle.cultivation.gametest;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.rfizzle.cultivation.api.CultivationAPI;
+import com.rfizzle.cultivation.command.CommandText;
+import com.rfizzle.cultivation.command.CultivationCommand;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.attachment.SoilStores;
@@ -115,13 +117,26 @@ public class CultivationCommandGameTest implements FabricGameTest {
         SoilStores.update(level, helper.absolutePos(new BlockPos(2, 1, 2)), false,
                 data -> data.withEnrichedChance(15).withLastCrop(carrots));
 
+        BlockPos center = helper.absolutePos(new BlockPos(1, 1, 1));
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        aimStraightDownAt(player, helper.absolutePos(new BlockPos(1, 1, 1)));
+        aimStraightDownAt(player, center);
         MinecraftServer server = helper.getLevel().getServer();
 
         int result = server.getCommands().getDispatcher()
                 .execute("cultivation field", player.createCommandSourceStack());
         helper.assertTrue(result > 0, "field survey succeeds over a placed plot");
+
+        // The aggregate carries the per-block reads through: 9 farmland, the one
+        // fertility-0 block exhausted, the one enriched block counted, no doses, and
+        // both remembered crops in spatial encounter order (wheat before carrots).
+        CultivationCommand.FieldReport report = CultivationCommand.surveyField(level, center);
+        CommandText.FieldSummary summary = report.summary();
+        helper.assertTrue(summary.farmland() == 9, "survey covers all 9 farmland blocks, got " + summary.farmland());
+        helper.assertTrue(summary.exhausted() == 1, "one block is exhausted, got " + summary.exhausted());
+        helper.assertTrue(summary.enriched() == 1, "one block is enriched, got " + summary.enriched());
+        helper.assertTrue(summary.fertilized() == 0, "no blocks are fertilized, got " + summary.fertilized());
+        helper.assertTrue(report.crops().equals(List.of(wheat, carrots)),
+                "distinct crops are wheat then carrots, got " + report.crops());
         helper.succeed();
     }
 
