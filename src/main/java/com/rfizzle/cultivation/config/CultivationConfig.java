@@ -55,6 +55,11 @@ public class CultivationConfig {
     public double polycultureGrowthMultiplier = 1.2;
     public int polycultureMinDifferentNeighbors = 2;
 
+    // Bee pollination (§2)
+    public boolean enableBeePollination = true;
+    public double beePollinationGrowthMultiplier = 1.1;
+    public int beePollinationRange = 8;
+
     // Dietary fatigue (§3)
     public boolean enableDietaryFatigue = true;
     public double fatiguePerRepeat = 0.10;
@@ -104,6 +109,8 @@ public class CultivationConfig {
         exhaustedGrowthMultiplier = clampDouble("exhaustedGrowthMultiplier", exhaustedGrowthMultiplier, 0.0, 1.0, defaults.exhaustedGrowthMultiplier);
         polycultureGrowthMultiplier = clampDouble("polycultureGrowthMultiplier", polycultureGrowthMultiplier, 1.0, 5.0, defaults.polycultureGrowthMultiplier);
         polycultureMinDifferentNeighbors = clampInt("polycultureMinDifferentNeighbors", polycultureMinDifferentNeighbors, 1, 4);
+        beePollinationGrowthMultiplier = clampDouble("beePollinationGrowthMultiplier", beePollinationGrowthMultiplier, 1.0, 5.0, defaults.beePollinationGrowthMultiplier);
+        beePollinationRange = clampInt("beePollinationRange", beePollinationRange, 1, 16);
         fatiguePerRepeat = clampDouble("fatiguePerRepeat", fatiguePerRepeat, 0.0, 1.0, defaults.fatiguePerRepeat);
         fatigueFloor = clampDouble("fatigueFloor", fatigueFloor, 0.0, 1.0, defaults.fatigueFloor);
         fatigueResetDistinctFoods = clampInt("fatigueResetDistinctFoods", fatigueResetDistinctFoods, 2, 5);

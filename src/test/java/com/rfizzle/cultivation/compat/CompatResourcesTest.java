@@ -71,6 +71,7 @@ class CompatResourcesTest {
             "tooltip.cultivation.soil.crop",
             "tooltip.cultivation.crop.growth",
             "tooltip.cultivation.crop.polyculture",
+            "tooltip.cultivation.crop.bees",
     };
 
     @Test

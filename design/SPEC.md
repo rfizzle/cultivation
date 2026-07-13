@@ -64,7 +64,7 @@ The two paths use the same base formula, so reverting farmland to dirt and re-ti
 
 ### Behavior — Effects of Fertility
 
-- **Growth:** the crop's computed growth speed is multiplied by the band's growth multiplier (table above), combined multiplicatively with the polyculture bonus (§2).
+- **Growth:** the crop's computed growth speed is multiplied by the band's growth multiplier (table above), combined multiplicatively with the polyculture and bee-pollination bonuses (§2).
 - **Exhausted yield clamp:** when a mature crop is harvested over fertility-0 farmland, after loot resolves, the drops are reduced to the bare minimum — the crop's primary product capped at 1 total, its seed item (where distinct from the product) capped at 1 total, and the §5/§6 bonus drops suppressed entirely.
 
 ### Supported Crops
@@ -157,6 +157,37 @@ When a supported crop (or stem) rolls a growth tick, count its four cardinal nei
 ### Implementation Notes
 
 - Lives entirely inside §1's growth-modifier mixin: a static helper computes the neighbor count and returns the multiplier. No attachment, no sync, no persistence.
+
+### Bee Pollination
+
+Crops near a populated beehive grow faster — vanilla already sends bees to the field, so Cultivation reads that signal instead of ignoring it.
+
+#### Behavior
+
+When a supported crop (or stem) rolls a growth tick, a **populated** beehive or bee nest within `beePollinationRange` (default **8** blocks) multiplies its growth speed by `beePollinationGrowthMultiplier` (default **1.1×**). The factor stacks multiplicatively with the fertility band (§1) and polyculture — a healthy alternating-row crop beside a hive grows at 1.2 × 1.1 = 1.32×.
+
+- **"Populated"** means the hive's block entity currently houses at least one bee (`BeehiveBlockEntity` occupant count > 0). An empty hive — decorative, or one whose bees have all left — grants nothing.
+- **Hive lookup** rides vanilla's own `bee_home` POI index (`PoiManager.getInRange`, the same query vanilla bee AI uses), so there is no block scan, no stored state, and no sync. Occupancy is confirmed only on the POI records the index returns, not on every block in range.
+- **Read-only on the bee.** The effect lands entirely on the crop; the bee's behavior, breeding, and health are never touched — the animal side of the silo stays Instinct's. Vanilla's own pollination visuals are the only feedback.
+
+#### Edge Cases
+
+- **Foraging flicker:** occupant count dips while bees are out foraging by day and rises when they return. Because growth is evaluated per random tick (already probabilistic), a hive that flickers empty for part of a day averages out imperceptibly — the same noise polyculture already tolerates.
+- **Range measurement:** the POI query is spherical (Euclidean), measured from the crop, so a hive above or below counts if it is within radius.
+- **Multiplayer:** none — hive presence and occupancy are world state, identical for everyone.
+
+#### Config
+
+| Key | Type | Default | Range |
+|---|---|---|---|
+| `enableBeePollination` | bool | true | — |
+| `beePollinationGrowthMultiplier` | float | 1.1 | 1–5 |
+| `beePollinationRange` | int | 8 | 1–16 |
+
+#### Implementation Notes
+
+- Lives in the same growth-modifier seam as §1–§2: a static helper (`BeePollination`) gated by config runs the POI query and returns the multiplier. No attachment, no sync, no persistence — the POI index it reads is vanilla's own.
+- The POI query's cost scales quadratically in `beePollinationRange`: it spans a `floor(range / 16) + 1` chunk radius, so range 8 sweeps a 3×3 chunk column and range 16 a 5×5. The query short-circuits on the first populated hive and runs only when the feature is enabled and a crop actually rolls a growth tick; admins raising the range on large servers should weigh that scaling.
 
 ---
 
@@ -517,6 +548,9 @@ All features are independently toggleable via a ModMenu / Cloth Config screen an
 | `enablePolyculture` | bool | true | Toggle the polyculture growth bonus (§2) |
 | `polycultureGrowthMultiplier` | float | 1.2 | Growth multiplier for qualifying crops |
 | `polycultureMinDifferentNeighbors` | int | 2 | Different-crop cardinal neighbors required |
+| `enableBeePollination` | bool | true | Toggle the bee-pollination growth bonus (§2) |
+| `beePollinationGrowthMultiplier` | float | 1.1 | Growth multiplier for a crop near a populated hive |
+| `beePollinationRange` | int | 8 | Block radius within which a populated hive boosts growth |
 | `enableDietaryFatigue` | bool | true | Toggle dietary fatigue (§3) |
 | `fatiguePerRepeat` | float | 0.10 | Effectiveness lost per consecutive repeat |
 | `fatigueFloor` | float | 0.5 | Minimum effectiveness |

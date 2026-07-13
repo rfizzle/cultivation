@@ -29,7 +29,8 @@
         {
           "type": "prose",
           "html": [
-            "A crop bordered by at least two cardinal neighbors of a different crop grows 20% faster. Plant in alternating rows — wheat, carrots, potatoes — and every interior row qualifies. Monoculture is never punished; it simply grows at the vanilla rate. The fastest farm on the server is a striped one."
+            "A crop bordered by at least two cardinal neighbors of a different crop grows 20% faster. Plant in alternating rows — wheat, carrots, potatoes — and every interior row qualifies. Monoculture is never punished; it simply grows at the vanilla rate. The fastest farm on the server is a striped one.",
+            "Bees join the field too. A crop within eight blocks of a populated beehive or bee nest grows 10% faster, stacking with polyculture and fertility — a striped field beside a hive is faster than either alone. Keep bees near the rows and vanilla's own pollination visuals become a bonus you can plan around; an empty hive does nothing."
           ]
         }
       ]
