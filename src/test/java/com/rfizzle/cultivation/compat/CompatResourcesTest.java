@@ -86,4 +86,19 @@ class CompatResourcesTest {
         // The composter-source line shared verbatim across EMI, REI, and JEI (mc-compat).
         assertNonBlank(lang(), "info.cultivation.fertilizer");
     }
+
+    @Test
+    void configScreenViewersAreBothSuggested() {
+        // The Cloth screen hard-references Cloth Config, so suggesting ModMenu without it
+        // would point players at a config button that errors on click.
+        try {
+            JsonObject mod = JsonParser.parseString(Files.readString(
+                    Path.of("src/main/resources/fabric.mod.json"))).getAsJsonObject();
+            JsonObject suggests = mod.getAsJsonObject("suggests");
+            assertTrue(suggests.has("modmenu"), "modmenu should be suggested");
+            assertTrue(suggests.has("cloth-config"), "cloth-config should be suggested alongside modmenu");
+        } catch (IOException e) {
+            throw new AssertionError("could not read fabric.mod.json", e);
+        }
+    }
 }

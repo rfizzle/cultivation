@@ -2,11 +2,14 @@ package com.rfizzle.cultivation.compat.modmenu;
 
 import com.rfizzle.cultivation.config.ConfigFields;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.network.ConfigNetworking;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
 import me.shedaniel.clothconfig2.api.ConfigEntryBuilder;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 
 /**
  * Builds the Cloth Config screen from {@link ConfigFields#ALL} — one tab per
@@ -36,6 +39,14 @@ public final class CultivationConfigScreen {
                     working.clamp();
                     working.save();
                     CultivationConfig.reload();
+                    // On an integrated server (singleplayer or LAN host), push the reloaded
+                    // rules to connected clients — this host included — so config-derived
+                    // surfaces refresh without a rejoin. Null when connected to a remote
+                    // server, where the local edit is not authoritative anyway.
+                    MinecraftServer server = Minecraft.getInstance().getSingleplayerServer();
+                    if (server != null) {
+                        server.execute(() -> ConfigNetworking.syncAll(server));
+                    }
                 });
 
         ConfigEntryBuilder entries = builder.entryBuilder();
