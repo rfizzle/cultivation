@@ -13,13 +13,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * Fired server-side from the harvest choke point whenever a supported mature
- * crop over farmland is destroyed with drops — player breaks, pistons, water,
- * explosions, and every future harvest path (scythe sweeps, villager harvests)
- * ride the same seam. It fires after Cultivation's own soil work (fertility
- * drain, the exhausted yield clamp, and future enriched/Fertilizer bonuses), and
- * fires regardless of {@code enableSoilFertility} — the toggle freezes the soil
- * system, not the harvest seam.
+ * Fired server-side from the harvest choke point whenever a supported crop is
+ * harvested with drops — a farmland crop, nether wart on soul sand, or a sweet
+ * berry bush — across every path that reaps one: player breaks, pistons, water,
+ * explosions, scythe sweeps, and villager harvests. It also fires on a
+ * sweet-berry <em>pick</em>, which pops berries <em>without</em> destroying the
+ * bush (the bush persists and resets to age 1) — so a listener must not assume
+ * the block at {@code pos} is gone. It fires after Cultivation's own soil work
+ * (fertility drain, the exhausted yield clamp, and the enriched/Fertilizer
+ * bonuses), and fires regardless of {@code enableSoilFertility} — the toggle
+ * freezes the soil system, not the harvest seam.
  *
  * <p>The {@code drops} list is mutable and is the sanctioned mutation point for
  * siblings and third parties (e.g. quality-produce injection). A listener that
@@ -42,8 +45,9 @@ public interface CultivationHarvestCallback {
 
     /**
      * @param level     the server level the harvest happened in
-     * @param pos       the destroyed crop block's position (not the farmland)
-     * @param crop      the destroyed crop's block state
+     * @param pos       the harvested crop block's position (not the ground below); on a
+     *                  sweet-berry pick the bush at this position survives, on every other path it is destroyed
+     * @param crop      the harvested crop's block state (its pre-pick state on a berry pick)
      * @param drops     the resolved drops, after the exhausted clamp — mutable
      * @param harvester the destroying entity (player, piston-less null, explosion source), when known
      */

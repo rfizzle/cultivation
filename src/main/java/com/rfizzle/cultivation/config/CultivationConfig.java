@@ -49,6 +49,7 @@ public class CultivationConfig {
     public double tiredThreshold = 25.0;
     public double tiredGrowthMultiplier = 0.75;
     public double exhaustedGrowthMultiplier = 0.5;
+    public boolean enableNonFarmlandSoil = true;
 
     // Polyculture (§2)
     public boolean enablePolyculture = true;

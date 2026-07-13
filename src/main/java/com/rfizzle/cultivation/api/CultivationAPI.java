@@ -5,13 +5,13 @@ import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.soil.SoilMath;
+import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
 
 import java.util.Optional;
 
@@ -27,19 +27,21 @@ public final class CultivationAPI {
     }
 
     /**
-     * The block's fertility, 0–100. Untracked farmland is pristine {@code 100};
-     * a block that is not farmland returns {@code -1}.
+     * The block's fertility, 0–100. Untracked soil is pristine {@code 100}; a block
+     * that is not soil returns {@code -1}. Soil is farmland, plus a second-wave
+     * crop's ground — soul sand under nether wart, dirt under a sweet berry bush —
+     * while {@code enableNonFarmlandSoil} is on.
      */
     public static float getFertility(ServerLevel level, BlockPos pos) {
-        if (!level.getBlockState(pos).is(Blocks.FARMLAND)) {
+        if (!isTrackedSoil(level, pos)) {
             return -1.0F;
         }
         return SoilStores.fertilityAt(level, pos);
     }
 
-    /** The block's full soil snapshot; empty if the block is not farmland. */
+    /** The block's full soil snapshot; empty if the block is not soil (see {@link #getFertility}). */
     public static Optional<SoilInfo> getSoilInfo(ServerLevel level, BlockPos pos) {
-        if (!level.getBlockState(pos).is(Blocks.FARMLAND)) {
+        if (!isTrackedSoil(level, pos)) {
             return Optional.empty();
         }
         SoilData data = SoilStores.peek(level, pos);
@@ -48,6 +50,13 @@ public final class CultivationAPI {
         }
         return Optional.of(new SoilInfo(
                 data.fertility(), data.enrichedChance(), data.fertilizerRemaining(), data.lastCrop()));
+    }
+
+    /** Whether {@code pos} is a soil position — farmland, or a second-wave crop's ground beneath it. */
+    private static boolean isTrackedSoil(ServerLevel level, BlockPos pos) {
+        return SupportedCrops.isTrackedSoilGround(
+                level.getBlockState(pos), level.getBlockState(pos.above()),
+                CultivationConfig.get().enableNonFarmlandSoil);
     }
 
     /**

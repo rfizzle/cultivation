@@ -23,6 +23,7 @@
             ["<code>tiredThreshold</code>", "float", "<code>25.0</code>", "0–100", "Living soil"],
             ["<code>tiredGrowthMultiplier</code>", "float", "<code>0.75</code>", "0–1", "Living soil"],
             ["<code>exhaustedGrowthMultiplier</code>", "float", "<code>0.5</code>", "0–1", "Living soil"],
+            ["<code>enableNonFarmlandSoil</code>", "bool", "<code>true</code>", "—", "Living soil"],
             ["<code>enablePolyculture</code>", "bool", "<code>true</code>", "—", "Polyculture"],
             ["<code>polycultureGrowthMultiplier</code>", "float", "<code>1.2</code>", "1–5", "Polyculture"],
             ["<code>polycultureMinDifferentNeighbors</code>", "int", "<code>2</code>", "1–4", "Polyculture"],
@@ -50,7 +51,7 @@
             ["<code>villagerFallowThreshold</code>", "float", "<code>25.0</code>", "0–100", "Stewardship"],
             ["<code>villagerReplantThreshold</code>", "float", "<code>50.0</code>", "0–100 (≥ fallow threshold, clamped up)", "Stewardship"]
           ],
-          "note": "Turning <code>enableSoilFertility</code> off freezes the soil system — farmland behaves exactly like vanilla and stored soil data is retained untouched. <code>composterProducesFertilizer=false</code> restores vanilla bone-meal output. <code>enableScytheHarvest=false</code> reduces scythes to ordinary single-block tools. <code>enableRightClickHarvest=false</code> returns a bare-hand right-click on a crop to vanilla. <code>enableVillagerStewardship=false</code> returns farmer villagers to the fully vanilla work task; <code>enableVillagerFertilizing</code> gates both Fertilizer pickup and dosing and is inert unless <code>enableFertilizer</code> is also on."
+          "note": "Turning <code>enableSoilFertility</code> off freezes the soil system — farmland behaves exactly like vanilla and stored soil data is retained untouched. <code>enableNonFarmlandSoil=false</code> reverts just the two off-farmland crops (sweet berries, nether wart) to vanilla and leaves farmland soil untouched. <code>composterProducesFertilizer=false</code> restores vanilla bone-meal output. <code>enableScytheHarvest=false</code> reduces scythes to ordinary single-block tools. <code>enableRightClickHarvest=false</code> returns a bare-hand right-click on a crop to vanilla. <code>enableVillagerStewardship=false</code> returns farmer villagers to the fully vanilla work task; <code>enableVillagerFertilizing</code> gates both Fertilizer pickup and dosing and is inert unless <code>enableFertilizer</code> is also on."
         }
       ]
     },
@@ -61,7 +62,7 @@
           "type": "table",
           "headers": ["Key", "Type", "Default", "Range", "Description"],
           "rows": [
-            ["<code>showSoilOverlays</code>", "bool", "<code>true</code>", "—", "Render the tired/exhausted farmland overlays"],
+            ["<code>showSoilOverlays</code>", "bool", "<code>true</code>", "—", "Render the tired/exhausted soil overlays"],
             ["<code>soilOverlayRenderDistance</code>", "int", "<code>24</code>", "4–64", "Max overlay render distance (blocks)"],
             ["<code>showFatigueTooltips</code>", "bool", "<code>true</code>", "—", "Show fatigue lines on food tooltips"]
           ]

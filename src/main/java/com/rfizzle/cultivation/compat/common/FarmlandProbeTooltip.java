@@ -6,13 +6,14 @@ import com.rfizzle.cultivation.command.CommandText;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.soil.SoilBand;
 import com.rfizzle.cultivation.soil.SoilMath;
+import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Blocks;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,12 +21,15 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * The viewer-agnostic farmland probe-tooltip surface (mc-probe-tooltips): a
- * server-side writer that packs a looked-at farmland block's soil state into the
- * probe's tag, and a pure formatter that turns that tag back into tooltip lines.
- * Holds no Jade or WTHIT types, so a missing viewer never class-loads it and both
- * adapters render an identical tooltip by construction. Mirrors the data set and
- * whole-percent formatting of {@code /cultivation soil} (SPEC §1).
+ * The viewer-agnostic soil probe-tooltip surface (mc-probe-tooltips): a
+ * server-side writer that packs a looked-at soil block's state into the probe's
+ * tag, and a pure formatter that turns that tag back into tooltip lines. Soil is
+ * farmland, or a second-wave crop's ground (soul sand under nether wart, dirt
+ * under a sweet berry bush) — looking at either the ground or the crop standing on
+ * it reads the same entry. Holds no Jade or WTHIT types, so a missing viewer never
+ * class-loads it and both adapters render an identical tooltip by construction.
+ * Mirrors the data set and whole-percent formatting of {@code /cultivation soil}
+ * (SPEC §1).
  */
 public final class FarmlandProbeTooltip {
     // Namespaced so the shared per-target tag can't collide with another mod's keys; the
@@ -43,19 +47,20 @@ public final class FarmlandProbeTooltip {
 
     /**
      * Server side. Writes nothing — no presence flag, so an empty tooltip — when
-     * the soil system is off or the target is not farmland. The fertility band is
-     * classified here (it needs the server's {@code tiredThreshold}) so the
-     * formatter stays a pure tag → lines mapping.
+     * the soil system is off or the target is neither soil nor a crop standing on
+     * soil. The fertility band is classified here (it needs the server's
+     * {@code tiredThreshold}) so the formatter stays a pure tag → lines mapping.
      */
     public static void writeServerData(CompoundTag tag, ServerLevel level, BlockPos pos) {
         CultivationConfig config = CultivationConfig.get();
         if (!config.enableSoilFertility) {
             return;
         }
-        if (!level.getBlockState(pos).is(Blocks.FARMLAND)) {
+        BlockPos soilPos = resolveSoilPos(level, pos, config.enableNonFarmlandSoil);
+        if (soilPos == null) {
             return;
         }
-        Optional<SoilInfo> info = CultivationAPI.getSoilInfo(level, pos);
+        Optional<SoilInfo> info = CultivationAPI.getSoilInfo(level, soilPos);
         if (info.isEmpty()) {
             return;
         }
@@ -68,6 +73,21 @@ public final class FarmlandProbeTooltip {
         tag.putInt(KEY_FERTILIZER, soil.fertilizerRemaining());
         tag.putInt(KEY_DOSE, config.fertilizerDoseHarvests);
         soil.lastCrop().ifPresent(id -> tag.putString(KEY_LAST_CROP, id.toString()));
+    }
+
+    /** The soil position for a looked-at block: the block itself if it is soil, else the soil ground below a crop. */
+    @Nullable
+    private static BlockPos resolveSoilPos(ServerLevel level, BlockPos pos, boolean includeSecondWave) {
+        if (SupportedCrops.isTrackedSoilGround(
+                level.getBlockState(pos), level.getBlockState(pos.above()), includeSecondWave)) {
+            return pos;
+        }
+        BlockPos below = pos.below();
+        if (SupportedCrops.isTrackedSoilGround(
+                level.getBlockState(below), level.getBlockState(pos), includeSecondWave)) {
+            return below;
+        }
+        return null;
     }
 
     /** Client side. Pure tag → lines; the tag crossed the network, so treat it as data. */

@@ -21,9 +21,9 @@ import java.util.List;
  * point. The three {@code dropResources} overloads cover survival player
  * breaks, pistons, water washing crops away, and {@code Level#destroyBlock};
  * explosions resolve drops elsewhere and are covered by
- * {@link BlockBehaviourMixin}. The handler filters to supported mature crops
- * over farmland before doing any soil work, so the wrap stays cheap for the
- * overwhelmingly common non-crop break.
+ * {@link BlockBehaviourMixin}. The handler filters to supported crops over
+ * tracked soil (farmland, or a second-wave crop's ground) before doing any soil
+ * work, so the wrap stays cheap for the overwhelmingly common non-crop break.
  */
 @Mixin(Block.class)
 abstract class BlockMixin {

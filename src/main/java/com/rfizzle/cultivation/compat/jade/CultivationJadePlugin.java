@@ -4,8 +4,10 @@ import com.rfizzle.cultivation.Cultivation;
 import net.minecraft.world.level.block.AttachedStemBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.NetherWartBlock;
 import net.minecraft.world.level.block.PitcherCropBlock;
 import net.minecraft.world.level.block.StemBlock;
+import net.minecraft.world.level.block.SweetBerryBushBlock;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
 import snownee.jade.api.IWailaPlugin;
@@ -23,6 +25,9 @@ public final class CultivationJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(CultivationJadeFarmlandProvider.INSTANCE, FarmBlock.class);
+        // The second-wave crops carry the soil line on the crop block — their ground is read below.
+        registration.registerBlockDataProvider(CultivationJadeFarmlandProvider.INSTANCE, NetherWartBlock.class);
+        registration.registerBlockDataProvider(CultivationJadeFarmlandProvider.INSTANCE, SweetBerryBushBlock.class);
         registration.registerBlockDataProvider(CultivationJadeCropProvider.INSTANCE, CropBlock.class);
         registration.registerBlockDataProvider(CultivationJadeCropProvider.INSTANCE, StemBlock.class);
         registration.registerBlockDataProvider(CultivationJadeCropProvider.INSTANCE, AttachedStemBlock.class);
@@ -32,6 +37,8 @@ public final class CultivationJadePlugin implements IWailaPlugin {
     @Override
     public void registerClient(IWailaClientRegistration registration) {
         registration.registerBlockComponent(CultivationJadeFarmlandProvider.INSTANCE, FarmBlock.class);
+        registration.registerBlockComponent(CultivationJadeFarmlandProvider.INSTANCE, NetherWartBlock.class);
+        registration.registerBlockComponent(CultivationJadeFarmlandProvider.INSTANCE, SweetBerryBushBlock.class);
         registration.registerBlockComponent(CultivationJadeCropProvider.INSTANCE, CropBlock.class);
         registration.registerBlockComponent(CultivationJadeCropProvider.INSTANCE, StemBlock.class);
         registration.registerBlockComponent(CultivationJadeCropProvider.INSTANCE, AttachedStemBlock.class);

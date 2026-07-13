@@ -78,7 +78,19 @@ The two paths use the same base formula, so reverting farmland to dirt and re-ti
 | `minecraft:torchflower_crop` | age 2 (becomes torchflower) | Torchflower | Torchflower Seeds |
 | `minecraft:pitcher_crop` | age 4 | Pitcher Plant | Pitcher Pod |
 
-Melon and pumpkin **stems** are affected by the growth-speed modifiers (fertility and polyculture) but never drain and never receive yield bonuses — the fruit grows beside the farmland, not on it, and is exempt. Crops not grown on farmland (nether wart, cocoa, sweet berries, sugar cane, cactus) are entirely out of scope.
+Melon and pumpkin **stems** are affected by the growth-speed modifiers (fertility and polyculture) but never drain and never receive yield bonuses — the fruit grows beside the farmland, not on it, and is exempt. Cocoa, sugar cane, and cactus stay out of scope. Nether wart and sweet berries grow on their own ground rather than farmland and are drawn into living soil as **second-wave crops** (below).
+
+### Second-wave crops (non-farmland soil)
+
+Nether wart (on soul sand) and the sweet berry bush (on any `minecraft:dirt`-tag block) tire and recover their ground on the same fertility model as farmland. Soil state keys on the ground block directly below the crop; the chunk attachment is positional, so soul sand and dirt hold a `SoilData` entry exactly as farmland does — no new state shape, no migration.
+
+- **Drain.** Nether wart drains on the break (its only harvest). The sweet berry bush drains on each **pick** — the age ≥ 2 right-click that pops berries and resets the bush to age 1 — and on a break that yields berries. Every one routes through the single harvest choke point, so drain, the exhausted yield clamp, and `CultivationHarvestCallback` apply exactly as for a farmland crop, using the same `harvestDrain`/`rotationDrainMultiplier` numbers. The exhausted clamp keeps at most one berry / one wart.
+- **Growth.** Tired and Exhausted ground slows these crops by the same fertility band multiplier (`tiredGrowthMultiplier`/`exhaustedGrowthMultiplier`), applied by widening their own random-tick growth roll. Polyculture and bee pollination stay a farmland-row mechanic and do **not** apply — these crops receive the fertility band alone.
+- **Recovery.** Their ground is never farmland, so it recovers on the lazy fallow-accrual path (`fallowRecoveryPerRandomTick`), settled on the next harvest read — no live per-random-tick hook and no rain multiplier (moot in the Nether; a deliberate simplification for berry dirt). A bush's soil recovers continuously between picks rather than only when cleared, which keeps a persistent bush from ratcheting straight to exhaustion.
+- **Investment.** Enriched tilling and Fertilizer dosing do **not** extend to these crops — soul sand and dirt cannot be tilled, so `enrichedChance`/`fertilizerRemaining` stay 0 and their harvest bonuses are inert.
+- **Reap-and-replant tools.** The scythe (§7) and bare-hand right-click harvest (§7) act only on farmland replant crops and pass a bush or wart through untouched — a bush is picked, never destroyed-and-replanted.
+- **Surfaces.** `/cultivation soil`, `/cultivation field`, Jade/WTHIT, and the `com.rfizzle.cultivation.api` fertility reads resolve the ground under a looked-at wart or bush. The in-world crack overlay renders on the ground block's top face where visible beneath the crop; a wart position (harvested by the break, so the crop is already gone at the drain write) refreshes its overlay on the next chunk-load pull rather than as a live delta.
+- **Toggle.** `enableNonFarmlandSoil` (default true) gates all of the above; off, both crops behave as vanilla and farmland is unaffected.
 
 ### Visual Feedback
 
@@ -108,15 +120,17 @@ Melon and pumpkin **stems** are affected by the growth-speed modifiers (fertilit
 | `tiredThreshold` | float | 25.0 | 0–100 |
 | `tiredGrowthMultiplier` | float | 0.75 | 0–1 |
 | `exhaustedGrowthMultiplier` | float | 0.5 | 0–1 |
+| `enableNonFarmlandSoil` | bool | true | — |
 
-`enableSoilFertility=false` freezes the system: no drain, no recovery, no overlays, all growth multipliers 1.0, exhausted clamp off. Stored SoilData is retained untouched (re-enabling resumes where the world left off; the fallow clock does not accrue while disabled).
+`enableSoilFertility=false` freezes the system: no drain, no recovery, no overlays, all growth multipliers 1.0, exhausted clamp off. Stored SoilData is retained untouched (re-enabling resumes where the world left off; the fallow clock does not accrue while disabled). `enableNonFarmlandSoil=false` reverts only the second-wave crops (nether wart, sweet berries) to vanilla and leaves farmland soil untouched.
 
 ### Implementation Notes
 
 - Chunk attachment `SoilStore`: a persistent Fabric data attachment on `LevelChunk` holding `Map<Integer, SoilData>` keyed by packed in-chunk position (`x | z << 4 | y << 8` section-relative packing at the implementer's discretion), with a codec for chunk NBT persistence. One helper mediates every read/write and handles entry creation, default eviction, lazy-recovery settling, and chunk dirtying.
 - Drain + yield choke point: a mixin on the crop-drop resolution path (`Block#dropResources` filtered to supported mature crops, or an equivalent single seam) so players, villagers, scythes, explosions, and pistons all flow through one handler — drain, exhausted clamp, §5/§6 bonuses, and the `CultivationHarvestCallback` (see Public API) fire here, in that order.
 - Growth modifier: a mixin on `CropBlock`/`StemBlock`/`PitcherCropBlock` random-tick growth that multiplies the effective growth speed by the combined fertility × polyculture modifier.
-- Recovery: `FarmlandBlock#randomTick` mixin for the live path; the lazy path runs inside the `SoilStore` helper on first touch.
+- Second-wave crops: `NetherWartBlock`/`SweetBerryBushBlock` random-tick mixins widen the vanilla growth roll (`RandomSource#nextInt`) by the fertility band alone; the sweet-berry pick wraps `useWithoutItem`'s `popResource` to route the popped berries through the same drop choke point. A single crop-keyed predicate (`SupportedCrops.isTrackedSoilGround`, carrying the `enableNonFarmlandSoil` toggle) replaces the farmland-only gate across the drain seam, overlay sync, command, probe, and API; `SupportedCrops.soilProfile` is the drain registry (farmland crops + wart + berries) while `matureProfile` stays the replant registry (farmland crops only).
+- Recovery: `FarmlandBlock#randomTick` mixin for the live path; the lazy path runs inside the `SoilStore` helper on first touch and is the only recovery the second-wave grounds receive.
 - Bone meal amendment: a `UseItemCallback`/`UseBlockCallback` handler on bone meal targeting fallow farmland, running before vanilla item behavior.
 - Overlay renderer: client class rendering band quads from a per-chunk cache; packets `SoilBandsS2C` (chunk response) and `SoilBandDeltaS2C` (change push).
 
@@ -618,8 +632,8 @@ Per concord [`API-STANDARD.md`](../../concord/API-STANDARD.md): the only stable 
 
 ### Surface
 
-- `CultivationAPI.getFertility(ServerLevel, BlockPos): float` — 0–100; `100` for untracked farmland; `-1` if the block is not farmland.
-- `CultivationAPI.getSoilInfo(ServerLevel, BlockPos): Optional<SoilInfo>` — `SoilInfo(float fertility, int enrichedChance, int fertilizerRemaining, Optional<ResourceLocation> lastCrop)`; empty if not farmland.
+- `CultivationAPI.getFertility(ServerLevel, BlockPos): float` — 0–100; `100` for untracked soil; `-1` if the block is not soil. Soil is farmland, plus a second-wave crop's ground (soul sand under nether wart, dirt under a sweet berry bush) while `enableNonFarmlandSoil` is on.
+- `CultivationAPI.getSoilInfo(ServerLevel, BlockPos): Optional<SoilInfo>` — `SoilInfo(float fertility, int enrichedChance, int fertilizerRemaining, Optional<ResourceLocation> lastCrop)`; empty if the block is not soil (same definition as `getFertility`).
 - `CultivationAPI.getFoodEffectiveness(ServerPlayer, ItemStack): float` — the multiplier the player's next eat of this item would receive, in `[fatigueFloor, 1.0]` (the floor is the configurable `fatigueFloor`, default `0.5`); `1.0` when dietary fatigue is disabled.
 - **`CultivationHarvestCallback`** — Fabric event fired server-side from the harvest choke point after Cultivation's own drain/bonuses: `(ServerLevel, BlockPos, BlockState crop, List<ItemStack> drops, @Nullable Entity harvester)`. The drops list is mutable — the sanctioned mutation point for siblings/third parties (e.g. quality-produce injection). A listener that throws is caught, logged, and skipped.
 - **`CultivationFoodCallback`** — Fabric event fired server-side after a food is consumed and fatigue applied: `(ServerPlayer, Item food, float effectivenessApplied)`. Observation only.

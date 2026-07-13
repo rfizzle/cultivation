@@ -6,13 +6,13 @@ import com.rfizzle.cultivation.attachment.SoilStore;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.soil.SoilOverlayFlags;
+import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.ArrayList;
@@ -56,7 +56,8 @@ public final class SoilOverlayServer {
                     chunkPos.getMinBlockX() + SoilStore.unpackX(key),
                     SoilStore.unpackY(key),
                     chunkPos.getMinBlockZ() + SoilStore.unpackZ(key));
-            if (!level.getBlockState(pos).is(Blocks.FARMLAND)) {
+            if (!SupportedCrops.isTrackedSoilGround(
+                    level.getBlockState(pos), level.getBlockState(pos.above()), config.enableNonFarmlandSoil)) {
                 return;
             }
             byte flags = SoilOverlayFlags.computeFlags(data, config.tiredThreshold);
@@ -68,15 +69,22 @@ public final class SoilOverlayServer {
     }
 
     /**
-     * Pushes a delta when a write changed a farmland position's client-visible
-     * overlay. Called from the soil write choke point with the pre- and post-write
-     * state. No-op when soil is disabled, the position is not farmland (removal is
+     * Pushes a delta when a write changed a soil position's client-visible overlay.
+     * Called from the soil write choke point with the pre- and post-write state.
+     * No-op when soil is disabled, the position is not soil (farmland removal is
      * handled by {@link #notifyFarmlandRemoved}), or the visible representation is
-     * unchanged.
+     * unchanged. A second-wave ground harvested by the break (nether wart) writes
+     * its drain after the crop is already gone, so no delta fires; {@link
+     * #collectChunkEntries} keys on the current crop above, so that position's
+     * overlay reappears on a chunk-load pull only once wart is replanted there.
      */
     public static void notifyFlagChange(ServerLevel level, BlockPos pos, SoilData before, SoilData after) {
         CultivationConfig config = CultivationConfig.get();
-        if (!config.enableSoilFertility || !level.getBlockState(pos).is(Blocks.FARMLAND)) {
+        if (!config.enableSoilFertility) {
+            return;
+        }
+        if (!SupportedCrops.isTrackedSoilGround(
+                level.getBlockState(pos), level.getBlockState(pos.above()), config.enableNonFarmlandSoil)) {
             return;
         }
         byte beforeFlags = SoilOverlayFlags.computeFlags(before, config.tiredThreshold);

@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /**
  * Shared scaffolding for the soil gametests. The canonical layout puts the
@@ -32,13 +33,28 @@ final class SoilFixtures {
         return Blocks.CARROTS.defaultBlockState().setValue(CropBlock.AGE, CropBlock.MAX_AGE);
     }
 
+    /** Nether wart at its harvest age (the break drains). */
+    static BlockState matureWart() {
+        return Blocks.NETHER_WART.defaultBlockState().setValue(BlockStateProperties.AGE_3, 3);
+    }
+
+    /** A sweet berry bush at {@code age} (pickable from age 2). */
+    static BlockState berryBush(int age) {
+        return Blocks.SWEET_BERRY_BUSH.defaultBlockState().setValue(BlockStateProperties.AGE_3, age);
+    }
+
     static ResourceLocation idOf(Block block) {
         return BuiltInRegistries.BLOCK.getKey(block);
     }
 
     /** Places farmland at {@code rel} and pins its tracked fertility. */
     static void placeTrackedFarmland(GameTestHelper helper, BlockPos rel, float fertility, Block lastCrop) {
-        helper.setBlock(rel, Blocks.FARMLAND);
+        placeTrackedGround(helper, rel, Blocks.FARMLAND, fertility, lastCrop);
+    }
+
+    /** Places an arbitrary soil ground ({@code ground}) at {@code rel} and pins its tracked fertility. */
+    static void placeTrackedGround(GameTestHelper helper, BlockPos rel, Block ground, float fertility, Block lastCrop) {
+        helper.setBlock(rel, ground);
         SoilStores.update(helper.getLevel(), helper.absolutePos(rel), false,
                 data -> data.withFertility(fertility).withLastCrop(idOf(lastCrop)));
     }

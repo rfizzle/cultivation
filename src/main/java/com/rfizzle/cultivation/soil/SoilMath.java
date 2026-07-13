@@ -72,4 +72,19 @@ public final class SoilMath {
             case RICH, FAIR -> 1.0F;
         };
     }
+
+    /**
+     * The random-tick growth-roll bound scaled by a growth multiplier. Nether wart
+     * and the sweet berry bush grow when {@code random.nextInt(bound) == 0}, so a
+     * multiplier below 1 widens the bound (rarer growth) and 1.0 leaves it
+     * untouched — the second-wave crops' equivalent of the {@code getGrowthSpeed}
+     * scaling the farmland crops route through, since neither of these two does.
+     * Never below 1 (a valid {@code nextInt} bound).
+     */
+    public static int scaledGrowthBound(int vanillaBound, float multiplier) {
+        if (multiplier <= 0.0F) {
+            return Integer.MAX_VALUE;
+        }
+        return Math.max(1, Math.round(vanillaBound / multiplier));
+    }
 }

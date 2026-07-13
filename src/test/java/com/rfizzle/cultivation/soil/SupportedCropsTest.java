@@ -97,6 +97,56 @@ class SupportedCropsTest {
     }
 
     @Test
+    void soilProfileCoversSecondWaveCropsButMatureProfileDoesNot() {
+        // Nether wart drains on the break, so its soil profile keys on MAX_AGE.
+        var wartMature = SupportedCrops.soilProfile(
+                Blocks.NETHER_WART.defaultBlockState().setValue(BlockStateProperties.AGE_3, 3));
+        assertNotNull(wartMature);
+        assertEquals("minecraft:nether_wart", wartMature.cropId().toString());
+        assertEquals(Items.NETHER_WART, wartMature.product());
+        assertEquals(Items.NETHER_WART, wartMature.seed());
+        assertNull(SupportedCrops.soilProfile(
+                Blocks.NETHER_WART.defaultBlockState().setValue(BlockStateProperties.AGE_3, 2)));
+
+        // The sweet berry bush drains on every pick from age 2 up.
+        var berriesReady = SupportedCrops.soilProfile(
+                Blocks.SWEET_BERRY_BUSH.defaultBlockState().setValue(BlockStateProperties.AGE_3, 2));
+        assertNotNull(berriesReady);
+        assertEquals("minecraft:sweet_berry_bush", berriesReady.cropId().toString());
+        assertEquals(Items.SWEET_BERRIES, berriesReady.product());
+        assertEquals(Items.SWEET_BERRIES, berriesReady.seed());
+        assertNotNull(SupportedCrops.soilProfile(
+                Blocks.SWEET_BERRY_BUSH.defaultBlockState().setValue(BlockStateProperties.AGE_3, 3)));
+        assertNull(SupportedCrops.soilProfile(
+                Blocks.SWEET_BERRY_BUSH.defaultBlockState().setValue(BlockStateProperties.AGE_3, 1)));
+
+        // The second-wave crops never enter the replant registry the scythe and right-click use.
+        assertNull(SupportedCrops.matureProfile(
+                Blocks.NETHER_WART.defaultBlockState().setValue(BlockStateProperties.AGE_3, 3)));
+        assertNull(SupportedCrops.matureProfile(
+                Blocks.SWEET_BERRY_BUSH.defaultBlockState().setValue(BlockStateProperties.AGE_3, 3)));
+        // A farmland crop's soil profile matches its replant profile.
+        assertEquals(SupportedCrops.matureProfile(Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 7)),
+                SupportedCrops.soilProfile(Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 7)));
+    }
+
+    @Test
+    void trackedSoilGroundHonorsCropAndToggle() {
+        BlockState wart = Blocks.NETHER_WART.defaultBlockState();
+        BlockState bush = Blocks.SWEET_BERRY_BUSH.defaultBlockState();
+        // Farmland tracks for any crop above it, toggle or not.
+        assertTrue(SupportedCrops.isTrackedSoilGround(
+                Blocks.FARMLAND.defaultBlockState(), Blocks.AIR.defaultBlockState()));
+        assertTrue(SupportedCrops.isTrackedSoilGround(Blocks.FARMLAND.defaultBlockState(), wart, false));
+        // Each second-wave crop tracks only on its own ground.
+        assertTrue(SupportedCrops.isTrackedSoilGround(Blocks.SOUL_SAND.defaultBlockState(), wart));
+        assertFalse(SupportedCrops.isTrackedSoilGround(Blocks.SOUL_SAND.defaultBlockState(), bush));
+        assertFalse(SupportedCrops.isTrackedSoilGround(Blocks.STONE.defaultBlockState(), wart));
+        // The enableNonFarmlandSoil toggle gates the non-farmland grounds.
+        assertFalse(SupportedCrops.isTrackedSoilGround(Blocks.SOUL_SAND.defaultBlockState(), wart, false));
+    }
+
+    @Test
     void seedsMapToTheCropIdTheyPlant() {
         // The seed's block id is the same identity the choke point records as lastCrop.
         assertEquals("minecraft:wheat", SupportedCrops.cropIdForSeed(new ItemStack(Items.WHEAT_SEEDS)).toString());

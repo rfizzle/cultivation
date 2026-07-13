@@ -61,7 +61,7 @@ class CommandTextTest {
         CommandText.FieldSummary summary = CommandText.summarize(List.of(
                 new CommandText.FieldBlock(100.0F, 0, 0),
                 new CommandText.FieldBlock(50.0F, 0, 0)), 25.0);
-        assertEquals(2, summary.farmland());
+        assertEquals(2, summary.soil());
         assertEquals(75, summary.avgPercent());
         assertEquals(SoilBand.RICH, summary.band());
     }
@@ -73,7 +73,7 @@ class CommandTextTest {
                 new CommandText.FieldBlock(0.0F, 15, 0),     // exhausted + enriched
                 new CommandText.FieldBlock(60.0F, 10, 5),    // enriched + fertilized
                 new CommandText.FieldBlock(60.0F, 0, 0)), 25.0);
-        assertEquals(4, summary.farmland());
+        assertEquals(4, summary.soil());
         assertEquals(2, summary.exhausted());
         assertEquals(2, summary.enriched());
         assertEquals(1, summary.fertilized());
@@ -92,7 +92,7 @@ class CommandTextTest {
     @Test
     void summarizeHandlesAnEmptySurvey() {
         CommandText.FieldSummary summary = CommandText.summarize(List.of(), 25.0);
-        assertEquals(0, summary.farmland());
+        assertEquals(0, summary.soil());
         assertEquals(0, summary.avgPercent());
         assertEquals(0, summary.exhausted());
     }

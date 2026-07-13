@@ -13,10 +13,12 @@
         "FarmBlockMixin",
         "HarvestFarmlandMixin",
         "HoeItemMixin",
+        "NetherWartBlockMixin",
         "PitcherCropBlockMixin",
         "PlayerEatMixin",
         "PlayerExhaustionMixin",
         "StemBlockMixin",
+        "SweetBerryBushBlockMixin",
         "VillagerMixin"
     ],
     "client": [],

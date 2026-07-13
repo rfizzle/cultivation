@@ -20,6 +20,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 import java.util.List;
 import java.util.Map;
@@ -70,6 +71,28 @@ public class CultivationCommandGameTest implements FabricGameTest {
         helper.assertTrue(result > 0, "soil set on targeted farmland succeeds");
         float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), abs).orElseThrow().fertility();
         helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4, "fertility is set to 40, got " + fertility);
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void soilSetResolvesSecondWaveCropGround(GameTestHelper helper) throws CommandSyntaxException {
+        BlockPos groundRel = new BlockPos(1, 1, 1);
+        BlockPos wartRel = groundRel.above();
+        helper.setBlock(groundRel, Blocks.SOUL_SAND);
+        helper.setBlock(wartRel, Blocks.NETHER_WART.defaultBlockState().setValue(BlockStateProperties.AGE_3, 3));
+        BlockPos groundAbs = helper.absolutePos(groundRel);
+
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        // Aim at the wart itself — the command resolves the soul sand tracked below it.
+        aimStraightDownAt(player, helper.absolutePos(wartRel));
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
+
+        int result = server.getCommands().getDispatcher().execute("cultivation soil set 40", op);
+        helper.assertTrue(result > 0, "soil set resolves the wart's soul sand and succeeds");
+        float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), groundAbs).orElseThrow().fertility();
+        helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4,
+                "the soul sand below the wart is set to 40, got " + fertility);
         helper.succeed();
     }
 
@@ -131,7 +154,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
         // both remembered crops in spatial encounter order (wheat before carrots).
         CultivationCommand.FieldReport report = CultivationCommand.surveyField(level, center);
         CommandText.FieldSummary summary = report.summary();
-        helper.assertTrue(summary.farmland() == 9, "survey covers all 9 farmland blocks, got " + summary.farmland());
+        helper.assertTrue(summary.soil() == 9, "survey covers all 9 soil blocks, got " + summary.soil());
         helper.assertTrue(summary.exhausted() == 1, "one block is exhausted, got " + summary.exhausted());
         helper.assertTrue(summary.enriched() == 1, "one block is enriched, got " + summary.enriched());
         helper.assertTrue(summary.fertilized() == 0, "no blocks are fertilized, got " + summary.fertilized());
