@@ -8,8 +8,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.rfizzle.cultivation.Cultivation;
 import com.rfizzle.cultivation.api.CultivationAPI;
 import com.rfizzle.cultivation.api.SoilInfo;
+import com.rfizzle.cultivation.attachment.CultivationAttachments;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
+import com.rfizzle.cultivation.attachment.SoilData;
+import com.rfizzle.cultivation.attachment.SoilStore;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.network.ConfigNetworking;
@@ -27,16 +30,18 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 /**
  * The {@code /cultivation} admin/debug command tree ({@code design/SPEC.md} §9).
- * Read verbs ({@code soil}, {@code diet}) stay at permission 0; every mutation
+ * Read verbs ({@code soil}, {@code field}, {@code diet}) stay at permission 0; every mutation
  * ({@code soil set}, {@code diet reset}, {@code reload}) is gated at permission
  * 2 on its own node. Soil and diet writes route through the {@link SoilStores}
  * and {@link DietStore} choke points so recovery settles, all-default entries
@@ -50,6 +55,9 @@ import java.util.Optional;
 public final class CultivationCommand {
     /** Fixed command reach for the looked-at farmland, independent of the player's interaction-range attribute. */
     private static final double SOIL_REACH = 10.0;
+
+    /** Half-extent of the {@code field} survey square around the looked-at block — radius 4 is a 9×9 plot. */
+    private static final int FIELD_RADIUS = 4;
 
     private static final int MIN_FERTILITY = 0;
     private static final int MAX_FERTILITY = (int) SoilMath.MAX_FERTILITY;
@@ -71,6 +79,8 @@ public final class CultivationCommand {
                                 .then(Commands.argument("fertility",
                                                 IntegerArgumentType.integer(MIN_FERTILITY, MAX_FERTILITY))
                                         .executes(CultivationCommand::runSoilSet))))
+                .then(Commands.literal("field")
+                        .executes(CultivationCommand::runFieldReport))
                 .then(Commands.literal("diet")
                         .executes(CultivationCommand::runDietSelf)
                         .then(Commands.literal("reset")
@@ -133,6 +143,99 @@ public final class CultivationCommand {
     public static float applySoilSet(ServerLevel level, BlockPos pos, int fertility) {
         SoilStores.update(level, pos, true, data -> data.withFertility(fertility));
         return SoilStores.fertilityAt(level, pos);
+    }
+
+    // --- field ---
+
+    private static int runFieldReport(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer player = ctx.getSource().getPlayerOrException();
+        ServerLevel level = player.serverLevel();
+        Optional<BlockPos> target = lookedAtFarmland(player);
+        if (target.isEmpty()) {
+            ctx.getSource().sendFailure(Component.translatable(
+                    "command.cultivation.soil.not_farmland", (int) SOIL_REACH));
+            return 0;
+        }
+        FieldReport report = surveyField(level, target.get());
+        CommandText.FieldSummary summary = report.summary();
+        int diameter = FIELD_RADIUS * 2 + 1;
+
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.report",
+                diameter, summary.farmland(), summary.avgPercent(),
+                Component.translatable(CommandText.bandKey(summary.band()))), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.counts",
+                summary.exhausted(), summary.enriched(), summary.fertilized()), false);
+        List<ResourceLocation> distinctCrops = report.crops();
+        if (distinctCrops.isEmpty()) {
+            ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.crops.none"), false);
+        } else {
+            MutableComponent names = joinCrops(distinctCrops);
+            ctx.getSource().sendSuccess(() -> Component.translatable("command.cultivation.field.crops", names), false);
+        }
+        return Command.SINGLE_SUCCESS;
+    }
+
+    /**
+     * The testable core of {@code /cultivation field}: surveys the plot around
+     * {@code center} and returns its aggregate. Read-only — walks only loaded
+     * chunks and never touches the soil write choke point. The Brigadier handler
+     * is the thin shell over this; gametests call it directly to assert the
+     * aggregated numbers.
+     */
+    public static FieldReport surveyField(ServerLevel level, BlockPos center) {
+        List<CommandText.FieldBlock> blocks = new ArrayList<>();
+        List<ResourceLocation> crops = new ArrayList<>();
+        surveyPlot(level, center, blocks, crops);
+        CommandText.FieldSummary summary = CommandText.summarize(blocks, CultivationConfig.get().tiredThreshold);
+        return new FieldReport(summary, CommandText.distinct(crops));
+    }
+
+    /** The aggregate a field survey produces: the numeric summary plus the distinct crops in rotation. */
+    public record FieldReport(CommandText.FieldSummary summary, List<ResourceLocation> crops) {
+    }
+
+    /**
+     * Walks the {@link #FIELD_RADIUS} square around {@code center} at its Y level,
+     * collecting each farmland column's soil into {@code blocks} and its remembered
+     * crop into {@code crops}. Reads only already-loaded chunks ({@code getChunkNow}
+     * + null-skip) so a plot straddling the render-distance edge never force-loads;
+     * untracked columns count as pristine full fertility.
+     */
+    private static void surveyPlot(ServerLevel level, BlockPos center,
+                                   List<CommandText.FieldBlock> blocks, List<ResourceLocation> crops) {
+        int y = center.getY();
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int dx = -FIELD_RADIUS; dx <= FIELD_RADIUS; dx++) {
+            for (int dz = -FIELD_RADIUS; dz <= FIELD_RADIUS; dz++) {
+                pos.set(center.getX() + dx, y, center.getZ() + dz);
+                LevelChunk chunk = level.getChunkSource().getChunkNow(pos.getX() >> 4, pos.getZ() >> 4);
+                if (chunk == null || !chunk.getBlockState(pos).is(Blocks.FARMLAND)) {
+                    continue;
+                }
+                SoilStore store = chunk.getAttached(CultivationAttachments.SOIL);
+                SoilData data = store == null ? null : store.get(SoilStore.pack(pos));
+                if (data == null) {
+                    blocks.add(new CommandText.FieldBlock(SoilMath.MAX_FERTILITY, 0, 0));
+                } else {
+                    blocks.add(new CommandText.FieldBlock(
+                            data.fertility(), data.enrichedChance(), data.fertilizerRemaining()));
+                    data.lastCrop().ifPresent(crops::add);
+                }
+            }
+        }
+    }
+
+    private static MutableComponent joinCrops(List<ResourceLocation> crops) {
+        MutableComponent out = Component.empty();
+        boolean first = true;
+        for (ResourceLocation id : crops) {
+            if (!first) {
+                out.append(Component.literal(", "));
+            }
+            first = false;
+            out.append(BuiltInRegistries.BLOCK.get(id).getName());
+        }
+        return out;
     }
 
     private static Optional<BlockPos> lookedAtFarmland(ServerPlayer player) {
