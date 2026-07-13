@@ -34,6 +34,7 @@
             "com.rfizzle.cultivation.gametest.BowlFoodStackingGameTest",
             "com.rfizzle.cultivation.gametest.ScytheSweepGameTest",
             "com.rfizzle.cultivation.gametest.RightClickHarvestGameTest",
+            "com.rfizzle.cultivation.gametest.BroadcastSowingGameTest",
             "com.rfizzle.cultivation.gametest.VillagerStewardshipGameTest",
             "com.rfizzle.cultivation.gametest.SoilOverlaySyncGameTest",
             "com.rfizzle.cultivation.gametest.CultivationCommandGameTest",
