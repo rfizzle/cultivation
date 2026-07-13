@@ -13,7 +13,7 @@ In your first hours nothing is unfamiliar: you till, you plant, you eat. Then th
 ## The features, as you'll play them
 
 ### Living soil
-- **What it is** — Every farmland block carries its own fertility, from rich to exhausted. Rich farmland is visibly dark; tired soil turns pale and cracked.
+- **What it is** — Every farmland block carries its own fertility, from rich to exhausted. Rich farmland is visibly dark; tired soil turns pale and cracked. The two crops that never touch farmland — sweet berries on their bush, nether wart on soul sand — live by the same soil: their ground tires under repeat harvest and rests back the same way.
 - **How you use it** — Harvesting drains a block about 3% each time — half that if you plant a different crop than last season. Leave a block fallow and it recovers fully over three in-game days — half that when rain falls on it under open sky; a sprinkle of bone meal on empty farmland restores a quarter instantly. `/cultivation soil` reads the exact fertility of the block you're looking at.
 - **What changes for you** — Below a quarter fertility, crops grow 25% slower; exhausted soil grows at half speed and yields the bare minimum. The hundred-hour wheat square stops being free — you rotate, rest, and feed your fields, and a well-kept farm outproduces a neglected one by a wide margin.
 

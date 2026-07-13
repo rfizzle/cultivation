@@ -16,6 +16,7 @@
           "type": "prose",
           "html": [
             "Harvesting drains a block about 3% of its fertility each time — half that if you plant a different crop than last season. Leave a block fallow and it recovers fully over roughly three in-game days; a sprinkle of bone meal on empty farmland restores a quarter instantly. Tired soil (below 25%) grows crops 25% slower and turns visibly pale and cracked; exhausted soil grows at half speed and yields the bare minimum.",
+            "The two crops that never grow on farmland come along too: nether wart on soul sand and the sweet berry bush on dirt tire their ground under repeat harvest — wart on the break, berries on each pick — and grow slower as it wears, recovering the same way. They keep the fertility model only; the polyculture, bee, and Fertilizer bonuses stay a farmland affair.",
             "Soil is shared world state, exactly like vanilla hydration — every player works the same ground. Read any block's exact fertility with <code>/cultivation soil</code>, or at a glance with Jade/WTHIT installed."
           ]
         }
