@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.item.CultivationItems;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
@@ -30,20 +31,51 @@ import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland
 
 /**
  * Broadcast sowing ({@code design/SPEC.md} §7) — the planting mirror of the
- * scythe sweep. A sneak-right-click with a farmland-crop seed sows the 3×3 of
- * farmland centered on the clicked block, one seed per planted block.
+ * scythe sweep, gated behind the iron rake. Right-clicking farmland with a rake
+ * in the main hand and a crop seed in the off-hand sows the 3×3, one seed and one
+ * rake durability per planted block.
  */
 public class BroadcastSowingGameTest implements FabricGameTest {
     @GameTest(template = TEMPLATE)
-    public void sowsTheFullThreeByThreeOnEmptyFarmland(GameTestHelper helper) {
+    public void sowsTheFullThreeByThreeWithARake(GameTestHelper helper) {
         placeFarmlandGrid(helper);
-        ServerPlayer player = sneakingWith(helper, Items.WHEAT_SEEDS, 9);
+        ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
 
         InteractionResult result = sow(helper, player, FARM);
 
         helper.assertTrue(result == InteractionResult.SUCCESS, "sowing consumes the interaction");
         helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 9, "the whole 3x3 must be sown with wheat at age 0");
-        helper.assertTrue(player.getMainHandItem().getCount() == 0, "one seed is spent per planted block");
+        helper.assertTrue(player.getOffhandItem().getCount() == 0, "one off-hand seed is spent per planted block");
+        helper.assertTrue(player.getMainHandItem().getDamageValue() == 9, "the rake spends one durability per block");
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void noRakeDoesNotBroadcast(GameTestHelper helper) {
+        placeFarmlandGrid(helper);
+        // A seed in the main hand (no rake) is left to vanilla single-block planting.
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        player.setGameMode(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT_SEEDS, 9));
+
+        InteractionResult result = sow(helper, player, FARM);
+
+        helper.assertTrue(result == InteractionResult.PASS, "without a rake the gesture defers to vanilla");
+        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "no broadcast sowing happens without a rake");
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void rakeWithoutASeedSowsNothing(GameTestHelper helper) {
+        placeFarmlandGrid(helper);
+        ServerPlayer player = rakeWith(helper, Items.AIR, 0); // rake in hand, empty off-hand
+
+        InteractionResult result = sow(helper, player, FARM);
+
+        helper.assertTrue(result == InteractionResult.PASS, "a rake with no off-hand seed sows nothing");
+        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "nothing is sown without a seed");
         player.discard();
         helper.succeed();
     }
@@ -51,19 +83,16 @@ public class BroadcastSowingGameTest implements FabricGameTest {
     @GameTest(template = TEMPLATE)
     public void skipsOccupiedAndNonFarmland(GameTestHelper helper) {
         placeFarmlandGrid(helper);
-        // One position is not farmland; one already holds a crop — both are skipped.
         helper.setBlock(FARM.offset(-1, 0, -1), Blocks.DIRT);
         helper.setBlock(FARM.offset(1, 0, 1).above(), matureWheat());
-        ServerPlayer player = sneakingWith(helper, Items.WHEAT_SEEDS, 9);
+        ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
 
         InteractionResult result = sow(helper, player, FARM);
 
         helper.assertTrue(result == InteractionResult.SUCCESS, "sowing the rest still consumes the interaction");
         helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 7, "the 7 free farmland blocks are sown, the other 2 skipped");
-        helper.assertTrue(player.getMainHandItem().getCount() == 2, "only the 7 planted blocks spend a seed");
-        helper.assertBlockPresent(Blocks.AIR, FARM.offset(-1, 0, -1).above());
-        helper.assertTrue(helper.getBlockState(FARM.offset(1, 0, 1).above()).getValue(CropBlock.AGE) == CropBlock.MAX_AGE,
-                "the pre-existing mature crop must be left untouched");
+        helper.assertTrue(player.getOffhandItem().getCount() == 2, "only the 7 planted blocks spend a seed");
+        helper.assertTrue(player.getMainHandItem().getDamageValue() == 7, "only the 7 planted blocks spend durability");
         player.discard();
         helper.succeed();
     }
@@ -71,27 +100,31 @@ public class BroadcastSowingGameTest implements FabricGameTest {
     @GameTest(template = TEMPLATE)
     public void seedBudgetCapsPlanting(GameTestHelper helper) {
         placeFarmlandGrid(helper);
-        ServerPlayer player = sneakingWith(helper, Items.WHEAT_SEEDS, 3);
+        ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 3);
 
         InteractionResult result = sow(helper, player, FARM);
 
         helper.assertTrue(result == InteractionResult.SUCCESS, "a partial sow still consumes the interaction");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 3, "only as many blocks as seeds are sown");
-        helper.assertTrue(player.getMainHandItem().isEmpty(), "the seed stack is emptied");
+        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 3, "only as many blocks as off-hand seeds are sown");
+        helper.assertTrue(player.getOffhandItem().isEmpty(), "the seed stack is emptied");
         player.discard();
         helper.succeed();
     }
 
     @GameTest(template = TEMPLATE)
-    public void nonSneakClickIsLeftToVanilla(GameTestHelper helper) {
+    public void rakeDurabilityCapsPlantingAndBreaks(GameTestHelper helper) {
         placeFarmlandGrid(helper);
-        ServerPlayer player = sneakingWith(helper, Items.WHEAT_SEEDS, 9);
-        player.setShiftKeyDown(false);
+        ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
+        ItemStack rake = new ItemStack(CultivationItems.IRON_RAKE);
+        rake.setDamageValue(rake.getMaxDamage() - 3); // three uses left
+        player.setItemInHand(InteractionHand.MAIN_HAND, rake);
 
         InteractionResult result = sow(helper, player, FARM);
 
-        helper.assertTrue(result == InteractionResult.PASS, "without a sneak the gesture defers to vanilla single planting");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "no broadcast sowing happens without a sneak");
+        helper.assertTrue(result == InteractionResult.SUCCESS, "the partial sow consumes the interaction");
+        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 3, "the rake sows only until it breaks");
+        helper.assertTrue(player.getMainHandItem().isEmpty(), "the rake breaks when its durability runs out mid-sow");
+        helper.assertTrue(player.getOffhandItem().getCount() == 6, "only the 3 planted blocks spend a seed");
         player.discard();
         helper.succeed();
     }
@@ -102,11 +135,11 @@ public class BroadcastSowingGameTest implements FabricGameTest {
         try {
             CultivationConfig.get().enableBroadcastSowing = false;
             placeFarmlandGrid(helper);
-            ServerPlayer player = sneakingWith(helper, Items.WHEAT_SEEDS, 9);
+            ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
 
             InteractionResult result = sow(helper, player, FARM);
 
-            helper.assertTrue(result == InteractionResult.PASS, "with the toggle off the gesture is inert");
+            helper.assertTrue(result == InteractionResult.PASS, "with the toggle off the rake is inert");
             helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "with the toggle off nothing is broadcast");
             player.discard();
             helper.succeed();
@@ -116,16 +149,17 @@ public class BroadcastSowingGameTest implements FabricGameTest {
     }
 
     @GameTest(template = TEMPLATE)
-    public void creativeSowsWithoutSpendingSeeds(GameTestHelper helper) {
+    public void creativeSowsWithoutSpendingSeedsOrDurability(GameTestHelper helper) {
         placeFarmlandGrid(helper);
-        ServerPlayer player = sneakingWith(helper, Items.WHEAT_SEEDS, 1);
+        ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 1);
         player.setGameMode(GameType.CREATIVE);
 
         InteractionResult result = sow(helper, player, FARM);
 
         helper.assertTrue(result == InteractionResult.SUCCESS, "creative sows the whole 3x3");
         helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 9, "creative is not capped by the held stack");
-        helper.assertTrue(player.getMainHandItem().getCount() == 1, "creative spends no seeds");
+        helper.assertTrue(player.getOffhandItem().getCount() == 1, "creative spends no seeds");
+        helper.assertTrue(player.getMainHandItem().getDamageValue() == 0, "creative spends no durability");
         player.discard();
         helper.succeed();
     }
@@ -134,7 +168,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
     public void sowingDoesNotDrainSoil(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         placeTrackedFarmland(helper, FARM, 100.0F, Blocks.WHEAT);
-        ServerPlayer player = sneakingWith(helper, Items.WHEAT_SEEDS, 9);
+        ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
 
         sow(helper, player, FARM);
 
@@ -147,7 +181,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
     @GameTest(template = TEMPLATE)
     public void sowsPitcherPods(GameTestHelper helper) {
         placeFarmlandGrid(helper);
-        ServerPlayer player = sneakingWith(helper, Items.PITCHER_POD, 9);
+        ServerPlayer player = rakeWith(helper, Items.PITCHER_POD, 9);
 
         InteractionResult result = sow(helper, player, FARM);
 
@@ -184,11 +218,12 @@ public class BroadcastSowingGameTest implements FabricGameTest {
         return count;
     }
 
-    private static ServerPlayer sneakingWith(GameTestHelper helper, Item seed, int count) {
+    /** A survival player holding an iron rake in the main hand and {@code count} seeds in the off-hand. */
+    private static ServerPlayer rakeWith(GameTestHelper helper, Item seed, int count) {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
         player.setGameMode(GameType.SURVIVAL);
-        player.setShiftKeyDown(true);
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(seed, count));
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(CultivationItems.IRON_RAKE));
+        player.setItemInHand(InteractionHand.OFF_HAND, count > 0 ? new ItemStack(seed, count) : ItemStack.EMPTY);
         return player;
     }
 
