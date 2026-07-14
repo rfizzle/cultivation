@@ -103,6 +103,7 @@ public class CultivationConfig {
     public boolean showSoilOverlays = true;
     public int soilOverlayRenderDistance = 24;
     public boolean showFatigueTooltips = true;
+    public boolean showNutritionTooltips = true;
 
     public void clamp() {
         CultivationConfig defaults = new CultivationConfig();
