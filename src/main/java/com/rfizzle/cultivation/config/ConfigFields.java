@@ -109,6 +109,7 @@ public final class ConfigFields {
             bool("enableEnrichedTilling", CAT_TILLING, c -> c.enableEnrichedTilling, (c, v) -> c.enableEnrichedTilling = v),
             intg("diamondHoeEnrichChance", CAT_TILLING, 0, 100, c -> c.diamondHoeEnrichChance, (c, v) -> c.diamondHoeEnrichChance = v),
             intg("netheriteHoeEnrichChance", CAT_TILLING, 0, 100, c -> c.netheriteHoeEnrichChance, (c, v) -> c.netheriteHoeEnrichChance = v),
+            bool("enrichedSoilResistsTrampling", CAT_TILLING, c -> c.enrichedSoilResistsTrampling, (c, v) -> c.enrichedSoilResistsTrampling = v),
 
             // Compost Fertilizer (§6)
             bool("enableFertilizer", CAT_FERTILIZER, c -> c.enableFertilizer, (c, v) -> c.enableFertilizer = v),
