@@ -84,7 +84,7 @@
   "config.cultivation.polyculture_min_different_neighbors": "Minimum Different Neighbors",
   "config.cultivation.polyculture_min_different_neighbors.tooltip": "Different-crop cardinal neighbors required for the bonus.",
   "config.cultivation.enable_sniffer_polyculture": "Enable Sniffer Polyculture Bonus",
-  "config.cultivation.enable_sniffer_polyculture.tooltip": "Double the polyculture bonus for a qualifying row bordered by a torchflower or pitcher plant.",
+  "config.cultivation.enable_sniffer_polyculture.tooltip": "Scale up the polyculture bonus for a qualifying row bordered by a torchflower or pitcher plant.",
   "config.cultivation.sniffer_polyculture_bonus_multiplier": "Sniffer Polyculture Bonus Multiplier",
   "config.cultivation.sniffer_polyculture_bonus_multiplier.tooltip": "How much the polyculture bonus is scaled when a sniffer crop borders the row.",
   "config.cultivation.enable_bee_pollination": "Enable Bee Pollination",

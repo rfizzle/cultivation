@@ -87,8 +87,9 @@ class PolycultureTest {
     void snifferCropsAreTorchflowerAndPitcher() {
         assertTrue(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.TORCHFLOWER_CROP.defaultBlockState())));
         assertTrue(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.PITCHER_CROP.defaultBlockState())));
-        // The mature flower carries the torchflower_crop identity, so it counts too.
+        // Both crops' mature forms carry the crop identity, so they count too.
         assertTrue(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.TORCHFLOWER.defaultBlockState())));
+        assertTrue(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.PITCHER_PLANT.defaultBlockState())));
     }
 
     @Test
@@ -127,6 +128,13 @@ class PolycultureTest {
         // The one crop whose maturity changes its block id — maturing must not
         // silently drop it out of the field's neighbor counts.
         assertEquals("minecraft:torchflower_crop", identity(Blocks.TORCHFLOWER));
+    }
+
+    @Test
+    void maturePitcherPlantKeepsItsCropIdentity() {
+        // The two-tall pitcher plant likewise keeps pitcher_crop, so a finished
+        // pitcher stays a field neighbor — and a premium partner — like torchflower.
+        assertEquals("minecraft:pitcher_crop", identity(Blocks.PITCHER_PLANT));
     }
 
     @Test

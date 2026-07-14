@@ -31,6 +31,16 @@ import org.jetbrains.annotations.Nullable;
  * bonus.
  */
 public final class Polyculture {
+    /**
+     * The two sniffer crops' comparison ids, resolved once — the block registry
+     * is long frozen by the time growth ticks or tooltips run. Both torchflower
+     * growth stages ({@code torchflower_crop} and the mature flower) and both
+     * pitcher stages ({@code pitcher_crop} and the mature two-tall plant) collapse
+     * onto these in {@link #cropIdentity}, so a single id apiece covers each crop.
+     */
+    private static final ResourceLocation TORCHFLOWER_CROP_ID = id(Blocks.TORCHFLOWER_CROP);
+    private static final ResourceLocation PITCHER_CROP_ID = id(Blocks.PITCHER_CROP);
+
     private Polyculture() {
     }
 
@@ -61,9 +71,13 @@ public final class Polyculture {
 
     /**
      * Whether {@code self} at {@code pos} is currently receiving the sniffer
-     * premium — a qualifying polyculture field with a sniffer-crop neighbor and
-     * the premium enabled. The probe tooltip's honest "which magnitude" signal
-     * (mc-probe-tooltips); off the growth hot path, so it rescans on demand.
+     * premium — a qualifying polyculture field bordered by a sniffer crop where
+     * the premium is enabled <em>and actually raising growth</em>. The last part
+     * matters: at a degenerate {@code polycultureGrowthMultiplier} of 1.0 (or a
+     * sniffer bonus of 1.0) the premium adds nothing, so the tooltip must not
+     * promise a boost it isn't delivering. The probe tooltip's honest "which
+     * magnitude" signal (mc-probe-tooltips); off the growth hot path, so it
+     * rescans on demand.
      */
     public static boolean snifferPremiumActiveAt(ServerLevel level, BlockPos pos, BlockState self) {
         CultivationConfig config = CultivationConfig.get();
@@ -75,7 +89,17 @@ public final class Polyculture {
             return false;
         }
         NeighborScan scan = scan(level, pos, selfId);
-        return scan.sniffer() && scan.different() >= config.polycultureMinDifferentNeighbors;
+        if (!scan.sniffer() || scan.different() < config.polycultureMinDifferentNeighbors) {
+            return false;
+        }
+        // Only flag it when the premium strictly lifts the multiplier above the base bonus.
+        float withPremium = premiumMultiplier(scan.different(), true,
+                config.polycultureMinDifferentNeighbors, config.polycultureGrowthMultiplier,
+                true, config.snifferPolycultureBonusMultiplier);
+        float withoutPremium = premiumMultiplier(scan.different(), true,
+                config.polycultureMinDifferentNeighbors, config.polycultureGrowthMultiplier,
+                false, config.snifferPolycultureBonusMultiplier);
+        return withPremium > withoutPremium;
     }
 
     /** The four-direction cardinal tally around {@code pos} for a crop whose identity is {@code selfId}. */
@@ -122,14 +146,13 @@ public final class Polyculture {
 
     /**
      * Whether {@code id} is a sniffer crop — the premium polyculture partners,
-     * torchflower and pitcher plant. Torchflower's two growth stages share the
-     * {@code torchflower_crop} identity ({@link #cropIdentity} collapses the
-     * mature flower onto it), so this single id covers both; the pitcher crop
-     * keeps its own {@code pitcher_crop} id.
+     * torchflower and pitcher plant. Both growth stages of each collapse onto one
+     * comparison id in {@link #cropIdentity} (the mature torchflower flower onto
+     * {@code torchflower_crop}, the two-tall pitcher plant onto {@code
+     * pitcher_crop}), so these two ids cover a sniffer crop at any stage.
      */
     public static boolean isSnifferCrop(@Nullable ResourceLocation id) {
-        return id != null
-                && (id.equals(id(Blocks.TORCHFLOWER_CROP)) || id.equals(id(Blocks.PITCHER_CROP)));
+        return id != null && (id.equals(TORCHFLOWER_CROP_ID) || id.equals(PITCHER_CROP_ID));
     }
 
     /** How many of {@code neighbors} carry a crop identity different from {@code selfId}. */
@@ -147,11 +170,13 @@ public final class Polyculture {
     /**
      * The crop identity {@code state} contributes to neighbor comparison, or
      * null when it is not a crop. Identity survives maturity: an attached stem
-     * keeps its base stem's id (melon and pumpkin stay two distinct crops) and
-     * the mature torchflower — the one crop whose maturity changes its block
-     * id — keeps {@code torchflower_crop}. Vanilla's attached stems hold their
-     * base-stem link in a private field, so the two blocks are mapped by
-     * identity; a modded {@link AttachedStemBlock} falls back to its own id.
+     * keeps its base stem's id (melon and pumpkin stay two distinct crops); the
+     * two sniffer crops whose maturity changes their block id keep their crop id —
+     * the mature torchflower flower onto {@code torchflower_crop} and the two-tall
+     * pitcher plant onto {@code pitcher_crop} — so neither drops out of a field's
+     * neighbor counts by finishing. Vanilla's attached stems hold their base-stem
+     * link in a private field, so the two blocks are mapped by identity; a modded
+     * {@link AttachedStemBlock} falls back to its own id.
      */
     @Nullable
     public static ResourceLocation cropIdentity(BlockState state) {
@@ -163,7 +188,10 @@ public final class Polyculture {
             return id(Blocks.PUMPKIN_STEM);
         }
         if (state.is(Blocks.TORCHFLOWER)) {
-            return id(Blocks.TORCHFLOWER_CROP);
+            return TORCHFLOWER_CROP_ID;
+        }
+        if (state.is(Blocks.PITCHER_PLANT)) {
+            return PITCHER_CROP_ID;
         }
         if (block instanceof CropBlock
                 || block instanceof StemBlock

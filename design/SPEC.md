@@ -159,7 +159,7 @@ When a supported crop (or stem) rolls a growth tick, count its four cardinal nei
 - **Field edges:** the end-cap blocks of the two outermost rows have only 1 different-crop neighbor and miss the bonus. Accepted — interior dominates, and the rule stays four block reads.
 - **Mixed maturity:** neighbor maturity is irrelevant; only block id is compared. A just-planted neighbor counts.
 - **Stems:** an attached stem keeps its base stem's id for comparison; melon and pumpkin stems count as two distinct crops.
-- **Torchflower:** the mature torchflower keeps `torchflower_crop` as its comparison id — the one crop whose maturity changes its block id never drops out of a field's neighbor counts by growing up. Both growth stages therefore count as a sniffer neighbor for the premium.
+- **Sniffer maturity:** torchflower and pitcher are the two crops whose maturity changes their block id — the mature torchflower flower keeps `torchflower_crop` and the two-tall pitcher plant keeps `pitcher_crop`. Neither drops out of a field's neighbor counts by finishing, so both growth stages of each count as a sniffer neighbor for the premium (and as ordinary polyculture neighbors).
 - **Sniffer self:** a sniffer crop earns the premium only from a *different* sniffer or crop bordering it — a torchflower row beside an identical torchflower row is monoculture and qualifies for nothing. The premium rewards the row the sniffer borders.
 - **Multiplayer:** none — layout is world geometry, identical for everyone.
 

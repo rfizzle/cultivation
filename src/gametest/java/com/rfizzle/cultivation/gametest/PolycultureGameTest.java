@@ -155,6 +155,17 @@ public class PolycultureGameTest implements FabricGameTest {
     }
 
     @GameTest(template = TEMPLATE)
+    public void maturePitcherPlantCountsAsASnifferNeighbor(GameTestHelper helper) {
+        // The two-tall pitcher plant keeps the pitcher_crop identity — a finished
+        // pitcher is still a premium partner, symmetric with the torchflower.
+        plant(helper, CROP, Blocks.WHEAT);
+        plant(helper, WEST, Blocks.PITCHER_PLANT);
+        plant(helper, EAST, Blocks.CARROTS);
+        assertMultiplier(helper, 1.4F, "a matured pitcher plant still doubles the bonus");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
     public void snifferPremiumNeedsAQualifyingLayout(GameTestHelper helper) {
         // A lone sniffer neighbor is below the threshold — the premium never conjures a bonus.
         plant(helper, CROP, Blocks.WHEAT);

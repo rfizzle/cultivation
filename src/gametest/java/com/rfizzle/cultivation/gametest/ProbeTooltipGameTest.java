@@ -123,6 +123,30 @@ public class ProbeTooltipGameTest implements FabricGameTest {
         helper.succeed();
     }
 
+    @GameTest(template = TEMPLATE)
+    public void snifferLineIsHiddenWhenTheBaseBonusIsZeroed(GameTestHelper helper) {
+        // At the degenerate polycultureGrowthMultiplier of 1.0 the premium adds
+        // nothing, so the tooltip must not promise a boost it isn't delivering.
+        var config = com.rfizzle.cultivation.config.CultivationConfig.get();
+        double saved = config.polycultureGrowthMultiplier;
+        config.polycultureGrowthMultiplier = 1.0;
+        try {
+            placeTrackedFarmland(helper, FARM, 100.0F, Blocks.WHEAT);
+            helper.setBlock(CROP, Blocks.WHEAT.defaultBlockState());
+            helper.setBlock(CROP.west(), Blocks.TORCHFLOWER_CROP.defaultBlockState());
+            helper.setBlock(CROP.east(), Blocks.POTATOES.defaultBlockState());
+            CompoundTag tag = new CompoundTag();
+            var level = helper.getLevel();
+            var cropAbs = helper.absolutePos(CROP);
+            CropProbeTooltip.writeServerData(tag, level, cropAbs, level.getBlockState(cropAbs));
+            helper.assertTrue(!hasLine(tag, "tooltip.cultivation.crop.sniffer"),
+                    "no sniffer line when the premium raises growth by nothing");
+        } finally {
+            config.polycultureGrowthMultiplier = saved;
+        }
+        helper.succeed();
+    }
+
     /** Whether the crop tooltip built from {@code tag} carries a line with the given translation key. */
     private static boolean hasLine(CompoundTag tag, String key) {
         return CropProbeTooltip.buildLines(tag).stream()
