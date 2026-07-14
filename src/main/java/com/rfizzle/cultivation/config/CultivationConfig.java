@@ -77,6 +77,7 @@ public class CultivationConfig {
     public boolean enableEnrichedTilling = true;
     public int diamondHoeEnrichChance = 10;
     public int netheriteHoeEnrichChance = 15;
+    public boolean enrichedSoilResistsTrampling = true;
 
     // Compost Fertilizer (§6)
     public boolean enableFertilizer = true;

@@ -101,7 +101,7 @@ Nether wart (on soul sand) and the sweet berry bush (on any `minecraft:dirt`-tag
 
 ### Edge Cases
 
-- **Farmland reversion** (trampling, shoveling, breaking, block replaced): `enrichedChance` and `fertilizerRemaining` reset to defaults immediately; `fertility`, `lastCrop`, and recovery bookkeeping persist at the position, so soil memory survives the block and applies to whatever farmland is tilled there later.
+- **Farmland reversion** (trampling, shoveling, breaking, block replaced): `enrichedChance` and `fertilizerRemaining` reset to defaults immediately; `fertility`, `lastCrop`, and recovery bookkeeping persist at the position, so soil memory survives the block and applies to whatever farmland is tilled there later. Enriched farmland resists a player's trample and so never reverts that way (§5); a resisted trample changes nothing at the position.
 - **Pistons:** soil state is positional and never moves with a pushed block. The state at a vacated position remains and governs future farmland there. Accepted: the soil is the ground, not the block.
 - **Multiplayer:** soil is shared world state, server-authoritative — every player sees and works the same fertility, exactly like vanilla hydration. No per-player soil.
 - **Chunk lifecycle:** the attachment persists with the chunk. A corrupted or unreadable soil entry is dropped and logged; the block silently returns to pristine defaults.
@@ -350,12 +350,15 @@ On every mature harvest of that block (§1 choke point), roll `enrichedChance`: 
 - is suppressed at fertility 0 (§1 exhausted clamp);
 - stacks with §6 Fertilizer (independent additions).
 
+**Trample resistance.** Enriched farmland (`enrichedChance > 0`) is not reverted to dirt by a **player's** trampling — a jump that would revert plain farmland leaves an invested block standing, so a plot worth a hundred hours survives its own gardener's misstep. Plain farmland stays exactly as fragile as vanilla. The protection covers only a player's own feet: a mob still reverts enriched farmland under `mobGriefing`, keeping world danger out of scope. Governed by `enrichedSoilResistsTrampling` (default on), independent of `enableEnrichedTilling` — a block already enriched keeps resisting even if tilling is later disabled.
+
 ### Edge Cases
 
 - **Existing farmland** cannot be re-tilled in vanilla; the only way to change a block's tier is reversion + re-till.
 - **Enchantments on the hoe** are irrelevant to the roll; Fortune on the *harvesting* tool applies to the base loot as vanilla, before the flat bonus is appended.
 - **Creative tilling** counts normally.
 - **Multiplayer:** whoever tills sets the bonus; the block then serves everyone equally (shared world state).
+- **Mob trampling** still reverts enriched farmland (under `mobGriefing`) — the trample resistance covers only a player's own feet, never hostile trampling.
 
 ### Config
 
@@ -364,11 +367,13 @@ On every mature harvest of that block (§1 choke point), roll `enrichedChance`: 
 | `enableEnrichedTilling` | bool | true | — |
 | `diamondHoeEnrichChance` | int | 10 | 0–100 |
 | `netheriteHoeEnrichChance` | int | 15 | 0–100 |
+| `enrichedSoilResistsTrampling` | bool | true | — |
 
 ### Implementation Notes
 
 - Hook the till action (`UseBlockCallback` before vanilla, or a `HoeItem#useOn` mixin) — detect the dirt→farmland conversion, write `enrichedChance` by tier into `SoilStore`.
 - The harvest-side roll lives in §1's drop choke point.
+- Trample resistance wraps the single `turnToDirt` call in `FarmBlock#fallOn` (a `@WrapWithCondition`), skipping the revert for a player over an enriched block while leaving the fall-damage `super.fallOn` intact; the mob path is untouched.
 
 ---
 
@@ -659,6 +664,7 @@ All features are independently toggleable via a ModMenu / Cloth Config screen an
 | `enableEnrichedTilling` | bool | true | Toggle high-tier hoe tilling (§5) |
 | `diamondHoeEnrichChance` | int | 10 | Bonus-drop chance (%) for diamond-tilled farmland |
 | `netheriteHoeEnrichChance` | int | 15 | Bonus-drop chance (%) for netherite-tilled farmland |
+| `enrichedSoilResistsTrampling` | bool | true | Enriched farmland is not trampled to dirt by players (§5) |
 | `enableFertilizer` | bool | true | Toggle Fertilizer application and bonus (§6) |
 | `composterProducesFertilizer` | bool | true | Composter yields Fertilizer instead of bone meal |
 | `fertilizerDoseHarvests` | int | 15 | Harvests granted +1 product per Fertilizer dose |

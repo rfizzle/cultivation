@@ -41,6 +41,7 @@
             ["<code>enableEnrichedTilling</code>", "bool", "<code>true</code>", "—", "Enriched tilling"],
             ["<code>diamondHoeEnrichChance</code>", "int", "<code>10</code>", "0–100", "Enriched tilling"],
             ["<code>netheriteHoeEnrichChance</code>", "int", "<code>15</code>", "0–100", "Enriched tilling"],
+            ["<code>enrichedSoilResistsTrampling</code>", "bool", "<code>true</code>", "—", "Enriched tilling"],
             ["<code>enableFertilizer</code>", "bool", "<code>true</code>", "—", "Fertilizer"],
             ["<code>composterProducesFertilizer</code>", "bool", "<code>true</code>", "—", "Fertilizer"],
             ["<code>fertilizerDoseHarvests</code>", "int", "<code>15</code>", "1–1000", "Fertilizer"],

@@ -106,6 +106,8 @@
   "config.cultivation.snack_buff_duration_ticks.tooltip": "Pumpkin pie and cookie buff duration, in ticks.",
   "config.cultivation.enable_enriched_tilling": "Enable Enriched Tilling",
   "config.cultivation.enable_enriched_tilling.tooltip": "Toggle bonus drops from diamond- and netherite-hoe tilling.",
+  "config.cultivation.enriched_soil_resists_trampling": "Enriched Soil Resists Trampling",
+  "config.cultivation.enriched_soil_resists_trampling.tooltip": "Enriched farmland is not trampled to dirt by players. Mobs still trample it.",
   "config.cultivation.diamond_hoe_enrich_chance": "Diamond Hoe Enrich Chance",
   "config.cultivation.diamond_hoe_enrich_chance.tooltip": "Bonus-drop chance, in percent, for diamond-tilled farmland.",
   "config.cultivation.netherite_hoe_enrich_chance": "Netherite Hoe Enrich Chance",
