@@ -28,6 +28,7 @@
             "com.rfizzle.cultivation.gametest.SoilDisabledGameTest",
             "com.rfizzle.cultivation.gametest.HarvestCallbackGameTest",
             "com.rfizzle.cultivation.gametest.EnrichedTillingGameTest",
+            "com.rfizzle.cultivation.gametest.TrampleResistanceGameTest",
             "com.rfizzle.cultivation.gametest.FertilizerGameTest",
             "com.rfizzle.cultivation.gametest.DietFatigueGameTest",
             "com.rfizzle.cultivation.gametest.MealBuffGameTest",
