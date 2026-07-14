@@ -123,4 +123,59 @@ public class PolycultureGameTest implements FabricGameTest {
         }
         helper.succeed();
     }
+
+    // --- sniffer premium (SPEC §2) ---
+
+    @GameTest(template = TEMPLATE)
+    public void torchflowerNeighborDoublesTheBonus(GameTestHelper helper) {
+        plant(helper, CROP, Blocks.WHEAT);
+        plant(helper, WEST, Blocks.TORCHFLOWER_CROP);
+        plant(helper, EAST, Blocks.POTATOES);
+        assertMultiplier(helper, 1.4F, "a torchflower border doubles the +20% bonus to +40%");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void pitcherNeighborDoublesTheBonus(GameTestHelper helper) {
+        plant(helper, CROP, Blocks.WHEAT);
+        plant(helper, WEST, Blocks.PITCHER_CROP);
+        plant(helper, EAST, Blocks.CARROTS);
+        assertMultiplier(helper, 1.4F, "a pitcher crop border doubles the bonus");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void matureTorchflowerCountsAsASnifferNeighbor(GameTestHelper helper) {
+        // The mature flower keeps the torchflower_crop identity, so it stays a premium partner.
+        plant(helper, CROP, Blocks.WHEAT);
+        plant(helper, WEST, Blocks.TORCHFLOWER);
+        plant(helper, EAST, Blocks.CARROTS);
+        assertMultiplier(helper, 1.4F, "a matured torchflower still doubles the bonus");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void snifferPremiumNeedsAQualifyingLayout(GameTestHelper helper) {
+        // A lone sniffer neighbor is below the threshold — the premium never conjures a bonus.
+        plant(helper, CROP, Blocks.WHEAT);
+        plant(helper, WEST, Blocks.TORCHFLOWER_CROP);
+        assertMultiplier(helper, 1.0F, "one sniffer neighbor still misses the two-neighbor threshold");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void disabledSnifferPremiumLeavesTheBaseBonus(GameTestHelper helper) {
+        CultivationConfig config = CultivationConfig.get();
+        boolean saved = config.enableSnifferPolyculture;
+        config.enableSnifferPolyculture = false;
+        try {
+            plant(helper, CROP, Blocks.WHEAT);
+            plant(helper, WEST, Blocks.TORCHFLOWER_CROP);
+            plant(helper, EAST, Blocks.POTATOES);
+            assertMultiplier(helper, 1.2F, "with the premium off, a sniffer border earns only the base bonus");
+        } finally {
+            config.enableSnifferPolyculture = saved;
+        }
+        helper.succeed();
+    }
 }

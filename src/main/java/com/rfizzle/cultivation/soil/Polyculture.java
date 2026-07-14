@@ -22,15 +22,27 @@ import org.jetbrains.annotations.Nullable;
  * at {@code polycultureGrowthMultiplier}. Evaluated live at each growth roll —
  * four block reads, no stored state, no sync. Monoculture is never penalized;
  * the multiplier is always ≥ 1.0.
+ *
+ * <p>A qualifying row bordered by a <em>sniffer crop</em> — torchflower or
+ * pitcher plant — earns the premium partner bonus: the fraction above 1.0 is
+ * scaled by {@code snifferPolycultureBonusMultiplier} (default 2×, so the
+ * standard +20% becomes +40%). The premium never reduces growth — the factor is
+ * floored at 1.0 by its config clamp — so it stays positive-only like the base
+ * bonus.
  */
 public final class Polyculture {
     private Polyculture() {
     }
 
+    /** A cardinal-neighbor tally: how many differ from the ticking crop, and whether any is a sniffer crop. */
+    private record NeighborScan(int different, boolean sniffer) {
+    }
+
     /**
      * The polyculture multiplier for the growth roll of {@code self} at
      * {@code pos}. Exactly 1.0 when the feature is disabled, the ticking block
-     * has no crop identity, or the field around it is too uniform.
+     * has no crop identity, or the field around it is too uniform. A qualifying
+     * field bordered by a sniffer crop earns the doubled premium.
      */
     public static float multiplierAt(ServerLevel level, BlockPos pos, BlockState self) {
         CultivationConfig config = CultivationConfig.get();
@@ -41,19 +53,83 @@ public final class Polyculture {
         if (selfId == null) {
             return 1.0F;
         }
+        NeighborScan scan = scan(level, pos, selfId);
+        return premiumMultiplier(scan.different(), scan.sniffer(),
+                config.polycultureMinDifferentNeighbors, config.polycultureGrowthMultiplier,
+                config.enableSnifferPolyculture, config.snifferPolycultureBonusMultiplier);
+    }
+
+    /**
+     * Whether {@code self} at {@code pos} is currently receiving the sniffer
+     * premium — a qualifying polyculture field with a sniffer-crop neighbor and
+     * the premium enabled. The probe tooltip's honest "which magnitude" signal
+     * (mc-probe-tooltips); off the growth hot path, so it rescans on demand.
+     */
+    public static boolean snifferPremiumActiveAt(ServerLevel level, BlockPos pos, BlockState self) {
+        CultivationConfig config = CultivationConfig.get();
+        if (!config.enablePolyculture || !config.enableSnifferPolyculture) {
+            return false;
+        }
+        ResourceLocation selfId = cropIdentity(self);
+        if (selfId == null) {
+            return false;
+        }
+        NeighborScan scan = scan(level, pos, selfId);
+        return scan.sniffer() && scan.different() >= config.polycultureMinDifferentNeighbors;
+    }
+
+    /** The four-direction cardinal tally around {@code pos} for a crop whose identity is {@code selfId}. */
+    private static NeighborScan scan(ServerLevel level, BlockPos pos, ResourceLocation selfId) {
         int different = 0;
+        boolean sniffer = false;
         for (Direction direction : Direction.Plane.HORIZONTAL) {
             ResourceLocation neighbor = cropIdentity(level.getBlockState(pos.relative(direction)));
             if (neighbor != null && !neighbor.equals(selfId)) {
                 different++;
+                if (isSnifferCrop(neighbor)) {
+                    sniffer = true;
+                }
             }
         }
-        return multiplier(different, config.polycultureMinDifferentNeighbors, config.polycultureGrowthMultiplier);
+        return new NeighborScan(different, sniffer);
     }
 
     /** Pure threshold math: the configured multiplier at or above the neighbor count, else 1.0. */
     public static float multiplier(int differentNeighbors, int minRequired, double configMultiplier) {
         return differentNeighbors >= minRequired ? (float) configMultiplier : 1.0F;
+    }
+
+    /**
+     * The polyculture multiplier with the sniffer-partner premium (SPEC §2).
+     * Below the threshold it is 1.0. At or above it, the bonus fraction
+     * ({@code baseMultiplier - 1}) is returned as-is, or scaled by
+     * {@code snifferBonus} when the premium is enabled and a different-crop
+     * neighbor is a sniffer crop — the +20% becoming +40% at the 2× default.
+     * Always ≥ 1.0: {@code snifferBonus} is clamped to ≥ 1.0, so the premium
+     * only ever adds.
+     */
+    public static float premiumMultiplier(int differentNeighbors, boolean snifferNeighbor,
+            int minRequired, double baseMultiplier, boolean premiumEnabled, double snifferBonus) {
+        if (differentNeighbors < minRequired) {
+            return 1.0F;
+        }
+        double bonus = baseMultiplier - 1.0;
+        if (premiumEnabled && snifferNeighbor) {
+            bonus *= snifferBonus;
+        }
+        return (float) (1.0 + bonus);
+    }
+
+    /**
+     * Whether {@code id} is a sniffer crop — the premium polyculture partners,
+     * torchflower and pitcher plant. Torchflower's two growth stages share the
+     * {@code torchflower_crop} identity ({@link #cropIdentity} collapses the
+     * mature flower onto it), so this single id covers both; the pitcher crop
+     * keeps its own {@code pitcher_crop} id.
+     */
+    public static boolean isSnifferCrop(@Nullable ResourceLocation id) {
+        return id != null
+                && (id.equals(id(Blocks.TORCHFLOWER_CROP)) || id.equals(id(Blocks.PITCHER_CROP)));
     }
 
     /** How many of {@code neighbors} carry a crop identity different from {@code selfId}. */
