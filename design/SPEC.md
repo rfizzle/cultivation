@@ -233,6 +233,7 @@ Every item with a food component, including honey bottles and all golden-apple v
 ### Feedback
 
 - Food item tooltips (client, when `showFatigueTooltips` is on) show a line once the item has any stacks: *"Losing its appeal (−20%)"*, and at the floor: *"Thoroughly tired of this (−50%)"* — keys under `tooltip.cultivation.fatigue.*`.
+- Food item tooltips (client, when `showNutritionTooltips` is on) show a nutrition line above the fatigue line: hunger and saturation from the item's `FOOD` component. When the food currently carries fatigue, the line leads with the fatigue-adjusted values for this bite and keeps the base in parentheses — *"Hunger 6 (8), Saturation 9.6 (12.8)"* — using the same `scaledNutrition` / `saturation × effectiveness` math the server applies; otherwise the base values stand alone — *"Hunger 8, Saturation 12.8"*. Keys under `tooltip.cultivation.nutrition.*`. Suppressed when AppleSkin is installed, which draws its own hunger/saturation shanks (the fatigue line, having no AppleSkin counterpart, still shows).
 - `/cultivation diet` prints the player's current fatigue entries and last three foods.
 
 ### Edge Cases
@@ -252,7 +253,7 @@ Every item with a food component, including honey bottles and all golden-apple v
 | `fatigueFloor` | float | 0.5 | 0–1 |
 | `fatigueResetDistinctFoods` | int | 3 | 2–5 |
 
-Client: `showFatigueTooltips` (bool, default true).
+Client: `showFatigueTooltips` (bool, default true), `showNutritionTooltips` (bool, default true).
 
 ### Implementation Notes
 
@@ -675,6 +676,7 @@ All features are independently toggleable via a ModMenu / Cloth Config screen an
 | `showSoilOverlays` | bool | true | — | Render Tired/Exhausted farmland overlays |
 | `soilOverlayRenderDistance` | int | 24 | 4–64 | Max overlay render distance (blocks) |
 | `showFatigueTooltips` | bool | true | — | Show fatigue lines on food tooltips |
+| `showNutritionTooltips` | bool | true | — | Show hunger/saturation on food tooltips (deferred to AppleSkin when present) |
 
 ---
 
@@ -786,6 +788,6 @@ Cultivation ships **no HUD element**. The slot decision and reasoning live in `d
 ### Manual Testing
 
 - Soil overlay rendering: band textures, fleck overlays (fertilized/enriched) composing with cracks, render distance, depth testing, Sodium/EBE/Iris
-- Food tooltips (fatigue lines) and Jade/WTHIT soil/crop lines
+- Food tooltips (nutrition and fatigue lines, with and without AppleSkin) and Jade/WTHIT soil/crop lines
 - Effect icons in the vanilla HUD; config screen labels/tooltips
 - Village farms over long observation: rotation patchwork and fallow strips emerging

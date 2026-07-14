@@ -45,7 +45,7 @@
           "type": "prose",
           "html": [
             "Each consecutive repeat of the same food restores 10% less hunger and saturation, bottoming out at half effect. Eating three different foods clears the fatigue entirely — a three-food rotation always eats at 100%, while a two-food alternation grinds both down together. Food effects are never touched: golden apples, suspicious stews, and meal buffs apply at full strength regardless.",
-            "The food's tooltip tells you plainly when it's losing its appeal and by how much. Fatigue is strictly per-player and clears on death."
+            "The food's tooltip tells you plainly when it's losing its appeal and by how much. It also prints the food's hunger and saturation outright — and, once fatigue is biting, the reduced values for this bite alongside the originals, so the numbers you weigh foods by are never hidden. When AppleSkin is installed the mod defers the hunger/saturation line to it. Fatigue is strictly per-player and clears on death."
           ]
         }
       ]
