@@ -55,6 +55,8 @@ public class CultivationConfig {
     public boolean enablePolyculture = true;
     public double polycultureGrowthMultiplier = 1.2;
     public int polycultureMinDifferentNeighbors = 2;
+    public boolean enableSnifferPolyculture = true;
+    public double snifferPolycultureBonusMultiplier = 2.0;
 
     // Bee pollination (§2)
     public boolean enableBeePollination = true;
@@ -118,6 +120,7 @@ public class CultivationConfig {
         exhaustedGrowthMultiplier = clampDouble("exhaustedGrowthMultiplier", exhaustedGrowthMultiplier, 0.0, 1.0, defaults.exhaustedGrowthMultiplier);
         polycultureGrowthMultiplier = clampDouble("polycultureGrowthMultiplier", polycultureGrowthMultiplier, 1.0, 5.0, defaults.polycultureGrowthMultiplier);
         polycultureMinDifferentNeighbors = clampInt("polycultureMinDifferentNeighbors", polycultureMinDifferentNeighbors, 1, 4);
+        snifferPolycultureBonusMultiplier = clampDouble("snifferPolycultureBonusMultiplier", snifferPolycultureBonusMultiplier, 1.0, 5.0, defaults.snifferPolycultureBonusMultiplier);
         beePollinationGrowthMultiplier = clampDouble("beePollinationGrowthMultiplier", beePollinationGrowthMultiplier, 1.0, 5.0, defaults.beePollinationGrowthMultiplier);
         beePollinationRange = clampInt("beePollinationRange", beePollinationRange, 1, 16);
         fatiguePerRepeat = clampDouble("fatiguePerRepeat", fatiguePerRepeat, 0.0, 1.0, defaults.fatiguePerRepeat);

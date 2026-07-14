@@ -26,6 +26,7 @@ public final class CropProbeTooltip {
     static final String KEY_PRESENT = "cultivation:crop_present";
     static final String KEY_GROWTH = "cultivation:growth";
     static final String KEY_POLYCULTURE = "cultivation:polyculture";
+    static final String KEY_SNIFFER = "cultivation:sniffer";
     static final String KEY_BEE = "cultivation:bee";
 
     private CropProbeTooltip() {
@@ -47,6 +48,7 @@ public final class CropProbeTooltip {
         tag.putBoolean(KEY_PRESENT, true);
         tag.putFloat(KEY_GROWTH, SoilGrowth.multiplierAt(level, pos, state));
         tag.putBoolean(KEY_POLYCULTURE, Polyculture.multiplierAt(level, pos, state) > 1.0F);
+        tag.putBoolean(KEY_SNIFFER, Polyculture.snifferPremiumActiveAt(level, pos, state));
         tag.putBoolean(KEY_BEE, BeePollination.multiplierAt(level, pos) > 1.0F);
     }
 
@@ -60,6 +62,9 @@ public final class CropProbeTooltip {
                 String.format(Locale.ROOT, "%.2f", tag.getFloat(KEY_GROWTH))));
         if (tag.getBoolean(KEY_POLYCULTURE)) {
             lines.add(Component.translatable("tooltip.cultivation.crop.polyculture"));
+        }
+        if (tag.getBoolean(KEY_SNIFFER)) {
+            lines.add(Component.translatable("tooltip.cultivation.crop.sniffer"));
         }
         if (tag.getBoolean(KEY_BEE)) {
             lines.add(Component.translatable("tooltip.cultivation.crop.bees"));

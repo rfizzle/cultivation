@@ -11,8 +11,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PolycultureTest {
     @BeforeAll
@@ -37,6 +39,66 @@ class PolycultureTest {
         assertEquals(1.5F, Polyculture.multiplier(1, 1, 1.5), 1e-6F);
         assertEquals(1.0F, Polyculture.multiplier(3, 4, 1.5), 1e-6F);
         assertEquals(1.5F, Polyculture.multiplier(4, 4, 1.5), 1e-6F);
+    }
+
+    // --- sniffer premium math (SPEC §2) ---
+
+    @Test
+    void premiumBelowThresholdIsAlwaysVanilla() {
+        // A sniffer neighbor can never conjure a bonus that the layout hasn't earned.
+        assertEquals(1.0F, Polyculture.premiumMultiplier(0, true, 2, 1.2, true, 2.0), 1e-6F);
+        assertEquals(1.0F, Polyculture.premiumMultiplier(1, true, 2, 1.2, true, 2.0), 1e-6F);
+    }
+
+    @Test
+    void premiumWithoutSnifferNeighborIsTheBaseBonus() {
+        assertEquals(1.2F, Polyculture.premiumMultiplier(2, false, 2, 1.2, true, 2.0), 1e-6F);
+        assertEquals(1.2F, Polyculture.premiumMultiplier(4, false, 2, 1.2, true, 2.0), 1e-6F);
+    }
+
+    @Test
+    void snifferNeighborDoublesTheBonusFraction() {
+        // The +20% fraction doubles to +40% — the multiplier, not the fraction, is 1.4.
+        assertEquals(1.4F, Polyculture.premiumMultiplier(2, true, 2, 1.2, true, 2.0), 1e-6F);
+        // A larger base bonus doubles the same way: +50% → +100%.
+        assertEquals(2.0F, Polyculture.premiumMultiplier(2, true, 2, 1.5, true, 2.0), 1e-6F);
+    }
+
+    @Test
+    void disabledPremiumLeavesTheBaseBonus() {
+        assertEquals(1.2F, Polyculture.premiumMultiplier(2, true, 2, 1.2, false, 2.0), 1e-6F);
+    }
+
+    @Test
+    void aUnitSnifferBonusIsInert() {
+        // The clamp floors the factor at 1.0; a floored value never reduces the bonus.
+        assertEquals(1.2F, Polyculture.premiumMultiplier(2, true, 2, 1.2, true, 1.0), 1e-6F);
+    }
+
+    @Test
+    void customSnifferBonusScalesTheFraction() {
+        // +20% at 3× → +60%.
+        assertEquals(1.6F, Polyculture.premiumMultiplier(2, true, 2, 1.2, true, 3.0), 1e-6F);
+    }
+
+    // --- sniffer crop identity ---
+
+    @Test
+    void snifferCropsAreTorchflowerAndPitcher() {
+        assertTrue(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.TORCHFLOWER_CROP.defaultBlockState())));
+        assertTrue(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.PITCHER_CROP.defaultBlockState())));
+        // Both crops' mature forms carry the crop identity, so they count too.
+        assertTrue(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.TORCHFLOWER.defaultBlockState())));
+        assertTrue(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.PITCHER_PLANT.defaultBlockState())));
+    }
+
+    @Test
+    void ordinaryCropsAreNotSnifferCrops() {
+        assertFalse(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.WHEAT.defaultBlockState())));
+        assertFalse(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.CARROTS.defaultBlockState())));
+        assertFalse(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.MELON_STEM.defaultBlockState())));
+        assertFalse(Polyculture.isSnifferCrop(Polyculture.cropIdentity(Blocks.FARMLAND.defaultBlockState())));
+        assertFalse(Polyculture.isSnifferCrop(null));
     }
 
     // --- crop identity ---
@@ -66,6 +128,13 @@ class PolycultureTest {
         // The one crop whose maturity changes its block id — maturing must not
         // silently drop it out of the field's neighbor counts.
         assertEquals("minecraft:torchflower_crop", identity(Blocks.TORCHFLOWER));
+    }
+
+    @Test
+    void maturePitcherPlantKeepsItsCropIdentity() {
+        // The two-tall pitcher plant likewise keeps pitcher_crop, so a finished
+        // pitcher stays a field neighbor — and a premium partner — like torchflower.
+        assertEquals("minecraft:pitcher_crop", identity(Blocks.PITCHER_PLANT));
     }
 
     @Test

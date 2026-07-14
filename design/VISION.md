@@ -20,7 +20,7 @@ In your first hours nothing is unfamiliar: you till, you plant, you eat. Then th
 ### Polyculture
 - **What it is** — Mixed fields grow faster than monoculture. Plant in alternating rows — wheat, carrots, potatoes — and the soil shares what each crop leaves behind.
 - **How you use it** — Lay out rows so each borders a different crop. Nothing to craft, nothing to turn on: the layout is the mechanic. Keep a hive by the field and the bees lend their own nudge, on top of the layout.
-- **What changes for you** — Every row bordered by a different crop grows 20% faster, and a crop near a populated beehive grows another 10% faster — stacking, so a striped field beside a hive beats either alone. Monoculture is never punished — it simply grows at the vanilla rate — but the fastest farm on the server is a striped one with bees.
+- **What changes for you** — Every row bordered by a different crop grows 20% faster, and a crop near a populated beehive grows another 10% faster — stacking, so a striped field beside a hive beats either alone. Border a row with the sniffer's finds — torchflower or pitcher plant — and that bonus doubles, making those rare crops the crown jewels of a striped field. Monoculture is never punished — it simply grows at the vanilla rate — but the fastest farm on the server is a striped one with bees.
 
 ### A varied table
 - **What it is** — Eating the exact same food again and again dulls it. Each consecutive repeat restores 10% less hunger and saturation, bottoming out at half effect.

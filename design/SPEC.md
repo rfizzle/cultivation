@@ -152,12 +152,15 @@ When a supported crop (or stem) rolls a growth tick, count its four cardinal nei
 - Stacks multiplicatively with fertility: an exhausted polyculture block grows at 0.5 × 1.2 = 0.6×.
 - Layout math: in alternating single rows (wheat / carrot / potato), every interior block has exactly 2 different-crop neighbors — the whole row qualifies. A two-crop checkerboard qualifies everywhere. A monoculture field has 0 different neighbors and simply grows at the vanilla rate — never penalized.
 
+**Sniffer premium.** A qualifying block whose different-crop neighbors include a **sniffer crop** — torchflower (either growth stage) or pitcher plant — earns the premium partner bonus while `enableSnifferPolyculture` is true: the polyculture *bonus fraction* above 1.0 is scaled by `snifferPolycultureBonusMultiplier` (default **2×**), so the standard 1.2× becomes 1.4×. It is the fraction that doubles, not the raw multiplier — the +20% becomes +40%, never +140%. The premium only applies to a block that already qualifies (`different ≥ polycultureMinDifferentNeighbors`); a lone sniffer neighbor never conjures a bonus. Positive-only: the factor is floored at 1.0 by its clamp, so a sniffer border can only speed a row up. This gives the sniffer's rare finds a job — the crown jewels of a striped field — without touching the animal side (sniffer breeding, egg-finding, and behavior stay vanilla).
+
 ### Edge Cases
 
 - **Field edges:** the end-cap blocks of the two outermost rows have only 1 different-crop neighbor and miss the bonus. Accepted — interior dominates, and the rule stays four block reads.
 - **Mixed maturity:** neighbor maturity is irrelevant; only block id is compared. A just-planted neighbor counts.
 - **Stems:** an attached stem keeps its base stem's id for comparison; melon and pumpkin stems count as two distinct crops.
-- **Torchflower:** the mature torchflower keeps `torchflower_crop` as its comparison id — the one crop whose maturity changes its block id never drops out of a field's neighbor counts by growing up.
+- **Sniffer maturity:** torchflower and pitcher are the two crops whose maturity changes their block id — the mature torchflower flower keeps `torchflower_crop` and the two-tall pitcher plant keeps `pitcher_crop`. Neither drops out of a field's neighbor counts by finishing, so both growth stages of each count as a sniffer neighbor for the premium (and as ordinary polyculture neighbors).
+- **Sniffer self:** a sniffer crop earns the premium only from a *different* sniffer or crop bordering it — a torchflower row beside an identical torchflower row is monoculture and qualifies for nothing. The premium rewards the row the sniffer borders.
 - **Multiplayer:** none — layout is world geometry, identical for everyone.
 
 ### Config
@@ -167,10 +170,13 @@ When a supported crop (or stem) rolls a growth tick, count its four cardinal nei
 | `enablePolyculture` | bool | true | — |
 | `polycultureGrowthMultiplier` | float | 1.2 | 1–5 |
 | `polycultureMinDifferentNeighbors` | int | 2 | 1–4 |
+| `enableSnifferPolyculture` | bool | true | — |
+| `snifferPolycultureBonusMultiplier` | float | 2.0 | 1–5 |
 
 ### Implementation Notes
 
 - Lives entirely inside §1's growth-modifier mixin: a static helper computes the neighbor count and returns the multiplier. No attachment, no sync, no persistence.
+- The sniffer premium rides the same four-block neighbor scan — the same states are already read, so it adds no world reads. The scan yields both the different-crop count and whether any different neighbor is a sniffer crop; the pure premium function folds the two configs in.
 
 ### Bee Pollination
 
@@ -651,6 +657,8 @@ All features are independently toggleable via a ModMenu / Cloth Config screen an
 | `enablePolyculture` | bool | true | Toggle the polyculture growth bonus (§2) |
 | `polycultureGrowthMultiplier` | float | 1.2 | Growth multiplier for qualifying crops |
 | `polycultureMinDifferentNeighbors` | int | 2 | Different-crop cardinal neighbors required |
+| `enableSnifferPolyculture` | bool | true | Toggle the sniffer-crop premium polyculture bonus (§2) |
+| `snifferPolycultureBonusMultiplier` | float | 2.0 | Scale on the polyculture bonus when a sniffer crop borders the row |
 | `enableBeePollination` | bool | true | Toggle the bee-pollination growth bonus (§2) |
 | `beePollinationGrowthMultiplier` | float | 1.1 | Growth multiplier for a crop near a populated hive |
 | `beePollinationRange` | int | 8 | Block radius within which a populated hive boosts growth |
@@ -714,7 +722,7 @@ Per concord [`API-STANDARD.md`](../../concord/API-STANDARD.md): the only stable 
 ### Optional Integrations
 
 - **ModMenu + Cloth Config** — config screen.
-- **Jade / WTHIT** — farmland tooltip: fertility % + band, enriched %, Fertilizer dose remaining, last crop; crop tooltip: polyculture bonus active and the combined growth modifier.
+- **Jade / WTHIT** — farmland tooltip: fertility % + band, enriched %, Fertilizer dose remaining, last crop; crop tooltip: polyculture bonus active, sniffer premium active, bees nearby, and the combined growth modifier.
 - **EMI / REI / JEI** — scythe recipes (shaped + smithing) and a Fertilizer info entry naming the composter as its source.
 
 ### Sibling & Mod Compatibility

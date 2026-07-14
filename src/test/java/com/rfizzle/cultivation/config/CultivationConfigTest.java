@@ -53,6 +53,8 @@ class CultivationConfigTest {
         assertTrue(config.enablePolyculture);
         assertEquals(1.2, config.polycultureGrowthMultiplier);
         assertEquals(2, config.polycultureMinDifferentNeighbors);
+        assertTrue(config.enableSnifferPolyculture);
+        assertEquals(2.0, config.snifferPolycultureBonusMultiplier);
         assertTrue(config.enableBeePollination);
         assertEquals(1.1, config.beePollinationGrowthMultiplier);
         assertEquals(8, config.beePollinationRange);
@@ -149,6 +151,7 @@ class CultivationConfigTest {
         config.exhaustedGrowthMultiplier = -0.5;
         config.polycultureGrowthMultiplier = 0.9;
         config.polycultureMinDifferentNeighbors = 0;
+        config.snifferPolycultureBonusMultiplier = 0.5;
         config.beePollinationGrowthMultiplier = 0.9;
         config.beePollinationRange = 0;
         config.fatiguePerRepeat = -0.10;
@@ -175,6 +178,7 @@ class CultivationConfigTest {
         assertEquals(0.0, config.exhaustedGrowthMultiplier);
         assertEquals(1.0, config.polycultureGrowthMultiplier);
         assertEquals(1, config.polycultureMinDifferentNeighbors);
+        assertEquals(1.0, config.snifferPolycultureBonusMultiplier);
         assertEquals(1.0, config.beePollinationGrowthMultiplier);
         assertEquals(1, config.beePollinationRange);
         assertEquals(0.0, config.fatiguePerRepeat);
@@ -204,6 +208,7 @@ class CultivationConfigTest {
         config.exhaustedGrowthMultiplier = 1.5;
         config.polycultureGrowthMultiplier = 5.2;
         config.polycultureMinDifferentNeighbors = 5;
+        config.snifferPolycultureBonusMultiplier = 5.2;
         config.beePollinationGrowthMultiplier = 5.2;
         config.beePollinationRange = 17;
         config.fatiguePerRepeat = 1.10;
@@ -230,6 +235,7 @@ class CultivationConfigTest {
         assertEquals(1.0, config.exhaustedGrowthMultiplier);
         assertEquals(5.0, config.polycultureGrowthMultiplier);
         assertEquals(4, config.polycultureMinDifferentNeighbors);
+        assertEquals(5.0, config.snifferPolycultureBonusMultiplier);
         assertEquals(5.0, config.beePollinationGrowthMultiplier);
         assertEquals(16, config.beePollinationRange);
         assertEquals(1.0, config.fatiguePerRepeat);
@@ -258,6 +264,7 @@ class CultivationConfigTest {
         low.exhaustedGrowthMultiplier = 0.0;
         low.polycultureGrowthMultiplier = 1.0;
         low.polycultureMinDifferentNeighbors = 1;
+        low.snifferPolycultureBonusMultiplier = 1.0;
         low.beePollinationGrowthMultiplier = 1.0;
         low.beePollinationRange = 1;
         low.fatiguePerRepeat = 0.0;
@@ -284,6 +291,7 @@ class CultivationConfigTest {
         assertEquals(0.0, low.exhaustedGrowthMultiplier);
         assertEquals(1.0, low.polycultureGrowthMultiplier);
         assertEquals(1, low.polycultureMinDifferentNeighbors);
+        assertEquals(1.0, low.snifferPolycultureBonusMultiplier);
         assertEquals(1.0, low.beePollinationGrowthMultiplier);
         assertEquals(1, low.beePollinationRange);
         assertEquals(0.0, low.fatiguePerRepeat);
@@ -309,6 +317,7 @@ class CultivationConfigTest {
         high.exhaustedGrowthMultiplier = 1.0;
         high.polycultureGrowthMultiplier = 5.0;
         high.polycultureMinDifferentNeighbors = 4;
+        high.snifferPolycultureBonusMultiplier = 5.0;
         high.beePollinationGrowthMultiplier = 5.0;
         high.beePollinationRange = 16;
         high.fatiguePerRepeat = 1.0;
@@ -335,6 +344,7 @@ class CultivationConfigTest {
         assertEquals(1.0, high.exhaustedGrowthMultiplier);
         assertEquals(5.0, high.polycultureGrowthMultiplier);
         assertEquals(4, high.polycultureMinDifferentNeighbors);
+        assertEquals(5.0, high.snifferPolycultureBonusMultiplier);
         assertEquals(5.0, high.beePollinationGrowthMultiplier);
         assertEquals(16, high.beePollinationRange);
         assertEquals(1.0, high.fatiguePerRepeat);
