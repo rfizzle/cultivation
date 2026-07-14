@@ -133,7 +133,8 @@ public final class ConfigFields {
             // Client presentation
             bool("showSoilOverlays", CAT_CLIENT, c -> c.showSoilOverlays, (c, v) -> c.showSoilOverlays = v),
             intg("soilOverlayRenderDistance", CAT_CLIENT, 4, 64, c -> c.soilOverlayRenderDistance, (c, v) -> c.soilOverlayRenderDistance = v),
-            bool("showFatigueTooltips", CAT_CLIENT, c -> c.showFatigueTooltips, (c, v) -> c.showFatigueTooltips = v));
+            bool("showFatigueTooltips", CAT_CLIENT, c -> c.showFatigueTooltips, (c, v) -> c.showFatigueTooltips = v),
+            bool("showNutritionTooltips", CAT_CLIENT, c -> c.showNutritionTooltips, (c, v) -> c.showNutritionTooltips = v));
 
     private ConfigFields() {
     }

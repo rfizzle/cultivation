@@ -15,9 +15,9 @@ import org.jetbrains.annotations.Nullable;
  * returns the synced copy when connected to a server that sent one, and falls
  * back to the local file only when standalone (the offline/singleplayer case).
  * <em>Client-only</em> presentation keys ({@code showSoilOverlays},
- * {@code showFatigueTooltips}, the overlay render distance) are always read from
- * {@link CultivationConfig#get()} directly — a server never dictates a purely
- * visual client preference.
+ * {@code showFatigueTooltips}, {@code showNutritionTooltips}, the overlay render
+ * distance) are always read from {@link CultivationConfig#get()} directly — a
+ * server never dictates a purely visual client preference.
  */
 public final class ClientCultivationConfig {
     @Nullable

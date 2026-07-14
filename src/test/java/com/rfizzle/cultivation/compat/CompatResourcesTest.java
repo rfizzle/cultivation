@@ -74,6 +74,22 @@ class CompatResourcesTest {
             "tooltip.cultivation.crop.bees",
     };
 
+    /** Keys the food-tooltip formatters emit (mc-tooltips): dietary fatigue and nutrition. */
+    private static final String[] FOOD_TOOLTIP_KEYS = {
+            "tooltip.cultivation.fatigue.appeal",
+            "tooltip.cultivation.fatigue.tired",
+            "tooltip.cultivation.nutrition.base",
+            "tooltip.cultivation.nutrition.adjusted",
+    };
+
+    @Test
+    void everyFoodTooltipKeyIsLocalized() {
+        JsonObject lang = lang();
+        for (String key : FOOD_TOOLTIP_KEYS) {
+            assertNonBlank(lang, key);
+        }
+    }
+
     @Test
     void everyProbeTooltipKeyIsLocalized() {
         JsonObject lang = lang();

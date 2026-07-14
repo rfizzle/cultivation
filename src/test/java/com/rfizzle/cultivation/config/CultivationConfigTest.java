@@ -33,7 +33,8 @@ class CultivationConfigTest {
             "enableScytheHarvest",
             "enableVillagerStewardship", "enableVillagerFertilizing",
             "villagerFallowThreshold", "villagerReplantThreshold",
-            "showSoilOverlays", "soilOverlayRenderDistance", "showFatigueTooltips");
+            "showSoilOverlays", "soilOverlayRenderDistance", "showFatigueTooltips",
+            "showNutritionTooltips");
 
     @Test
     void defaultValuesMatchTheSpecTable() {
@@ -76,6 +77,7 @@ class CultivationConfigTest {
         assertTrue(config.showSoilOverlays);
         assertEquals(24, config.soilOverlayRenderDistance);
         assertTrue(config.showFatigueTooltips);
+        assertTrue(config.showNutritionTooltips);
     }
 
     @Test
@@ -488,6 +490,7 @@ class CultivationConfigTest {
         original.polycultureGrowthMultiplier = 1.5;
         original.fertilizerDoseHarvests = 30;
         original.showFatigueTooltips = false;
+        original.showNutritionTooltips = false;
 
         original.save(path);
         CultivationConfig restored = CultivationConfig.load(path);
@@ -497,6 +500,7 @@ class CultivationConfigTest {
         assertEquals(1.5, restored.polycultureGrowthMultiplier);
         assertEquals(30, restored.fertilizerDoseHarvests);
         assertFalse(restored.showFatigueTooltips);
+        assertFalse(restored.showNutritionTooltips);
         assertFalse(Files.exists(dir.resolve("cultivation.json.tmp")), "atomic save must not leave a tmp file");
     }
 
