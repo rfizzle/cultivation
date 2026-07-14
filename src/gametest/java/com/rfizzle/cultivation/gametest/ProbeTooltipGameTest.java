@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.level.block.Blocks;
 
 import static com.rfizzle.cultivation.gametest.SoilFixtures.CROP;
@@ -90,5 +91,43 @@ public class ProbeTooltipGameTest implements FabricGameTest {
         helper.assertTrue(CropProbeTooltip.buildLines(tag).isEmpty(),
                 "a non-crop block leaves the crop tooltip empty");
         helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void cropWriterFlagsTheSnifferPremium(GameTestHelper helper) {
+        placeTrackedFarmland(helper, FARM, 100.0F, Blocks.WHEAT);
+        helper.setBlock(CROP, Blocks.WHEAT.defaultBlockState());
+        helper.setBlock(CROP.west(), Blocks.TORCHFLOWER_CROP.defaultBlockState());
+        helper.setBlock(CROP.east(), Blocks.POTATOES.defaultBlockState());
+        CompoundTag tag = new CompoundTag();
+        var level = helper.getLevel();
+        var cropAbs = helper.absolutePos(CROP);
+        CropProbeTooltip.writeServerData(tag, level, cropAbs, level.getBlockState(cropAbs));
+        helper.assertTrue(hasLine(tag, "tooltip.cultivation.crop.sniffer"),
+                "a sniffer-bordered polyculture crop flags the premium line");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void cropWriterOmitsSnifferLineWithoutAPartner(GameTestHelper helper) {
+        placeTrackedFarmland(helper, FARM, 100.0F, Blocks.WHEAT);
+        helper.setBlock(CROP, Blocks.WHEAT.defaultBlockState());
+        helper.setBlock(CROP.west(), Blocks.CARROTS.defaultBlockState());
+        helper.setBlock(CROP.east(), Blocks.POTATOES.defaultBlockState());
+        CompoundTag tag = new CompoundTag();
+        var level = helper.getLevel();
+        var cropAbs = helper.absolutePos(CROP);
+        CropProbeTooltip.writeServerData(tag, level, cropAbs, level.getBlockState(cropAbs));
+        helper.assertTrue(!hasLine(tag, "tooltip.cultivation.crop.sniffer"),
+                "a plain polyculture crop shows no sniffer line");
+        helper.succeed();
+    }
+
+    /** Whether the crop tooltip built from {@code tag} carries a line with the given translation key. */
+    private static boolean hasLine(CompoundTag tag, String key) {
+        return CropProbeTooltip.buildLines(tag).stream()
+                .map(net.minecraft.network.chat.Component::getContents)
+                .filter(TranslatableContents.class::isInstance)
+                .anyMatch(contents -> ((TranslatableContents) contents).getKey().equals(key));
     }
 }

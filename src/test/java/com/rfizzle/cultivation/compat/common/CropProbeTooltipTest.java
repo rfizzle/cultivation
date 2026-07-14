@@ -37,6 +37,12 @@ class CropProbeTooltipTest {
         return tag;
     }
 
+    private static CompoundTag snifferTag(float growth, boolean sniffer) {
+        CompoundTag tag = tag(growth, true, false);
+        tag.putBoolean(CropProbeTooltip.KEY_SNIFFER, sniffer);
+        return tag;
+    }
+
     private static String key(Component line) {
         return ((TranslatableContents) line.getContents()).getKey();
     }
@@ -77,5 +83,15 @@ class CropProbeTooltipTest {
         assertEquals("tooltip.cultivation.crop.growth", key(lines.get(0)));
         assertEquals("tooltip.cultivation.crop.polyculture", key(lines.get(1)));
         assertEquals("tooltip.cultivation.crop.bees", key(lines.get(2)));
+    }
+
+    @Test
+    void snifferLineOnlyWhenActive() {
+        assertEquals(2, CropProbeTooltip.buildLines(snifferTag(1.2F, false)).size());
+        List<Component> active = CropProbeTooltip.buildLines(snifferTag(1.4F, true));
+        assertEquals(3, active.size());
+        assertEquals("tooltip.cultivation.crop.growth", key(active.get(0)));
+        assertEquals("tooltip.cultivation.crop.polyculture", key(active.get(1)));
+        assertEquals("tooltip.cultivation.crop.sniffer", key(active.get(2)));
     }
 }
