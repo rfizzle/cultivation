@@ -2,6 +2,7 @@ package com.rfizzle.cultivation.client;
 
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.config.SyncedConfig;
 import com.rfizzle.cultivation.diet.NutritionTooltip;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
@@ -54,7 +55,7 @@ public final class DietTooltip {
         // config, falling back to the local file only when standalone. With fatigue disabled,
         // retained stacks are inert (SPEC §3), so treat the food as unfatigued — the nutrition
         // line shows base values and no fatigue line renders.
-        CultivationConfig fatigueConfig = ClientCultivationConfig.effective();
+        CultivationConfig fatigueConfig = SyncedConfig.effective();
         float perRepeat = (float) fatigueConfig.fatiguePerRepeat;
         float floor = (float) fatigueConfig.fatigueFloor;
         ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
