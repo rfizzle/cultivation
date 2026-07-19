@@ -20,9 +20,6 @@ import org.jetbrains.annotations.Nullable;
  * testable without a level, mirroring {@link EnrichedTilling}.
  */
 public final class Fertilizer {
-    /** Bone meal on a block: green sparkle particles plus the use sound, client-side. */
-    private static final int LEVEL_EVENT_BONE_MEAL = 1505;
-
     private Fertilizer() {
     }
 
@@ -68,7 +65,7 @@ public final class Fertilizer {
             return false; // already full: no effect, item not consumed
         }
         SoilStores.update(level, soilPos, true, current2 -> current2.withFertilizerRemaining(dose));
-        level.levelEvent(LEVEL_EVENT_BONE_MEAL, soilPos, 15);
+        level.levelEvent(LevelEvents.BONE_MEAL, soilPos, 15);
         if (player != null) {
             player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
         }

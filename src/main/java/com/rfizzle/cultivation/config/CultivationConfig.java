@@ -183,7 +183,7 @@ public class CultivationConfig {
      * Serializes this config to the JSON the server→client sync ships. The whole
      * POJO rides across so a new field reaches clients without a bespoke codec;
      * the client only ever <em>reads</em> the server-authoritative keys back
-     * (client-only presentation keys stay local — see {@code ClientCultivationConfig}).
+     * (client-only presentation keys stay local — see {@link SyncedConfig}).
      */
     public String toSyncJson() {
         return GSON.toJson(this);

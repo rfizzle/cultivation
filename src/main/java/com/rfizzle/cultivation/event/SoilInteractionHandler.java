@@ -3,6 +3,7 @@ package com.rfizzle.cultivation.event;
 import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.soil.LevelEvents;
 import com.rfizzle.cultivation.soil.SoilMath;
 import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -38,9 +39,6 @@ import net.minecraft.world.phys.BlockHitResult;
  * </ul>
  */
 public final class SoilInteractionHandler implements UseBlockCallback {
-    /** Bone meal on a block: green sparkle particles plus the use sound, client-side. */
-    private static final int LEVEL_EVENT_BONE_MEAL = 1505;
-
     private SoilInteractionHandler() {
     }
 
@@ -83,7 +81,7 @@ public final class SoilInteractionHandler implements UseBlockCallback {
         }
         SoilStores.update(level, pos, true,
                 current -> current.withFertility(current.fertility() + (float) config.boneMealFertilityRestore));
-        level.levelEvent(LEVEL_EVENT_BONE_MEAL, pos, 15);
+        level.levelEvent(LevelEvents.BONE_MEAL, pos, 15);
         player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
         if (!player.getAbilities().instabuild) {
             stack.shrink(1);

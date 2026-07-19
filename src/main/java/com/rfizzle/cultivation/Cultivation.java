@@ -26,7 +26,9 @@ public class Cultivation implements ModInitializer {
 
     @Override
     public void onInitialize() {
-        // Materializes config/cultivation.json with defaults on first launch.
+        // Materializes config/cultivation.json with defaults on first launch, and warms
+        // the instance both sides read: SyncedConfig#effective falls back here on the
+        // item-use and tooltip paths, which must not take a disk load.
         CultivationConfig.get();
         CultivationItems.register();
         // Bowl foods stack to a real shelf (SPEC §4). Part of the meal-buff feature, so it

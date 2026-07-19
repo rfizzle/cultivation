@@ -1,5 +1,6 @@
 package com.rfizzle.cultivation.item;
 
+import com.rfizzle.cultivation.config.SyncedConfig;
 import com.rfizzle.cultivation.criteria.CultivationCriteria;
 import com.rfizzle.cultivation.soil.Fertilizer;
 import com.rfizzle.cultivation.soil.SupportedCrops;
@@ -35,7 +36,13 @@ public class FertilizerItem extends Item {
             return InteractionResult.PASS; // not usable on non-farmland
         }
         if (!(level instanceof ServerLevel serverLevel)) {
-            return InteractionResult.sidedSuccess(true); // client predicts the swing
+            // Predict the swing only for a decision the client can actually know: the
+            // feature toggle, read from the server's synced config. An already-full
+            // dose stays optimistic — it lives in a server-only chunk attachment, and
+            // vanilla bone meal mispredicts the same way.
+            return SyncedConfig.effective().enableFertilizer
+                    ? InteractionResult.sidedSuccess(true)
+                    : InteractionResult.PASS;
         }
         if (!Fertilizer.applyDose(serverLevel, soilPos, context.getPlayer())) {
             return InteractionResult.PASS; // disabled or already full: no consume

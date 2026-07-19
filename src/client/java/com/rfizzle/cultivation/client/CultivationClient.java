@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.client;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.config.SyncedConfig;
 import com.rfizzle.cultivation.network.ConfigSyncS2CPayload;
 import com.rfizzle.cultivation.network.DietSyncS2CPayload;
 import com.rfizzle.cultivation.network.SoilBandDeltaS2CPayload;
@@ -17,7 +18,7 @@ public class CultivationClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(ConfigSyncS2CPayload.TYPE,
-                (payload, context) -> context.client().execute(() -> ClientCultivationConfig.accept(payload.config())));
+                (payload, context) -> context.client().execute(() -> SyncedConfig.accept(payload.config())));
         ClientPlayNetworking.registerGlobalReceiver(DietSyncS2CPayload.TYPE,
                 (payload, context) -> context.client().execute(() -> ClientDietData.accept(payload)));
         ClientPlayNetworking.registerGlobalReceiver(SoilBandsS2CPayload.TYPE,
@@ -38,7 +39,7 @@ public class CultivationClient implements ClientModInitializer {
                 ClientSoilOverlayData.removeChunk(chunk.getPos().toLong()));
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-            ClientCultivationConfig.clear();
+            SyncedConfig.clear();
             ClientDietData.clear();
             ClientSoilOverlayData.clear();
         });
