@@ -4,6 +4,7 @@ import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.item.CultivationItems;
+import com.rfizzle.cultivation.soil.FallowGateThrottle;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -84,6 +85,37 @@ public class VillagerStewardshipGameTest implements FabricGameTest {
         Villager farmer = spawnFarmer(helper, new ItemStack(Items.WHEAT_SEEDS, 4));
         driveWork(helper, farmer);
 
+        helper.assertBlockPresent(Blocks.WHEAT, CROP);
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void fallowGateThrottlesRecheckButHonoursRecovery(GameTestHelper helper) {
+        // The whole engagement has to fit inside the behavior's default 60-tick
+        // duration, or the last tick below stops the task instead of replanting.
+        helper.assertTrue(FallowGateThrottle.INTERVAL_TICKS < 55,
+                "the recheck interval must stay well inside the behavior's 60-tick duration");
+        placeTrackedFarmland(helper, FARM, 20.0F, Blocks.WHEAT); // Tired band, below the 25 default
+        Villager farmer = spawnFarmer(helper, new ItemStack(Items.WHEAT_SEEDS, 4));
+
+        // One behavior instance across the whole engagement, so the gate's throttle
+        // persists between ticks the way it does for a real parked farmer.
+        ServerLevel level = helper.getLevel();
+        HarvestFarmland behavior = new HarvestFarmland();
+        long start = level.getGameTime();
+        helper.assertTrue(behavior.tryStart(level, farmer, start), "the farmer work task must engage the field");
+
+        behavior.tickOrStop(level, farmer, start + 1); // denies, and arms the throttle
+        helper.assertTrue(helper.getBlockState(CROP).isAir(), "a fallow block below the threshold must stay unplanted");
+
+        // Recovery lifts the plot past the replant threshold while the farmer stands on it.
+        SoilStores.update(level, helper.absolutePos(FARM), false, data -> data.withFertility(60.0F));
+
+        behavior.tickOrStop(level, farmer, start + 5);
+        helper.assertTrue(helper.getBlockState(CROP).isAir(),
+                "the gate must reuse its verdict inside the throttle interval rather than re-read the soil");
+
+        behavior.tickOrStop(level, farmer, start + 1 + FallowGateThrottle.INTERVAL_TICKS);
         helper.assertBlockPresent(Blocks.WHEAT, CROP);
         helper.succeed();
     }
