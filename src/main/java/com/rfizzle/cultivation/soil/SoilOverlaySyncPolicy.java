@@ -45,8 +45,13 @@ public final class SoilOverlaySyncPolicy {
         NONE,
         /** Drop the cache; nothing should draw, so nothing needs re-fetching. */
         CLEAR,
-        /** Drop the cache and re-pull every loaded chunk under the new rules. */
-        CLEAR_AND_REFETCH
+        /**
+         * Re-pull every loaded chunk under the new rules, letting each response
+         * replace its chunk in place. Deliberately not a clear-then-refill: the
+         * sweep is paced over several ticks, and dropping the cache up front would
+         * blank ground the player is looking at until its chunk's turn came round.
+         */
+        REFETCH
     }
 
     /**
@@ -62,6 +67,35 @@ public final class SoilOverlaySyncPolicy {
         if (before.equals(after)) {
             return Action.NONE;
         }
-        return after.displaying() ? Action.CLEAR_AND_REFETCH : Action.CLEAR;
+        return after.displaying() ? Action.REFETCH : Action.CLEAR;
+    }
+
+    /**
+     * Visits every chunk within {@code radius} of a centre, nearest first — ring by
+     * ring outward in Chebyshev distance.
+     *
+     * <p>Order is the point. A refetch is paced over many ticks, and the renderer
+     * culls to {@code soilOverlayRenderDistance} (blocks, not chunks), so only the
+     * handful of chunks around the player can visibly change. A raster walk from a
+     * corner spends its first several seconds on chunks whose responses the renderer
+     * discards; walking outward puts what the player is looking at in the first tick
+     * of the sweep.
+     */
+    public static void forEachChunkOutward(int centerX, int centerZ, int radius, ChunkVisitor visitor) {
+        for (int ring = 0; ring <= radius; ring++) {
+            for (int x = centerX - ring; x <= centerX + ring; x++) {
+                for (int z = centerZ - ring; z <= centerZ + ring; z++) {
+                    // Emit only this ring's perimeter; the interior went out on earlier rings.
+                    if (Math.max(Math.abs(x - centerX), Math.abs(z - centerZ)) == ring) {
+                        visitor.accept(x, z);
+                    }
+                }
+            }
+        }
+    }
+
+    @FunctionalInterface
+    public interface ChunkVisitor {
+        void accept(int chunkX, int chunkZ);
     }
 }

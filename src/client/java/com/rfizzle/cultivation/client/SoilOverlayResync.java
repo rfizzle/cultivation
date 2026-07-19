@@ -13,7 +13,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 /**
  * Keeps the client's soil overlay cache honest when the rules behind it move
@@ -40,12 +42,16 @@ import net.minecraft.world.level.ChunkPos;
  */
 public final class SoilOverlayResync {
     /**
-     * Just under the server's 256/s bucket refill (12 × 20 ticks = 240/s), so a
-     * resync of any size completes without a single request being rate-limited.
+     * Comfortably under the server's 256/s bucket refill (8 × 20 ticks = 160/s).
+     * The headroom is deliberate: {@code ClientChunkEvents.CHUNK_LOAD} sends its own
+     * unpaced request per chunk, so a sweep that ran right up to the refill rate
+     * would start losing requests to the rate limiter whenever chunks are streaming
+     * in at the same time — leaving exactly the blank patches this class prevents.
      */
-    private static final int REQUESTS_PER_TICK = 12;
+    private static final int REQUESTS_PER_TICK = 8;
 
     private static OverlayRules lastRules;
+    private static ResourceKey<Level> lastDimension;
     private static final LongArrayFIFOQueue PENDING = new LongArrayFIFOQueue();
 
     private SoilOverlayResync() {
@@ -58,6 +64,7 @@ public final class SoilOverlayResync {
 
     private static void reset() {
         lastRules = null;
+        lastDimension = null;
         PENDING.clear();
     }
 
@@ -74,6 +81,13 @@ public final class SoilOverlayResync {
             return;
         }
         try {
+            // A portal swaps the ClientLevel without disconnecting, so a sweep in
+            // flight is left holding the old dimension's chunk coordinates.
+            ResourceKey<Level> dimension = level.dimension();
+            if (!dimension.equals(lastDimension)) {
+                lastDimension = dimension;
+                PENDING.clear();
+            }
             OverlayRules current = new OverlayRules(
                     CultivationConfig.get().showSoilOverlays,
                     serverRules.enableSoilFertility,
@@ -99,26 +113,31 @@ public final class SoilOverlayResync {
         }
         // Drop any in-flight sweep first — it was queued under the old rules.
         PENDING.clear();
-        ClientSoilOverlayData.clear();
-        if (action == Action.CLEAR_AND_REFETCH) {
-            enqueueLoadedChunks(client, level);
+        if (action == Action.CLEAR) {
+            ClientSoilOverlayData.clear();
+            return;
         }
+        // REFETCH deliberately leaves the cache standing: acceptChunk replaces a
+        // chunk wholesale (and drops it on an empty response), so each response
+        // corrects its own chunk as it lands. Clearing up front would blank the
+        // whole field for the length of a paced sweep instead.
+        enqueueLoadedChunks(client, level);
     }
 
     /**
-     * Queues every currently loaded chunk around the player. Bounded by the render
-     * distance, and naturally capped below it by whatever the server actually sent.
+     * Queues every currently loaded chunk around the player, nearest first. Bounded
+     * by the render distance, and naturally capped below it by whatever the server
+     * actually sent.
      */
     private static void enqueueLoadedChunks(Minecraft client, ClientLevel level) {
         ChunkPos center = client.player.chunkPosition();
-        int radius = client.options.getEffectiveRenderDistance();
-        for (int x = center.x - radius; x <= center.x + radius; x++) {
-            for (int z = center.z - radius; z <= center.z + radius; z++) {
-                if (level.getChunkSource().hasChunk(x, z)) {
-                    PENDING.enqueue(ChunkPos.asLong(x, z));
-                }
-            }
-        }
+        SoilOverlaySyncPolicy.forEachChunkOutward(
+                center.x, center.z, client.options.getEffectiveRenderDistance(),
+                (x, z) -> {
+                    if (level.getChunkSource().hasChunk(x, z)) {
+                        PENDING.enqueue(ChunkPos.asLong(x, z));
+                    }
+                });
     }
 
     private static void drain(ClientLevel level) {
