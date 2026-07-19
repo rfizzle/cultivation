@@ -46,5 +46,6 @@ public class CultivationClient implements ClientModInitializer {
         ItemTooltipCallback.EVENT.register(DietTooltip::append);
 
         SoilOverlayRenderer.register();
+        SoilOverlayResync.register();
     }
 }

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.rfizzle.cultivation.attachment.SoilStore;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.config.SyncedConfig;
 import com.rfizzle.cultivation.soil.SoilBand;
 import com.rfizzle.cultivation.soil.SoilOverlayFlags;
 import com.rfizzle.cultivation.soil.SoilOverlayMath;
@@ -41,6 +42,12 @@ public final class SoilOverlayRenderer {
         CultivationConfig config = CultivationConfig.get();
         ClientLevel level = context.world();
         if (!config.showSoilOverlays || ClientSoilOverlayData.isEmpty() || level == null) {
+            return;
+        }
+        // SPEC §1: soil disabled means no overlays, including whatever the cache still
+        // holds from before the server disabled it. SoilOverlayResync clears on that
+        // transition; this gate makes the rule hold on the frame it lands, not the tick after.
+        if (!SyncedConfig.effective().enableSoilFertility) {
             return;
         }
         if (!(context.consumers() instanceof MultiBufferSource.BufferSource bufferSource)) {
