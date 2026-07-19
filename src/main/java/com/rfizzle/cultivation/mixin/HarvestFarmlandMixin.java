@@ -3,6 +3,7 @@ package com.rfizzle.cultivation.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.soil.FallowGateThrottle;
 import com.rfizzle.cultivation.soil.VillagerStewardship;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -12,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -38,10 +40,30 @@ abstract class HarvestFarmlandMixin {
     @Nullable
     private BlockPos aboveFarmlandPos;
 
+    /**
+     * The fallow gate's recheck throttle, one per behavior and so one per farmer.
+     * Created on first use rather than initialized inline: Mixin does not merge
+     * mixin constructors into the target, so a null default is the only field
+     * initializer that is guaranteed to apply.
+     */
+    @Unique
+    @Nullable
+    private FallowGateThrottle cultivation$fallowThrottle;
+
+    /**
+     * Denies the replant branch on fallow-ineligible soil, reusing the previous
+     * verdict for up to {@link FallowGateThrottle#INTERVAL_TICKS} ticks. A denied
+     * replant leaves the work block air, so the vanilla task never re-arms its own
+     * throttle and retries the plant every tick; without this the gate would read
+     * soil state 20 times a second for a farmer parked on resting ground.
+     */
     @ModifyExpressionValue(
             method = "tick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/npc/Villager;hasFarmSeeds()Z"))
-    private boolean cultivation$fallowGate(boolean hasSeeds, @Local(argsOnly = true) ServerLevel level) {
+    private boolean cultivation$fallowGate(
+            boolean hasSeeds,
+            @Local(argsOnly = true) ServerLevel level,
+            @Local(argsOnly = true) long gameTime) {
         if (!hasSeeds || aboveFarmlandPos == null) {
             return hasSeeds;
         }
@@ -49,7 +71,16 @@ abstract class HarvestFarmlandMixin {
         if (!config.enableVillagerStewardship) {
             return hasSeeds;
         }
-        return VillagerStewardship.canReplant(level, aboveFarmlandPos.below(), config);
+        if (cultivation$fallowThrottle == null) {
+            cultivation$fallowThrottle = new FallowGateThrottle();
+        }
+        long packedPos = aboveFarmlandPos.asLong();
+        if (!cultivation$fallowThrottle.needsRecheck(packedPos, gameTime)) {
+            return cultivation$fallowThrottle.cachedVerdict();
+        }
+        boolean verdict = VillagerStewardship.canReplant(level, aboveFarmlandPos.below(), config);
+        cultivation$fallowThrottle.record(packedPos, gameTime, verdict);
+        return verdict;
     }
 
     @ModifyExpressionValue(
