@@ -18,7 +18,7 @@
             ["<code>/cultivation field</code>", "everyone", "Surveys the 9×9 plot around the soil you're looking at: average fertility and band, counts of exhausted, enriched, and fertilized blocks, and the crops in rotation"],
             ["<code>/cultivation diet</code>", "everyone", "Lists your current fatigue entries (<code>Bread −30%</code>) and your last three foods"],
             ["<code>/cultivation diet reset [player]</code>", "op (level 2)", "Clears dietary fatigue for the target (default: yourself)"],
-            ["<code>/cultivation reload</code>", "op (level 2)", "Reloads <code>config/cultivation.json</code> from disk"]
+            ["<code>/cultivation reload</code>", "op (level 2)", "Reloads <code>config/cultivation.json</code> from disk and pushes the new rules to connected players, refreshing their soil overlays where the new rules change them"]
           ]
         }
       ]
