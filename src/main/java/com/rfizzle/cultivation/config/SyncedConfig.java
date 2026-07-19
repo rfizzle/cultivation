@@ -17,6 +17,12 @@ import org.jetbrains.annotations.Nullable;
  * both sides: {@code FertilizerItem#useOn} predicts its client-side swing from
  * here, and a client-only holder would be unreachable from it.
  *
+ * <p>The standalone fallback expects {@link CultivationConfig#get()} to be
+ * already warm — {@code Cultivation#onInitialize} loads it on both physical
+ * sides, so a fallback read is a volatile read rather than a disk load. Callers
+ * here sit on latency-sensitive paths (item use, tooltip build), so that
+ * warm-up must stay ahead of them.
+ *
  * <p>Server-side gameplay reads {@link CultivationConfig#get()} directly — the
  * reference here is only ever written by the client's payload receiver, so on a
  * dedicated server it stays null and {@code effective()} resolves to the
