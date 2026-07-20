@@ -32,7 +32,8 @@
             "com.rfizzle.cultivation.gametest.SoilOverlaySyncGameTest",
             "com.rfizzle.cultivation.gametest.CultivationCommandGameTest",
             "com.rfizzle.cultivation.gametest.AdvancementGameTest",
-            "com.rfizzle.cultivation.gametest.ProbeTooltipGameTest"
+            "com.rfizzle.cultivation.gametest.ProbeTooltipGameTest",
+            "com.rfizzle.cultivation.gametest.AppleskinCompatGameTest"
         ]
     },
     "depends": {

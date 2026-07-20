@@ -1,10 +1,10 @@
 package com.rfizzle.cultivation.client;
 
 import com.rfizzle.cultivation.attachment.DietData;
+import com.rfizzle.cultivation.compat.appleskin.AppleskinCompat;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.config.SyncedConfig;
 import com.rfizzle.cultivation.diet.NutritionTooltip;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -27,18 +27,14 @@ import java.util.List;
  * showFatigueTooltips}.
  */
 public final class DietTooltip {
-    // AppleSkin already draws hunger/saturation shanks under food tooltips; when it is
-    // present we defer the nutrition line to it rather than double-print. Resolved once —
-    // the loaded mod set is fixed for the session. The fatigue line has no AppleSkin
-    // counterpart, so it is never suppressed.
-    private static final boolean APPLESKIN_PRESENT = FabricLoader.getInstance().isModLoaded("appleskin");
-
     private DietTooltip() {
     }
 
     public static void append(ItemStack stack, Item.TooltipContext context, TooltipFlag flag, List<Component> lines) {
         CultivationConfig config = CultivationConfig.get();
-        boolean wantNutrition = config.showNutritionTooltips && !APPLESKIN_PRESENT;
+        // The nutrition line defers to AppleSkin when it is installed; the fatigue line has
+        // no AppleSkin counterpart, so it is never suppressed.
+        boolean wantNutrition = AppleskinCompat.showsNutritionLine(config.showNutritionTooltips);
         boolean wantFatigue = config.showFatigueTooltips;
         if (!wantNutrition && !wantFatigue) {
             return;
