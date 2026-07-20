@@ -8,7 +8,9 @@ import com.rfizzle.cultivation.command.CultivationCommand;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.attachment.SoilStores;
+import com.rfizzle.cultivation.config.CultivationConfig;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,6 +24,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -199,6 +204,43 @@ public class CultivationCommandGameTest implements FabricGameTest {
         CommandSourceStack op = server.createCommandSourceStack().withPermission(2);
         int result = server.getCommands().getDispatcher().execute("cultivation reload", op);
         helper.assertTrue(result > 0, "reload succeeds for an operator source");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void reloadReportsFailureWhenTheConfigFileIsUnreadable(GameTestHelper helper) throws CommandSyntaxException {
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack op = server.createCommandSourceStack().withPermission(2);
+        Path path = FabricLoader.getInstance().getConfigDir().resolve("cultivation.json");
+
+        byte[] original = null;
+        try {
+            if (Files.exists(path)) {
+                original = Files.readAllBytes(path);
+            }
+            Files.writeString(path, "{ this is not json");
+
+            int result = server.getCommands().getDispatcher().execute("cultivation reload", op);
+
+            helper.assertTrue(result == 0, "reload reports failure when the config file cannot be read");
+            helper.assertTrue(CultivationConfig.get().harvestDrain == new CultivationConfig().harvestDrain,
+                    "a rejected reload still leaves the server running on defaults");
+            helper.assertTrue("{ this is not json".equals(Files.readString(path)),
+                    "a rejected reload must never rewrite the operator's file");
+        } catch (IOException e) {
+            throw new AssertionError("could not stage the malformed config", e);
+        } finally {
+            try {
+                if (original != null) {
+                    Files.write(path, original);
+                } else {
+                    Files.deleteIfExists(path);
+                }
+            } catch (IOException ignored) {
+                // Best effort — the run directory is disposable.
+            }
+            CultivationConfig.reload();
+        }
         helper.succeed();
     }
 
