@@ -43,6 +43,7 @@ class CommandResourcesTest {
             "command.cultivation.diet.reset",
             "command.cultivation.reload",
             "command.cultivation.reload_failed",
+            "command.cultivation.reload_rejected_reason",
     };
 
     private static JsonObject lang() {

@@ -86,8 +86,10 @@ class CultivationConfigTest {
     void firstLaunchWritesEveryKeyWithDefaults(@TempDir Path dir) throws IOException {
         Path path = dir.resolve("cultivation.json");
 
-        CultivationConfig config = CultivationConfig.load(path);
+        CultivationConfig.LoadResult result = CultivationConfig.loadChecked(path);
+        CultivationConfig config = result.config();
 
+        assertFalse(result.fileRejected(), "a first launch is not a rejected file");
         assertTrue(Files.exists(path), "first launch must write the config file");
         JsonObject written = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
         assertEquals(1, written.get("configVersion").getAsInt());
@@ -390,8 +392,11 @@ class CultivationConfigTest {
                 }
                 """);
 
-        CultivationConfig config = CultivationConfig.load(path);
+        CultivationConfig.LoadResult result = CultivationConfig.loadChecked(path);
+        CultivationConfig config = result.config();
 
+        assertFalse(result.fileRejected(),
+                "a single healed field must not report the whole file as rejected");
         assertEquals(new CultivationConfig().polycultureGrowthMultiplier, config.polycultureGrowthMultiplier);
         assertEquals(5.0, config.harvestDrain, "healthy keys in the same file must load normally");
     }
@@ -437,8 +442,10 @@ class CultivationConfigTest {
         String corrupt = "{ this is not json";
         Files.writeString(path, corrupt);
 
-        CultivationConfig config = CultivationConfig.load(path);
+        CultivationConfig.LoadResult result = CultivationConfig.loadChecked(path);
+        CultivationConfig config = result.config();
 
+        assertTrue(result.fileRejected(), "a corrupt file must be reported as rejected");
         CultivationConfig defaults = new CultivationConfig();
         assertEquals(defaults.harvestDrain, config.harvestDrain);
         assertEquals(defaults.enableSoilFertility, config.enableSoilFertility);
@@ -451,8 +458,10 @@ class CultivationConfigTest {
         String nonObject = "[1, 2, 3]";
         Files.writeString(path, nonObject);
 
-        CultivationConfig config = CultivationConfig.load(path);
+        CultivationConfig.LoadResult result = CultivationConfig.loadChecked(path);
+        CultivationConfig config = result.config();
 
+        assertTrue(result.fileRejected(), "a non-object file must be reported as rejected");
         assertEquals(new CultivationConfig().fertilizerDoseHarvests, config.fertilizerDoseHarvests);
         assertEquals(nonObject, Files.readString(path), "a non-object file must never be modified on disk");
     }
@@ -464,8 +473,10 @@ class CultivationConfigTest {
                 + "x".repeat((int) CultivationConfig.MAX_FILE_BYTES) + "\"}";
         Files.writeString(path, oversized);
 
-        CultivationConfig config = CultivationConfig.load(path);
+        CultivationConfig.LoadResult result = CultivationConfig.loadChecked(path);
+        CultivationConfig config = result.config();
 
+        assertTrue(result.fileRejected(), "an oversized file must be reported as rejected");
         assertEquals(new CultivationConfig().harvestDrain, config.harvestDrain,
                 "an oversized file must load as full defaults, not be parsed");
         assertEquals(oversized, Files.readString(path), "an oversized file must never be modified on disk");
@@ -484,8 +495,11 @@ class CultivationConfigTest {
                 }
                 """);
 
-        CultivationConfig config = CultivationConfig.load(path);
+        CultivationConfig.LoadResult result = CultivationConfig.loadChecked(path);
+        CultivationConfig config = result.config();
 
+        assertFalse(result.fileRejected(),
+                "clamping out-of-range fields must not report the file as rejected");
         assertEquals(100.0, config.harvestDrain);
         assertEquals(0.0, config.fatigueFloor);
         assertEquals(80.0, config.villagerReplantThreshold, "replant threshold must load clamped up to the fallow threshold");
@@ -523,8 +537,10 @@ class CultivationConfigTest {
                 }
                 """);
 
-        CultivationConfig config = CultivationConfig.load(path);
+        CultivationConfig.LoadResult result = CultivationConfig.loadChecked(path);
+        CultivationConfig config = result.config();
 
+        assertFalse(result.fileRejected(), "a migrated file must not report as rejected");
         assertEquals(5.0, config.harvestDrain);
         JsonObject written = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
         assertEquals(1, written.get("configVersion").getAsInt(), "the migrated schema must be persisted back");

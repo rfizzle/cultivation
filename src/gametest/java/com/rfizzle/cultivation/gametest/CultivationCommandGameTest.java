@@ -8,7 +8,9 @@ import com.rfizzle.cultivation.command.CultivationCommand;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.attachment.SoilStores;
+import com.rfizzle.cultivation.config.CultivationConfig;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -22,6 +24,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +37,13 @@ import java.util.Map;
  * prove the tree is wired, gated, and routes writes through the stores.
  */
 public class CultivationCommandGameTest implements FabricGameTest {
+    /**
+     * Reload swaps the process-wide {@link CultivationConfig} singleton, and tests in one batch
+     * tick simultaneously — a swap mid-flight would hand a default-batch test that flipped a
+     * config field in place (e.g. {@code ScytheSweepGameTest}) a fresh instance where its flip
+     * never happened. Batches run sequentially, so the reload tests get their own.
+     */
+    private static final String CONFIG_BATCH = "cultivationCommandConfig";
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void treeGatesEachNodeByPermission(GameTestHelper helper) {
@@ -193,12 +205,52 @@ public class CultivationCommandGameTest implements FabricGameTest {
         helper.succeed();
     }
 
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = CONFIG_BATCH)
     public void reloadSucceedsForOps(GameTestHelper helper) throws CommandSyntaxException {
         MinecraftServer server = helper.getLevel().getServer();
         CommandSourceStack op = server.createCommandSourceStack().withPermission(2);
         int result = server.getCommands().getDispatcher().execute("cultivation reload", op);
         helper.assertTrue(result > 0, "reload succeeds for an operator source");
+        helper.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = CONFIG_BATCH)
+    public void reloadReportsFailureWhenTheConfigFileIsUnreadable(GameTestHelper helper) throws CommandSyntaxException {
+        MinecraftServer server = helper.getLevel().getServer();
+        CommandSourceStack op = server.createCommandSourceStack().withPermission(2);
+        Path path = FabricLoader.getInstance().getConfigDir().resolve("cultivation.json");
+
+        byte[] original = null;
+        try {
+            if (Files.exists(path)) {
+                original = Files.readAllBytes(path);
+            }
+            Files.writeString(path, "{ this is not json");
+
+            int result = server.getCommands().getDispatcher().execute("cultivation reload", op);
+
+            helper.assertTrue(result == 0, "reload reports failure when the config file cannot be read");
+            helper.assertTrue(CultivationConfig.get().harvestDrain == new CultivationConfig().harvestDrain,
+                    "a rejected reload still leaves the server running on defaults");
+            helper.assertTrue("{ this is not json".equals(Files.readString(path)),
+                    "a rejected reload must never rewrite the operator's file");
+        } catch (IOException e) {
+            throw new AssertionError("could not stage the malformed config", e);
+        } finally {
+            try {
+                if (original != null) {
+                    Files.write(path, original);
+                } else {
+                    Files.deleteIfExists(path);
+                }
+            } catch (IOException e) {
+                // The restore is the only thing keeping the corrupt file out of the rest of the
+                // run, so a failure here invalidates every later test rather than just this one.
+                throw new AssertionError("could not restore the config file after the test", e);
+            } finally {
+                CultivationConfig.reload();
+            }
+        }
         helper.succeed();
     }
 

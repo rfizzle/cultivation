@@ -616,7 +616,7 @@ Village fields consequently settle into rotating patchworks with resting strips 
 | `/cultivation field` | 0 | Surveys the 9×9 plot around the looked-at farmland block (≤ 10 blocks): average fertility % and band, counts of exhausted, enriched, and fertilized blocks, and the distinct crops in rotation — e.g. `Field 9×9: 47 farmland, avg fertility 58% (Fair)` / `12 exhausted, 8 enriched, 5 fertilized` / `Crops: Wheat, Carrots, Potatoes`. Untracked columns count as full fertility. Error if not looking at farmland. |
 | `/cultivation diet` | 0 | Lists the caller's fatigue entries (`Bread −30%`) and last three foods. |
 | `/cultivation diet reset [player]` | 2 | Clears DietData for the target (default: caller). |
-| `/cultivation reload` | 2 | Reloads the JSON config from disk. |
+| `/cultivation reload` | 2 | Reloads the JSON config from disk. Reports failure when the file could not be read at all (unparseable, not a JSON object, or over the size limit) — the server falls back to defaults and leaves the file untouched, and the operator is told their edits did not take. A file that loads but has individual values clamped into range reports success. |
 
 All feedback is localized (`command.cultivation.*`). Diagnostic density is favored over prose in op-only output.
 

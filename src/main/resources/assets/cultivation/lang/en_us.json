@@ -32,6 +32,7 @@
   "command.cultivation.diet.reset": "Cleared dietary fatigue for %s.",
   "command.cultivation.reload": "Reloaded Cultivation config.",
   "command.cultivation.reload_failed": "Config reload failed: %s",
+  "command.cultivation.reload_rejected_reason": "config/cultivation.json could not be read; running on defaults",
   "tooltip.cultivation.soil.fertility": "Fertility: %1$s%% (%2$s)",
   "tooltip.cultivation.soil.band.rich": "Rich",
   "tooltip.cultivation.soil.band.fair": "Fair",

@@ -346,8 +346,9 @@ public final class CultivationCommand {
 
     private static int runReload(CommandContext<CommandSourceStack> ctx) {
         CommandSourceStack src = ctx.getSource();
+        boolean loadedCleanly;
         try {
-            CultivationConfig.reload();
+            loadedCleanly = CultivationConfig.reload();
         } catch (Exception e) {
             Cultivation.LOGGER.error("Config reload failed via command", e);
             src.sendFailure(Component.translatable(
@@ -355,8 +356,17 @@ public final class CultivationCommand {
             return 0;
         }
         // Push the freshly loaded rules to every connected client so their config-derived
-        // surfaces (diet tooltips) reflect the change without a rejoin.
+        // surfaces (diet tooltips) reflect the change without a rejoin. This runs even when
+        // the file was rejected: the active config really did change — to defaults — and
+        // clients holding the previous rules would otherwise be out of step with the server.
         ConfigNetworking.syncAll(src.getServer());
+        if (!loadedCleanly) {
+            // The file was unreadable and every setting in it was discarded. The server log
+            // carries the parse detail; the operator gets told their edits did not take.
+            src.sendFailure(Component.translatable("command.cultivation.reload_failed",
+                    Component.translatable("command.cultivation.reload_rejected_reason")));
+            return 0;
+        }
         src.sendSuccess(() -> Component.translatable("command.cultivation.reload"), true);
         return Command.SINGLE_SUCCESS;
     }
