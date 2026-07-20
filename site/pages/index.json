@@ -14,9 +14,9 @@
   },
   "sections": [
     {
-      "title": "In Development",
+      "title": "What Cultivation Does",
       "band": true,
-      "lede": "Cultivation is fully designed and specced — implementation is underway. Nothing is released yet; everything below describes the design.",
+      "lede": "Four systems carry the mod. No build is published yet — the first release will be cut from <code>master</code>.",
       "blocks": [
         {
           "type": "cards",
@@ -48,7 +48,7 @@
         },
         {
           "type": "note",
-          "html": "Also in the design: a 20% polyculture growth bonus for alternating-row fields, and villager farmers that rotate crops and rest tired ground. <a href='/features.html' class='text-accent hover:text-accent2 underline'>Full feature list →</a>",
+          "html": "Also in the mod: a 20% polyculture growth bonus for alternating-row fields, and villager farmers that rotate crops and rest tired ground. <a href='/features.html' class='text-accent hover:text-accent2 underline'>Full feature list →</a>",
           "center": true
         }
       ]
