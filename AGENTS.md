@@ -99,13 +99,15 @@ Fabric APIs must use gametests instead.
 
 ## Compat integrations
 
-The mod has optional integrations (all `modCompileOnly` — not bundled —
-deferred to a later phase):
+The mod has optional integrations (`modCompileOnly` — not bundled — deferred to a
+later phase):
 
 - **Mod Menu** — config screen entry
 - **Cloth Config** — settings GUI builder
 - **Jade / WTHIT** — farmland fertility and crop growth-modifier tooltips
 - **EMI / REI / JEI** — scythe recipes and Fertilizer source info
+- **AppleSkin** — detection only, no compile surface: the nutrition tooltip line
+  defers to AppleSkin's shanks when it is installed
 
 Compat classes live under `com.rfizzle.cultivation.compat.<modid>`. Cultivation
 is provider-side in the suite: it consumes no sibling at runtime; siblings key

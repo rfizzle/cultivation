@@ -724,6 +724,7 @@ Per concord [`API-STANDARD.md`](../../concord/API-STANDARD.md): the only stable 
 - **ModMenu + Cloth Config** — config screen.
 - **Jade / WTHIT** — farmland tooltip: fertility % + band, enriched %, Fertilizer dose remaining, last crop; crop tooltip: polyculture bonus active, sniffer premium active, bees nearby, and the combined growth modifier.
 - **EMI / REI / JEI** — scythe recipes (shaped + smithing) and a Fertilizer info entry naming the composter as its source.
+- **AppleSkin** — detection only, no compile surface: when AppleSkin is installed the nutrition line defers to its hunger/saturation shanks rather than double-printing them. The fatigue line has no counterpart and always shows.
 
 ### Sibling & Mod Compatibility
 
