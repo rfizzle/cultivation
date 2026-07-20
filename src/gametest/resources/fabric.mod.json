@@ -1,0 +1,41 @@
+{
+    "schemaVersion": 1,
+    "id": "cultivation-gametest",
+    "version": "1.0.0",
+    "name": "Cultivation Gametests",
+    "description": "Fabric gametests for Cultivation. Present only on the gametest run classpath — never bundled in the shipped jar.",
+    "authors": ["rfizzle"],
+    "license": "MIT",
+    "environment": "*",
+    "entrypoints": {
+        "fabric-gametest": [
+            "com.rfizzle.cultivation.gametest.SmokeGameTest",
+            "com.rfizzle.cultivation.gametest.MockPlayersGameTest",
+            "com.rfizzle.cultivation.gametest.SoilDrainGameTest",
+            "com.rfizzle.cultivation.gametest.SoilRecoveryGameTest",
+            "com.rfizzle.cultivation.gametest.SoilGrowthGameTest",
+            "com.rfizzle.cultivation.gametest.SecondWaveSoilGameTest",
+            "com.rfizzle.cultivation.gametest.PolycultureGameTest",
+            "com.rfizzle.cultivation.gametest.BeePollinationGameTest",
+            "com.rfizzle.cultivation.gametest.SoilDisabledGameTest",
+            "com.rfizzle.cultivation.gametest.HarvestCallbackGameTest",
+            "com.rfizzle.cultivation.gametest.EnrichedTillingGameTest",
+            "com.rfizzle.cultivation.gametest.TrampleResistanceGameTest",
+            "com.rfizzle.cultivation.gametest.FertilizerGameTest",
+            "com.rfizzle.cultivation.gametest.DietFatigueGameTest",
+            "com.rfizzle.cultivation.gametest.MealBuffGameTest",
+            "com.rfizzle.cultivation.gametest.BowlFoodStackingGameTest",
+            "com.rfizzle.cultivation.gametest.ScytheSweepGameTest",
+            "com.rfizzle.cultivation.gametest.RightClickHarvestGameTest",
+            "com.rfizzle.cultivation.gametest.BroadcastSowingGameTest",
+            "com.rfizzle.cultivation.gametest.VillagerStewardshipGameTest",
+            "com.rfizzle.cultivation.gametest.SoilOverlaySyncGameTest",
+            "com.rfizzle.cultivation.gametest.CultivationCommandGameTest",
+            "com.rfizzle.cultivation.gametest.AdvancementGameTest",
+            "com.rfizzle.cultivation.gametest.ProbeTooltipGameTest"
+        ]
+    },
+    "depends": {
+        "cultivation": "*"
+    }
+}
