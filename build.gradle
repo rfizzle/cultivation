@@ -247,6 +247,16 @@ configurations.testRuntimeClasspath {
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
+
+    // GametestRegistrationTest reads the gametest source tree and both manifests. The gametest
+    // tree and its manifest are not on the test classpath at all, and the shipped manifest reaches
+    // it only as a processResources output, so Gradle sees no dependency worth relying on.
+    // Declaring them keeps the check from staying UP-TO-DATE exactly when registration has drifted.
+    inputs.files(fileTree('src/gametest/java'),
+                 file('src/gametest/resources/fabric.mod.json'),
+                 file('src/main/resources/fabric.mod.json'))
+            .withPropertyName('gametestRegistration')
+            .withPathSensitivity(PathSensitivity.RELATIVE)
 }
 
 jacocoTestReport {
