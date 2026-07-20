@@ -59,7 +59,9 @@ if (FabricLoader.getInstance().isModLoaded("cultivation")) {
 
 Stable item IDs for datapack integrations: `cultivation:fertilizer`,
 `cultivation:iron_scythe`, `cultivation:diamond_scythe`,
-`cultivation:netherite_scythe`. The scythes carry a `#cultivation:scythes` tag
-alongside `#minecraft:enchantable/durability` and `#minecraft:enchantable/mining`.
+`cultivation:netherite_scythe`, `cultivation:iron_rake`. The scythes carry a
+`#cultivation:scythes` tag alongside `#minecraft:enchantable/durability` and
+`#minecraft:enchantable/mining`; the rake carries `#cultivation:rakes` and
+`#minecraft:enchantable/durability`.
 
 Full reference: [site/pages/developers.json](site/pages/developers.json).
