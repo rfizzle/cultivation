@@ -44,7 +44,7 @@
         {
           "type": "prose",
           "html": [
-            "Cultivation is a provider in every current suite integration — sibling mods reference these stable IDs from their own datapacks: <code>cultivation:fertilizer</code>, <code>cultivation:iron_scythe</code>, <code>cultivation:diamond_scythe</code>, <code>cultivation:netherite_scythe</code>. The scythes join <code>#minecraft:enchantable/durability</code> and <code>#minecraft:enchantable/mining</code> plus a <code>#cultivation:scythes</code> tag, so enchantment mods pick them up with zero code."
+            "Cultivation is a provider in every current suite integration — sibling mods reference these stable IDs from their own datapacks: <code>cultivation:fertilizer</code>, <code>cultivation:iron_scythe</code>, <code>cultivation:diamond_scythe</code>, <code>cultivation:netherite_scythe</code>, <code>cultivation:iron_rake</code>. The scythes join <code>#minecraft:enchantable/durability</code> and <code>#minecraft:enchantable/mining</code> plus a <code>#cultivation:scythes</code> tag, and the rake joins <code>#minecraft:enchantable/durability</code> plus a <code>#cultivation:rakes</code> tag, so enchantment mods pick them up with zero code."
           ]
         }
       ]
