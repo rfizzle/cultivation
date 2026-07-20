@@ -1,9 +1,9 @@
 {
   "nav": "Features",
   "metaTitle": "Features — Cultivation",
-  "metaDescription": "Cultivation's feature set as specced: living soil fertility, the polyculture bonus, dietary fatigue, meal buffs, enriched tilling, Fertilizer, the Scythe, villager field stewardship, and the Husbandry-tab advancements.",
+  "metaDescription": "Cultivation's feature set: living soil fertility, the polyculture bonus, dietary fatigue, meal buffs, enriched tilling, Fertilizer, the Scythe, villager field stewardship, and the Husbandry-tab advancements.",
   "title": "Features",
-  "lede": "The eight headline systems, as specced in <a href='https://github.com/rfizzle/cultivation/blob/master/design/SPEC.md' class='text-accent hover:text-accent2 underline'>design/SPEC.md</a>, plus the advancements that mark your progress through them. Cultivation is in development — these are commitments, not yet a shipped jar.",
+  "lede": "The eight headline systems, specified in full in <a href='https://github.com/rfizzle/cultivation/blob/master/design/SPEC.md' class='text-accent hover:text-accent2 underline'>design/SPEC.md</a>, plus the advancements that mark your progress through them.",
   "width": "5xl",
   "scale": "lg",
   "sections": [

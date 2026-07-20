@@ -13,7 +13,7 @@
           "items": [
             {
               "q": "Is Cultivation released?",
-              "a": "Not yet — it is in development. The design is committed (vision, full behavioral spec, brand), the repo builds, and features are being implemented against the spec. Watch <a href='https://github.com/rfizzle/cultivation/releases' class='text-accent hover:text-accent2 underline'>GitHub Releases</a>."
+              "a": "No published build yet. Every system described here is implemented and tested on <code>master</code>, and the first release will be cut from it. Watch <a href='https://github.com/rfizzle/cultivation/releases' class='text-accent hover:text-accent2 underline'>GitHub Releases</a>."
             },
             {
               "q": "Does soil fertility punish farming?",
