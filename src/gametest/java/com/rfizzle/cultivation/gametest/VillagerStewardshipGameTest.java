@@ -186,6 +186,71 @@ public class VillagerStewardshipGameTest implements FabricGameTest {
     }
 
     @GameTest(template = TEMPLATE)
+    public void fertilizeThrottlesTheDoseCheckBetweenIntervals(GameTestHelper helper) {
+        // The whole engagement has to fit inside the behavior's default 60-tick
+        // duration, or the last tick below stops the task instead of dosing.
+        helper.assertTrue(WorkPositionThrottle.INTERVAL_TICKS < 55,
+                "the recheck interval must stay well inside the behavior's 60-tick duration");
+        placeTrackedFarmland(helper, FARM, 90.0F, Blocks.WHEAT); // dose defaults to 0 (spent)
+        // No seeds: the replant branch stays out of the way, isolating the dose path.
+        Villager farmer = spawnFarmer(helper, new ItemStack(CultivationItems.FERTILIZER, 3));
+
+        // One behavior instance across the whole engagement, so the throttle
+        // persists between ticks the way it does for a real parked farmer.
+        ServerLevel level = helper.getLevel();
+        HarvestFarmland behavior = new HarvestFarmland();
+        long start = level.getGameTime();
+        helper.assertTrue(behavior.tryStart(level, farmer, start), "the farmer work task must engage the field");
+
+        behavior.tickOrStop(level, farmer, start + 1); // doses, and arms the throttle
+        helper.assertTrue(farmer.getInventory().countItem(CultivationItems.FERTILIZER) == 2,
+                "the first work tick must dose the spent block");
+
+        // The dose is spent again while the farmer stands on the block.
+        SoilStores.update(level, helper.absolutePos(FARM), false, data -> data.withFertilizerRemaining(0));
+
+        behavior.tickOrStop(level, farmer, start + 5);
+        helper.assertTrue(farmer.getInventory().countItem(CultivationItems.FERTILIZER) == 2,
+                "the upkeep must skip its scan inside the throttle interval rather than re-read the soil");
+
+        behavior.tickOrStop(level, farmer, start + 1 + WorkPositionThrottle.INTERVAL_TICKS);
+        helper.assertTrue(farmer.getInventory().countItem(CultivationItems.FERTILIZER) == 1,
+                "and dose again once the interval elapses");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void fertilizeDosesImmediatelyAtANewWorkPosition(GameTestHelper helper) {
+        placeTrackedFarmland(helper, FARM, 90.0F, Blocks.WHEAT); // dose defaults to 0 (spent)
+        // Far enough that neither block is a start candidate while the farmer stands on the other.
+        BlockPos secondFarm = new BlockPos(1, 1, 1);
+        BlockPos secondCrop = secondFarm.above();
+        placeTrackedFarmland(helper, secondFarm, 90.0F, Blocks.WHEAT);
+        Villager farmer = spawnFarmer(helper, new ItemStack(CultivationItems.FERTILIZER, 3));
+
+        ServerLevel level = helper.getLevel();
+        HarvestFarmland behavior = new HarvestFarmland();
+        long start = level.getGameTime();
+        helper.assertTrue(behavior.tryStart(level, farmer, start), "the farmer work task must engage the first block");
+        behavior.tickOrStop(level, farmer, start + 1); // doses, and arms the throttle on the first block
+        helper.assertTrue(farmer.getInventory().countItem(CultivationItems.FERTILIZER) == 2,
+                "the first work tick must dose the spent block");
+
+        // The farmer moves on to a second spent block, still inside the interval it
+        // just armed. The throttle is pinned to a work position, so the new block
+        // must not inherit the old one's window.
+        behavior.doStop(level, farmer, start + 2);
+        BlockPos absoluteCrop = helper.absolutePos(secondCrop);
+        farmer.moveTo(absoluteCrop.getX() + 0.5, absoluteCrop.getY(), absoluteCrop.getZ() + 0.5, 0.0F, 0.0F);
+        helper.assertTrue(behavior.tryStart(level, farmer, start + 3), "the farmer must engage the second block");
+
+        behavior.tickOrStop(level, farmer, start + 4);
+        helper.assertTrue(farmer.getInventory().countItem(CultivationItems.FERTILIZER) == 1,
+                "a new work position must dose on its first tick rather than wait out the previous interval");
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
     public void farmerWantsFertilizerButNonFarmersDoNot(GameTestHelper helper) {
         Villager farmer = spawnFarmer(helper);
         helper.assertTrue(farmer.wantsToPickUp(new ItemStack(CultivationItems.FERTILIZER)),

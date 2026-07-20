@@ -3,8 +3,8 @@ package com.rfizzle.cultivation.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.rfizzle.cultivation.config.CultivationConfig;
-import com.rfizzle.cultivation.soil.WorkPositionThrottle;
 import com.rfizzle.cultivation.soil.VillagerStewardship;
+import com.rfizzle.cultivation.soil.WorkPositionThrottle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.HarvestFarmland;
@@ -49,6 +49,15 @@ abstract class HarvestFarmlandMixin {
     @Unique
     @Nullable
     private WorkPositionThrottle cultivation$fallowThrottle;
+
+    /**
+     * The Fertilizer upkeep's recheck throttle. Separate from the fallow gate's:
+     * the two cache unrelated questions about the same block, so one interval must
+     * not re-arm the other.
+     */
+    @Unique
+    @Nullable
+    private WorkPositionThrottle cultivation$doseThrottle;
 
     /**
      * Denies the replant branch on fallow-ineligible soil, reusing the previous
@@ -98,6 +107,16 @@ abstract class HarvestFarmlandMixin {
                 level, aboveFarmlandPos.below(), seed, villager.getInventory());
     }
 
+    /**
+     * Refills a spent dose from the farmer's Fertilizer, at most once every
+     * {@link WorkPositionThrottle#INTERVAL_TICKS}. This inject sits at the tail of
+     * the tick, outside the vanilla task's own throttle, so without a gate the
+     * dose check — an inventory scan and a soil read — would run 20 times a second
+     * for as long as a Fertilizer-carrying farmer works the block, which SPEC §8
+     * makes the designed steady state. Throttling only delays a refill: the dose
+     * counter moves solely on harvest, through the drop choke point, so a skipped
+     * tick can never miss or double a dose.
+     */
     @Inject(method = "tick", at = @At("TAIL"))
     private void cultivation$fertilize(ServerLevel level, Villager villager, long gameTime, CallbackInfo ci) {
         if (aboveFarmlandPos == null || !aboveFarmlandPos.closerToCenterThan(villager.position(), 1.0)) {
@@ -107,6 +126,14 @@ abstract class HarvestFarmlandMixin {
         if (!config.enableVillagerStewardship || !config.enableVillagerFertilizing) {
             return;
         }
+        if (cultivation$doseThrottle == null) {
+            cultivation$doseThrottle = new WorkPositionThrottle();
+        }
+        long packedPos = aboveFarmlandPos.asLong();
+        if (!cultivation$doseThrottle.needsRecheck(packedPos, gameTime)) {
+            return;
+        }
+        cultivation$doseThrottle.record(packedPos, gameTime);
         VillagerStewardship.tryDose(level, aboveFarmlandPos.below(), villager.getInventory());
     }
 }
