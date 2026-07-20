@@ -58,7 +58,7 @@ Loom's `splitEnvironmentSourceSets()` is enabled — three source sets:
 |---|---|---|
 | `main` | `src/main/java` | Server + common logic. Entrypoint: `Cultivation.java` |
 | `client` | `src/client/java` | Client-only code (soil overlays, tooltips). Entrypoint: `CultivationClient.java` |
-| `gametest` | `src/gametest/java` | Fabric gametests (run with `runGametest`). Has `main` on its classpath but is NOT included in the jar. Entrypoints live under `com.rfizzle.cultivation.gametest` and are registered in `fabric.mod.json`. |
+| `gametest` | `src/gametest/java` | Fabric gametests (run with `runGametest`). Has `main` on its classpath but is NOT included in the jar. Entrypoints live under `com.rfizzle.cultivation.gametest` and are registered in the companion `src/gametest/resources/fabric.mod.json`, which declares a separate `cultivation-gametest` mod — never in the shipped manifest, where the dev runtime's ungated gametest initializer would break `runServer`. |
 
 JUnit tests go in the standard `src/test/java` directory. The test classpath
 includes `fabric-loader-junit` but excludes `fabric-api` — tests that need
