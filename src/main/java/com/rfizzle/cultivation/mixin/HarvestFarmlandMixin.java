@@ -3,7 +3,7 @@ package com.rfizzle.cultivation.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.rfizzle.cultivation.config.CultivationConfig;
-import com.rfizzle.cultivation.soil.FallowGateThrottle;
+import com.rfizzle.cultivation.soil.WorkPositionThrottle;
 import com.rfizzle.cultivation.soil.VillagerStewardship;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -48,11 +48,11 @@ abstract class HarvestFarmlandMixin {
      */
     @Unique
     @Nullable
-    private FallowGateThrottle cultivation$fallowThrottle;
+    private WorkPositionThrottle cultivation$fallowThrottle;
 
     /**
      * Denies the replant branch on fallow-ineligible soil, reusing the previous
-     * verdict for up to {@link FallowGateThrottle#INTERVAL_TICKS} ticks. A denied
+     * verdict for up to {@link WorkPositionThrottle#INTERVAL_TICKS} ticks. A denied
      * replant leaves the work block air, so the vanilla task never re-arms its own
      * throttle and retries the plant every tick; without this the gate would read
      * soil state 20 times a second for a farmer parked on resting ground.
@@ -72,7 +72,7 @@ abstract class HarvestFarmlandMixin {
             return hasSeeds;
         }
         if (cultivation$fallowThrottle == null) {
-            cultivation$fallowThrottle = new FallowGateThrottle();
+            cultivation$fallowThrottle = new WorkPositionThrottle();
         }
         long packedPos = aboveFarmlandPos.asLong();
         if (!cultivation$fallowThrottle.needsRecheck(packedPos, gameTime)) {

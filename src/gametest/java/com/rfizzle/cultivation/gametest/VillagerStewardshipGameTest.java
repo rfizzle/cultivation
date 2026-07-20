@@ -4,7 +4,7 @@ import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.item.CultivationItems;
-import com.rfizzle.cultivation.soil.FallowGateThrottle;
+import com.rfizzle.cultivation.soil.WorkPositionThrottle;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
@@ -93,7 +93,7 @@ public class VillagerStewardshipGameTest implements FabricGameTest {
     public void fallowGateThrottlesRecheckButHonoursRecovery(GameTestHelper helper) {
         // The whole engagement has to fit inside the behavior's default 60-tick
         // duration, or the last tick below stops the task instead of replanting.
-        helper.assertTrue(FallowGateThrottle.INTERVAL_TICKS < 55,
+        helper.assertTrue(WorkPositionThrottle.INTERVAL_TICKS < 55,
                 "the recheck interval must stay well inside the behavior's 60-tick duration");
         placeTrackedFarmland(helper, FARM, 20.0F, Blocks.WHEAT); // Tired band, below the 25 default
         Villager farmer = spawnFarmer(helper, new ItemStack(Items.WHEAT_SEEDS, 4));
@@ -115,7 +115,7 @@ public class VillagerStewardshipGameTest implements FabricGameTest {
         helper.assertTrue(helper.getBlockState(CROP).isAir(),
                 "the gate must reuse its verdict inside the throttle interval rather than re-read the soil");
 
-        behavior.tickOrStop(level, farmer, start + 1 + FallowGateThrottle.INTERVAL_TICKS);
+        behavior.tickOrStop(level, farmer, start + 1 + WorkPositionThrottle.INTERVAL_TICKS);
         helper.assertBlockPresent(Blocks.WHEAT, CROP);
         helper.succeed();
     }
