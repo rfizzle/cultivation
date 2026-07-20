@@ -224,10 +224,18 @@ public class CultivationConfig {
         return local;
     }
 
-    /** Rebuilds the active config from disk — the seam {@code /cultivation reload} will call. */
-    public static void reload() {
+    /**
+     * Rebuilds the active config from disk — the seam {@code /cultivation reload} calls.
+     *
+     * @return {@code true} when the on-disk file was read cleanly, {@code false} when it was
+     *         rejected wholesale and the active config fell back to defaults. A rejected reload
+     *         still swaps in the defaults, so callers must treat this as a report-only signal.
+     */
+    public static boolean reload() {
         synchronized (CultivationConfig.class) {
-            INSTANCE = load();
+            LoadResult result = loadChecked(configPath());
+            INSTANCE = result.config();
+            return !result.fileRejected();
         }
     }
 
@@ -266,18 +274,41 @@ public class CultivationConfig {
         return load(configPath());
     }
 
+    /**
+     * The outcome of one load attempt.
+     *
+     * @param config       the config to run on — always usable, defaults when the file was rejected
+     * @param fileRejected {@code true} when the file could not be read at all (oversized, not a
+     *                     JSON object, or unparseable) and every setting in it was discarded.
+     *                     A file that was accepted but had individual fields clamped, healed, or
+     *                     migrated is <em>not</em> rejected — the operator's edits survived.
+     */
+    record LoadResult(CultivationConfig config, boolean fileRejected) {
+        static LoadResult accepted(CultivationConfig config) {
+            return new LoadResult(config, false);
+        }
+
+        static LoadResult rejected() {
+            return new LoadResult(new CultivationConfig(), true);
+        }
+    }
+
     static CultivationConfig load(Path path) {
+        return loadChecked(path).config();
+    }
+
+    static LoadResult loadChecked(Path path) {
         if (!Files.exists(path)) {
             CultivationConfig defaults = new CultivationConfig();
             defaults.save(path);
-            return defaults;
+            return LoadResult.accepted(defaults);
         }
         try {
             long size = Files.size(path);
             if (size > MAX_FILE_BYTES) {
                 Cultivation.LOGGER.error("Config at {} is {} bytes (limit {}); using defaults (existing file left untouched)",
                         path, size, MAX_FILE_BYTES);
-                return new CultivationConfig();
+                return LoadResult.rejected();
             }
             // Migrate the raw JSON before Gson so renamed/restructured fields survive the upgrade,
             // then deserialize, clamp, and persist the upgraded schema back to disk.
@@ -285,23 +316,26 @@ public class CultivationConfig {
             JsonElement element = JsonParser.parseString(json);
             if (element == null || !element.isJsonObject()) {
                 Cultivation.LOGGER.error("Config at {} is not a JSON object; using defaults (existing file left untouched)", path);
-                return new CultivationConfig();
+                return LoadResult.rejected();
             }
             JsonObject raw = element.getAsJsonObject();
             boolean migrated = ConfigMigrator.migrate(raw);
 
             CultivationConfig config = GSON.fromJson(raw, CultivationConfig.class);
             if (config == null) {
-                config = new CultivationConfig();
+                // Defensive: raw is a JsonObject here, so Gson cannot actually return null.
+                // Nothing from the file survived, so report it the same as any other rejection.
+                Cultivation.LOGGER.error("Config at {} deserialized to nothing; using defaults", path);
+                return LoadResult.rejected();
             }
             config.clamp();
             if (migrated) {
                 config.save(path);
             }
-            return config;
+            return LoadResult.accepted(config);
         } catch (Exception e) {
             Cultivation.LOGGER.error("Failed to load config, using defaults (corrupted file preserved at {})", path, e);
-            return new CultivationConfig();
+            return LoadResult.rejected();
         }
     }
 }
