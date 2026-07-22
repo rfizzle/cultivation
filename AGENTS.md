@@ -41,10 +41,19 @@ in the local workspace. Normative for this repo:
 ./gradlew runClient      # launch dev client
 ./gradlew runServer      # launch dev server
 ./gradlew genSources     # decompile MC sources for IDE nav
+
+./gradlew test runGametest jacocoMergedReport   # merged coverage (the real number)
 ```
 
 Run a single JUnit test:
 `./gradlew test --tests "com.rfizzle.cultivation.SomeTest"`
+
+The mod's coverage number is the merged unit + gametest report over `src/main`
+— `make coverage` wraps the sweep above — read at
+`build/reports/jacoco/jacocoMergedReport/html/index.html`. The unit-only
+`jacocoTestReport` reads 0% for everything a gametest drives, so never diagnose
+coverage from it. `src/client` is outside the number: only a live client
+executes it, which is why its testable math lives in `src/main`.
 
 Read [`.ai/skills/mc-gradle-builds/SKILL.md`](.ai/skills/mc-gradle-builds/SKILL.md)
 **before running any Gradle command** — it covers how to avoid wasted reruns

@@ -140,7 +140,8 @@ configurations {
 // Minecraft's GameTestServer aborts ("No test functions were given!") when zero @GameTest
 // functions are registered, so runGametest would fail CI until the first gametest lands.
 // Skip the run while the gametest source set is empty; it runs normally once tests exist.
-// Loom registers runGametest during afterEvaluate, so match it lazily rather than by name.
+// This guard is declared above the `loom { runs { … } }` block that creates runGametest, so it
+// matches the task lazily by name rather than resolving it eagerly.
 tasks.matching { it.name == 'runGametest' }.configureEach {
     onlyIf {
         !sourceSets.gametest.allJava.files.isEmpty()
@@ -165,6 +166,68 @@ loom {
             vmArg "-Dfabric-api.gametest.report-file=${layout.buildDirectory.file('junit-gametest.xml').get().asFile}"
             runDir "build/gametest"
         }
+    }
+}
+
+// Attach the JaCoCo agent to the gametest server so code only exercised in-game counts toward
+// coverage. Loom's run task is a JavaExec, so the task extension applies. The includes filter
+// keeps the agent from instrumenting Minecraft/Fabric classes.
+tasks.named('runGametest') {
+    jacoco.applyTo(it)
+    it.jacoco.destinationFile = layout.buildDirectory.file('jacoco/runGametest.exec').get().asFile
+    it.jacoco.includes = ['com.rfizzle.cultivation.*']
+}
+
+// Single source of coverage truth: unit tests + gametests merged over src/main. The
+// unit-test-only jacocoTestReport reads 0% for everything a gametest drives (event handlers,
+// commands, registration, mixin-driven behavior), so per-package coverage is read from this
+// report, never from that one.
+tasks.register('jacocoMergedReport', JacocoReport) {
+    description = 'Merged unit + gametest coverage over src/main — the mod\'s real coverage number'
+    group = 'verification'
+    // The report reads compileJava/processResources output, so it must depend on them — without
+    // this, any invocation that compiles without also scheduling a test task (e.g.
+    // `gradlew jar jacocoMergedReport`) fails Gradle's implicit-dependency validation.
+    dependsOn tasks.named('classes')
+    // Ordering only — not dependsOn, so the report can run from existing exec data without
+    // forcing a gametest server spin-up. Both sweeps write into build/jacoco, so without this
+    // Gradle fails the implicit-dependency validation when the report shares an invocation
+    // with test/runGametest.
+    mustRunAfter test, tasks.named('runGametest')
+    // fileTree only picks up exec files that exist, so the report still runs when one of the
+    // two sweeps hasn't.
+    executionData fileTree(layout.buildDirectory.dir('jacoco')) {
+        include 'test.exec', 'runGametest.exec'
+    }
+    // Both ways a half-merged number can pass for a merged one, neither of which fails the
+    // build. A sweep that never ran leaves its exec file absent. A sweep that was skipped or
+    // simply not invoked leaves the previous run's file in place — Gradle deletes an exec file
+    // only when the task that writes it actually executes, and nothing but `clean` empties
+    // build/jacoco. Stale data does not throw either: JaCoCo keys execution data by class id,
+    // so an edited class reads 0% from that half while its unedited neighbours merge coverage
+    // from a sweep that never ran against this code.
+    doFirst {
+        def newestClass = sourceSets.main.output.classesDirs.asFileTree.files
+                .collect { it.lastModified() }.max() ?: 0L
+        ['test.exec', 'runGametest.exec'].each { name ->
+            def execFile = layout.buildDirectory.file("jacoco/${name}").get().asFile
+            if (!execFile.exists() || execFile.length() == 0) {
+                logger.warn("jacocoMergedReport: ${name} is missing or empty — this report is NOT merged coverage")
+            } else if (execFile.lastModified() < newestClass) {
+                logger.warn("jacocoMergedReport: ${name} predates the compiled classes — rerun the sweep that writes it")
+            }
+        }
+    }
+    sourceSets sourceSets.main
+    // Mixin bodies execute inside the transformed vanilla classes, so the agent can never
+    // attribute coverage to the mixin class files — excluding them keeps the denominator
+    // honest. Mixins stay thin (delegate to handlers), so nothing measurable hides here.
+    classDirectories.setFrom(files(classDirectories.files.collect {
+        fileTree(dir: it, exclude: ['com/rfizzle/cultivation/mixin/**'])
+    }))
+    reports {
+        xml.required = true
+        html.required = true
     }
 }
 
