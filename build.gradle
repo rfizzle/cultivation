@@ -171,11 +171,17 @@ loom {
 
 // Attach the JaCoCo agent to the gametest server so code only exercised in-game counts toward
 // coverage. Loom's run task is a JavaExec, so the task extension applies. The includes filter
-// keeps the agent from instrumenting Minecraft/Fabric classes.
-tasks.named('runGametest') {
+// keeps the agent from instrumenting Minecraft/Fabric classes. Matched lazily by name (Loom
+// registers runGametest during afterEvaluate) with the same idiom as the onlyIf guard above.
+tasks.matching { it.name == 'runGametest' }.configureEach {
     jacoco.applyTo(it)
     it.jacoco.destinationFile = layout.buildDirectory.file('jacoco/runGametest.exec').get().asFile
     it.jacoco.includes = ['com.rfizzle.cultivation.*']
+    // The agent's exec file is an @OutputFile, which would otherwise make this JavaExec
+    // up-to-date-checkable and silently skip the whole in-world suite on a repeat run —
+    // re-emitting the previous coverage number as if it were fresh. A gametest sweep must
+    // always execute.
+    it.outputs.upToDateWhen { false }
 }
 
 // Single source of coverage truth: unit tests + gametests merged over src/main. The
@@ -222,9 +228,11 @@ tasks.register('jacocoMergedReport', JacocoReport) {
     // Mixin bodies execute inside the transformed vanilla classes, so the agent can never
     // attribute coverage to the mixin class files — excluding them keeps the denominator
     // honest. Mixins stay thin (delegate to handlers), so nothing measurable hides here.
-    classDirectories.setFrom(files(classDirectories.files.collect {
-        fileTree(dir: it, exclude: ['com/rfizzle/cultivation/mixin/**'])
-    }))
+    // Derive from sourceSets.main lazily: the eager files(classDirectories.files.collect { … })
+    // form resolves at configuration time and discards the task dependency on classes.
+    classDirectories.setFrom(files(sourceSets.main.output).asFileTree.matching {
+        exclude 'com/rfizzle/cultivation/mixin/**'
+    })
     reports {
         xml.required = true
         html.required = true
