@@ -58,22 +58,28 @@ public class AdvancementGameTest implements FabricGameTest {
     @GameTest(template = TEMPLATE)
     public void balancedTableGrantsOnVarietyReset(GameTestHelper helper) {
         ServerPlayer player = listeningPlayer(helper);
-        eatDistinctFoods(player, CultivationConfig.get().fatigueResetDistinctFoods);
-        assertGranted(helper, player, "balanced_table");
-        player.discard();
-        helper.succeed();
+        try {
+            eatDistinctFoods(player, CultivationConfig.get().fatigueResetDistinctFoods);
+            assertGranted(helper, player, "balanced_table");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void balancedTableSilentWithoutVariety(GameTestHelper helper) {
         ServerPlayer player = listeningPlayer(helper);
-        // The same food, over and over — the reset window never sees enough distinct foods.
-        for (int i = 0; i < CultivationConfig.get().fatigueResetDistinctFoods + 1; i++) {
-            DietHandler.consume(player, Items.APPLE);
+        try {
+            // The same food, over and over — the reset window never sees enough distinct foods.
+            for (int i = 0; i < CultivationConfig.get().fatigueResetDistinctFoods + 1; i++) {
+                DietHandler.consume(player, Items.APPLE);
+            }
+            assertNotGranted(helper, player, "balanced_table");
+            helper.succeed();
+        } finally {
+            player.discard();
         }
-        assertNotGranted(helper, player, "balanced_table");
-        player.discard();
-        helper.succeed();
     }
 
     // --- long_term_investment ---
@@ -82,10 +88,13 @@ public class AdvancementGameTest implements FabricGameTest {
     public void longTermInvestmentGrantsOnDose(GameTestHelper helper) {
         helper.setBlock(FARM, Blocks.FARMLAND);
         ServerPlayer player = listeningPlayer(helper);
-        useFertilizer(helper, player, FARM);
-        assertGranted(helper, player, "long_term_investment");
-        player.discard();
-        helper.succeed();
+        try {
+            useFertilizer(helper, player, FARM);
+            assertGranted(helper, player, "long_term_investment");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -93,10 +102,13 @@ public class AdvancementGameTest implements FabricGameTest {
         // The villager stewardship path doses with a null player: nobody is granted.
         helper.setBlock(FARM, Blocks.FARMLAND);
         ServerPlayer bystander = listeningPlayer(helper);
-        Fertilizer.applyDose(helper.getLevel(), helper.absolutePos(FARM), null);
-        assertNotGranted(helper, bystander, "long_term_investment");
-        bystander.discard();
-        helper.succeed();
+        try {
+            Fertilizer.applyDose(helper.getLevel(), helper.absolutePos(FARM), null);
+            assertNotGranted(helper, bystander, "long_term_investment");
+            helper.succeed();
+        } finally {
+            bystander.discard();
+        }
     }
 
     // --- reap_what_you_sow ---
@@ -105,10 +117,13 @@ public class AdvancementGameTest implements FabricGameTest {
     public void reapWhatYouSowGrantsOnFullSweep(GameTestHelper helper) {
         fillField(helper, matureWheat());
         ServerPlayer player = listeningScyther(helper);
-        breakCenter(helper, player);
-        assertGranted(helper, player, "reap_what_you_sow");
-        player.discard();
-        helper.succeed();
+        try {
+            breakCenter(helper, player);
+            assertGranted(helper, player, "reap_what_you_sow");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -117,10 +132,13 @@ public class AdvancementGameTest implements FabricGameTest {
         // One corner is immature: only eight of the nine positions are reaped.
         helper.setBlock(CENTER.offset(1, 0, 1), Blocks.WHEAT.defaultBlockState().setValue(CropBlock.AGE, 3));
         ServerPlayer player = listeningScyther(helper);
-        breakCenter(helper, player);
-        assertNotGranted(helper, player, "reap_what_you_sow");
-        player.discard();
-        helper.succeed();
+        try {
+            breakCenter(helper, player);
+            assertNotGranted(helper, player, "reap_what_you_sow");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     // --- full_broadcast ---
@@ -129,10 +147,13 @@ public class AdvancementGameTest implements FabricGameTest {
     public void fullBroadcastGrantsOnNineBlockSow(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         ServerPlayer player = listeningRaker(helper, Items.WHEAT_SEEDS, 9);
-        sow(helper, player, FARM);
-        assertGranted(helper, player, "full_broadcast");
-        player.discard();
-        helper.succeed();
+        try {
+            sow(helper, player, FARM);
+            assertGranted(helper, player, "full_broadcast");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -142,10 +163,13 @@ public class AdvancementGameTest implements FabricGameTest {
         helper.setBlock(FARM.offset(-1, 0, -1), Blocks.DIRT);
         helper.setBlock(FARM.offset(1, 0, 1).above(), matureWheat());
         ServerPlayer player = listeningRaker(helper, Items.WHEAT_SEEDS, 9);
-        assertPartialSow(helper, sow(helper, player, FARM));
-        assertNotGranted(helper, player, "full_broadcast");
-        player.discard();
-        helper.succeed();
+        try {
+            assertPartialSow(helper, sow(helper, player, FARM));
+            assertNotGranted(helper, player, "full_broadcast");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -153,23 +177,29 @@ public class AdvancementGameTest implements FabricGameTest {
         placeFarmlandGrid(helper);
         // Three seeds cap the pass at three blocks.
         ServerPlayer player = listeningRaker(helper, Items.WHEAT_SEEDS, 3);
-        assertPartialSow(helper, sow(helper, player, FARM));
-        assertNotGranted(helper, player, "full_broadcast");
-        player.discard();
-        helper.succeed();
+        try {
+            assertPartialSow(helper, sow(helper, player, FARM));
+            assertNotGranted(helper, player, "full_broadcast");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void fullBroadcastSilentWhenRakeBreaksMidPass(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         ServerPlayer player = listeningRaker(helper, Items.WHEAT_SEEDS, 9);
-        ItemStack rake = new ItemStack(CultivationItems.IRON_RAKE);
-        rake.setDamageValue(rake.getMaxDamage() - 3); // three uses left, then it breaks
-        player.setItemInHand(InteractionHand.MAIN_HAND, rake);
-        assertPartialSow(helper, sow(helper, player, FARM));
-        assertNotGranted(helper, player, "full_broadcast");
-        player.discard();
-        helper.succeed();
+        try {
+            ItemStack rake = new ItemStack(CultivationItems.IRON_RAKE);
+            rake.setDamageValue(rake.getMaxDamage() - 3); // three uses left, then it breaks
+            player.setItemInHand(InteractionHand.MAIN_HAND, rake);
+            assertPartialSow(helper, sow(helper, player, FARM));
+            assertNotGranted(helper, player, "full_broadcast");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     // --- old_growth ---
@@ -177,28 +207,37 @@ public class AdvancementGameTest implements FabricGameTest {
     @GameTest(template = TEMPLATE)
     public void oldGrowthGrantsOnEnrichedAndDosed(GameTestHelper helper) {
         ServerPlayer player = listeningPlayer(helper);
-        harvestFrom(helper, player, 80.0F, 100, 2);
-        assertGranted(helper, player, "old_growth");
-        player.discard();
-        helper.succeed();
+        try {
+            harvestFrom(helper, player, 80.0F, 100, 2);
+            assertGranted(helper, player, "old_growth");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void oldGrowthSilentWhenOnlyEnriched(GameTestHelper helper) {
         ServerPlayer player = listeningPlayer(helper);
-        harvestFrom(helper, player, 80.0F, 100, 0);
-        assertNotGranted(helper, player, "old_growth");
-        player.discard();
-        helper.succeed();
+        try {
+            harvestFrom(helper, player, 80.0F, 100, 0);
+            assertNotGranted(helper, player, "old_growth");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void oldGrowthSilentWhenOnlyDosed(GameTestHelper helper) {
         ServerPlayer player = listeningPlayer(helper);
-        harvestFrom(helper, player, 80.0F, 0, 2);
-        assertNotGranted(helper, player, "old_growth");
-        player.discard();
-        helper.succeed();
+        try {
+            harvestFrom(helper, player, 80.0F, 0, 2);
+            assertNotGranted(helper, player, "old_growth");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -206,23 +245,29 @@ public class AdvancementGameTest implements FabricGameTest {
         // Enriched and dosed, but the harvest drains fertility to zero: the bonus
         // is suppressed and no dose is spent, so the grant must not fire either.
         ServerPlayer player = listeningPlayer(helper);
-        harvestFrom(helper, player, 1.0F, 100, 2);
-        assertNotGranted(helper, player, "old_growth");
-        player.discard();
-        helper.succeed();
+        try {
+            harvestFrom(helper, player, 1.0F, 100, 2);
+            assertNotGranted(helper, player, "old_growth");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void oldGrowthSilentForNoPlayerHarvest(GameTestHelper helper) {
         // A piston/explosion harvest resolves drops with a null harvester.
         ServerPlayer bystander = listeningPlayer(helper);
-        placeTrackedFarmland(helper, FARM, 80.0F, Blocks.WHEAT);
-        enrichAndDose(helper, 100, 2);
-        List<ItemStack> drops = new ArrayList<>(List.of(new ItemStack(Items.WHEAT)));
-        HarvestHandler.onDropsResolved(matureWheat(), helper.getLevel(), helper.absolutePos(CROP), null, drops);
-        assertNotGranted(helper, bystander, "old_growth");
-        bystander.discard();
-        helper.succeed();
+        try {
+            placeTrackedFarmland(helper, FARM, 80.0F, Blocks.WHEAT);
+            enrichAndDose(helper, 100, 2);
+            List<ItemStack> drops = new ArrayList<>(List.of(new ItemStack(Items.WHEAT)));
+            HarvestHandler.onDropsResolved(matureWheat(), helper.getLevel(), helper.absolutePos(CROP), null, drops);
+            assertNotGranted(helper, bystander, "old_growth");
+            helper.succeed();
+        } finally {
+            bystander.discard();
+        }
     }
 
     // --- helpers ---

@@ -79,13 +79,16 @@ public class SoilDrainGameTest implements FabricGameTest {
         helper.setBlock(FARM, Blocks.FARMLAND);
         helper.setBlock(CROP, matureWheat());
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        player.setGameMode(GameType.SURVIVAL);
-        player.gameMode.destroyBlock(helper.absolutePos(CROP));
+        try {
+            player.setGameMode(GameType.SURVIVAL);
+            player.gameMode.destroyBlock(helper.absolutePos(CROP));
 
-        assertFertility(helper, FARM, 98.5F, "a survival player break must drain");
-        helper.assertItemEntityPresent(Items.WHEAT, CROP, 2.0);
-        player.discard();
-        helper.succeed();
+            assertFertility(helper, FARM, 98.5F, "a survival player break must drain");
+            helper.assertItemEntityPresent(Items.WHEAT, CROP, 2.0);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -93,15 +96,18 @@ public class SoilDrainGameTest implements FabricGameTest {
         helper.setBlock(FARM, Blocks.FARMLAND);
         helper.setBlock(CROP, matureWheat());
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        player.setGameMode(GameType.CREATIVE);
-        player.gameMode.destroyBlock(helper.absolutePos(CROP));
+        try {
+            player.setGameMode(GameType.CREATIVE);
+            player.gameMode.destroyBlock(helper.absolutePos(CROP));
 
-        helper.assertBlockPresent(Blocks.AIR, CROP);
-        helper.assertTrue(SoilFixtures.data(helper, FARM) == null,
-                "a creative break produces no drops and must not drain");
-        helper.assertItemEntityNotPresent(Items.WHEAT, CROP, 2.0);
-        player.discard();
-        helper.succeed();
+            helper.assertBlockPresent(Blocks.AIR, CROP);
+            helper.assertTrue(SoilFixtures.data(helper, FARM) == null,
+                    "a creative break produces no drops and must not drain");
+            helper.assertItemEntityNotPresent(Items.WHEAT, CROP, 2.0);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)

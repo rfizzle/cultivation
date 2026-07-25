@@ -41,15 +41,19 @@ public class BroadcastSowingGameTest implements FabricGameTest {
     public void sowsTheFullThreeByThreeWithARake(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
+        try {
+            InteractionResult result = sow(helper, player, FARM);
 
-        InteractionResult result = sow(helper, player, FARM);
-
-        helper.assertTrue(result == InteractionResult.SUCCESS, "sowing consumes the interaction");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 9, "the whole 3x3 must be sown with wheat at age 0");
-        helper.assertTrue(player.getOffhandItem().getCount() == 0, "one off-hand seed is spent per planted block");
-        helper.assertTrue(player.getMainHandItem().getDamageValue() == 9, "the rake spends one durability per block");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS, "sowing consumes the interaction");
+            helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 9, "the whole 3x3 must be sown with wheat at age 0");
+            helper.assertTrue(player.getOffhandItem().getCount() == 0,
+                    "one off-hand seed is spent per planted block");
+            helper.assertTrue(player.getMainHandItem().getDamageValue() == 9,
+                    "the rake spends one durability per block");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -57,28 +61,33 @@ public class BroadcastSowingGameTest implements FabricGameTest {
         placeFarmlandGrid(helper);
         // A seed in the main hand (no rake) is left to vanilla single-block planting.
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        player.setGameMode(GameType.SURVIVAL);
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT_SEEDS, 9));
+        try {
+            player.setGameMode(GameType.SURVIVAL);
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WHEAT_SEEDS, 9));
 
-        InteractionResult result = sow(helper, player, FARM);
+            InteractionResult result = sow(helper, player, FARM);
 
-        helper.assertTrue(result == InteractionResult.PASS, "without a rake the gesture defers to vanilla");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "no broadcast sowing happens without a rake");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.PASS, "without a rake the gesture defers to vanilla");
+            helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "no broadcast sowing happens without a rake");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void rakeWithoutASeedSowsNothing(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         ServerPlayer player = rakeWith(helper, Items.AIR, 0); // rake in hand, empty off-hand
+        try {
+            InteractionResult result = sow(helper, player, FARM);
 
-        InteractionResult result = sow(helper, player, FARM);
-
-        helper.assertTrue(result == InteractionResult.PASS, "a rake with no off-hand seed sows nothing");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "nothing is sown without a seed");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.PASS, "a rake with no off-hand seed sows nothing");
+            helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "nothing is sown without a seed");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -87,64 +96,76 @@ public class BroadcastSowingGameTest implements FabricGameTest {
         helper.setBlock(FARM.offset(-1, 0, -1), Blocks.DIRT);
         helper.setBlock(FARM.offset(1, 0, 1).above(), matureWheat());
         ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
+        try {
+            InteractionResult result = sow(helper, player, FARM);
 
-        InteractionResult result = sow(helper, player, FARM);
-
-        helper.assertTrue(result == InteractionResult.SUCCESS, "sowing the rest still consumes the interaction");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 7, "the 7 free farmland blocks are sown, the other 2 skipped");
-        helper.assertTrue(player.getOffhandItem().getCount() == 2, "only the 7 planted blocks spend a seed");
-        helper.assertTrue(player.getMainHandItem().getDamageValue() == 7, "only the 7 planted blocks spend durability");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS,
+                    "sowing the rest still consumes the interaction");
+            helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 7,
+                    "the 7 free farmland blocks are sown, the other 2 skipped");
+            helper.assertTrue(player.getOffhandItem().getCount() == 2, "only the 7 planted blocks spend a seed");
+            helper.assertTrue(player.getMainHandItem().getDamageValue() == 7,
+                    "only the 7 planted blocks spend durability");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void seedBudgetCapsPlanting(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 3);
+        try {
+            InteractionResult result = sow(helper, player, FARM);
 
-        InteractionResult result = sow(helper, player, FARM);
-
-        helper.assertTrue(result == InteractionResult.SUCCESS, "a partial sow still consumes the interaction");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 3, "only as many blocks as off-hand seeds are sown");
-        helper.assertTrue(player.getOffhandItem().isEmpty(), "the seed stack is emptied");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS, "a partial sow still consumes the interaction");
+            helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 3,
+                    "only as many blocks as off-hand seeds are sown");
+            helper.assertTrue(player.getOffhandItem().isEmpty(), "the seed stack is emptied");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void rakeDurabilityCapsPlantingAndBreaks(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
-        ItemStack rake = new ItemStack(CultivationItems.IRON_RAKE);
-        rake.setDamageValue(rake.getMaxDamage() - 3); // three uses left
-        player.setItemInHand(InteractionHand.MAIN_HAND, rake);
+        try {
+            ItemStack rake = new ItemStack(CultivationItems.IRON_RAKE);
+            rake.setDamageValue(rake.getMaxDamage() - 3); // three uses left
+            player.setItemInHand(InteractionHand.MAIN_HAND, rake);
 
-        InteractionResult result = sow(helper, player, FARM);
+            InteractionResult result = sow(helper, player, FARM);
 
-        helper.assertTrue(result == InteractionResult.SUCCESS, "the partial sow consumes the interaction");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 3, "the rake sows only until it breaks");
-        helper.assertTrue(player.getMainHandItem().isEmpty(), "the rake breaks when its durability runs out mid-sow");
-        helper.assertTrue(player.getOffhandItem().getCount() == 6, "only the 3 planted blocks spend a seed");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS, "the partial sow consumes the interaction");
+            helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 3, "the rake sows only until it breaks");
+            helper.assertTrue(player.getMainHandItem().isEmpty(),
+                    "the rake breaks when its durability runs out mid-sow");
+            helper.assertTrue(player.getOffhandItem().getCount() == 6, "only the 3 planted blocks spend a seed");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void disabledConfigIsInert(GameTestHelper helper) {
         boolean saved = CultivationConfig.get().enableBroadcastSowing;
+        ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
         try {
             CultivationConfig.get().enableBroadcastSowing = false;
             placeFarmlandGrid(helper);
-            ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
 
             InteractionResult result = sow(helper, player, FARM);
 
             helper.assertTrue(result == InteractionResult.PASS, "with the toggle off the rake is inert");
             helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "with the toggle off nothing is broadcast");
-            player.discard();
             helper.succeed();
         } finally {
+            player.discard();
             CultivationConfig.get().enableBroadcastSowing = saved;
         }
     }
@@ -153,16 +174,19 @@ public class BroadcastSowingGameTest implements FabricGameTest {
     public void creativeSowsWithoutSpendingSeedsOrDurability(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 1);
-        player.setGameMode(GameType.CREATIVE);
+        try {
+            player.setGameMode(GameType.CREATIVE);
 
-        InteractionResult result = sow(helper, player, FARM);
+            InteractionResult result = sow(helper, player, FARM);
 
-        helper.assertTrue(result == InteractionResult.SUCCESS, "creative sows the whole 3x3");
-        helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 9, "creative is not capped by the held stack");
-        helper.assertTrue(player.getOffhandItem().getCount() == 1, "creative spends no seeds");
-        helper.assertTrue(player.getMainHandItem().getDamageValue() == 0, "creative spends no durability");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS, "creative sows the whole 3x3");
+            helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 9, "creative is not capped by the held stack");
+            helper.assertTrue(player.getOffhandItem().getCount() == 1, "creative spends no seeds");
+            helper.assertTrue(player.getMainHandItem().getDamageValue() == 0, "creative spends no durability");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -170,26 +194,31 @@ public class BroadcastSowingGameTest implements FabricGameTest {
         placeFarmlandGrid(helper);
         placeTrackedFarmland(helper, FARM, 100.0F, Blocks.WHEAT);
         ServerPlayer player = rakeWith(helper, Items.WHEAT_SEEDS, 9);
+        try {
+            sow(helper, player, FARM);
 
-        sow(helper, player, FARM);
-
-        // Planting is not a harvest — a fresh sow touches no soil state.
-        assertFertility(helper, FARM, 100.0F, "sowing must not drain fertility");
-        player.discard();
-        helper.succeed();
+            // Planting is not a harvest — a fresh sow touches no soil state.
+            assertFertility(helper, FARM, 100.0F, "sowing must not drain fertility");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void sowsPitcherPods(GameTestHelper helper) {
         placeFarmlandGrid(helper);
         ServerPlayer player = rakeWith(helper, Items.PITCHER_POD, 9);
+        try {
+            InteractionResult result = sow(helper, player, FARM);
 
-        InteractionResult result = sow(helper, player, FARM);
-
-        helper.assertTrue(result == InteractionResult.SUCCESS, "a pitcher pod sows the 3x3");
-        helper.assertTrue(countAge0(helper, Blocks.PITCHER_CROP) == 9, "each block sows a pitcher crop at age 0");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS, "a pitcher pod sows the 3x3");
+            helper.assertTrue(countAge0(helper, Blocks.PITCHER_CROP) == 9,
+                    "each block sows a pitcher crop at age 0");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     // --- helpers ---

@@ -75,16 +75,19 @@ public class CultivationCommandGameTest implements FabricGameTest {
         BlockPos abs = helper.absolutePos(rel);
 
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        aimStraightDownAt(player, abs);
-        MinecraftServer server = helper.getLevel().getServer();
-        CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
+        try {
+            aimStraightDownAt(player, abs);
+            MinecraftServer server = helper.getLevel().getServer();
+            CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
 
-        int result = server.getCommands().getDispatcher().execute("cultivation soil set 40", op);
-        helper.assertTrue(result > 0, "soil set on targeted farmland succeeds");
-        float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), abs).orElseThrow().fertility();
-        helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4, "fertility is set to 40, got " + fertility);
-        player.discard();
-        helper.succeed();
+            int result = server.getCommands().getDispatcher().execute("cultivation soil set 40", op);
+            helper.assertTrue(result > 0, "soil set on targeted farmland succeeds");
+            float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), abs).orElseThrow().fertility();
+            helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4, "fertility is set to 40, got " + fertility);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -96,46 +99,55 @@ public class CultivationCommandGameTest implements FabricGameTest {
         BlockPos groundAbs = helper.absolutePos(groundRel);
 
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        // Aim at the wart itself — the command resolves the soul sand tracked below it.
-        aimStraightDownAt(player, helper.absolutePos(wartRel));
-        MinecraftServer server = helper.getLevel().getServer();
-        CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
+        try {
+            // Aim at the wart itself — the command resolves the soul sand tracked below it.
+            aimStraightDownAt(player, helper.absolutePos(wartRel));
+            MinecraftServer server = helper.getLevel().getServer();
+            CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
 
-        int result = server.getCommands().getDispatcher().execute("cultivation soil set 40", op);
-        helper.assertTrue(result > 0, "soil set resolves the wart's soul sand and succeeds");
-        float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), groundAbs).orElseThrow().fertility();
-        helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4,
-                "the soul sand below the wart is set to 40, got " + fertility);
-        player.discard();
-        helper.succeed();
+            int result = server.getCommands().getDispatcher().execute("cultivation soil set 40", op);
+            helper.assertTrue(result > 0, "soil set resolves the wart's soul sand and succeeds");
+            float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), groundAbs).orElseThrow().fertility();
+            helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4,
+                    "the soul sand below the wart is set to 40, got " + fertility);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void soilReportFailsWhenNotLookingAtFarmland(GameTestHelper helper) throws CommandSyntaxException {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        // Aim up at open sky — nothing to hit within reach.
-        player.moveTo(player.getX(), player.getY(), player.getZ(), 0.0F, -90.0F);
-        MinecraftServer server = helper.getLevel().getServer();
-        CommandSourceStack source = player.createCommandSourceStack();
+        try {
+            // Aim up at open sky — nothing to hit within reach.
+            player.moveTo(player.getX(), player.getY(), player.getZ(), 0.0F, -90.0F);
+            MinecraftServer server = helper.getLevel().getServer();
+            CommandSourceStack source = player.createCommandSourceStack();
 
-        int result = server.getCommands().getDispatcher().execute("cultivation soil", source);
-        helper.assertTrue(result == 0, "soil report fails with no farmland in sight");
-        player.discard();
-        helper.succeed();
+            int result = server.getCommands().getDispatcher().execute("cultivation soil", source);
+            helper.assertTrue(result == 0, "soil report fails with no farmland in sight");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void fieldReportFailsWhenNotLookingAtFarmland(GameTestHelper helper) throws CommandSyntaxException {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        // Aim up at open sky — no farmland center to survey around.
-        player.moveTo(player.getX(), player.getY(), player.getZ(), 0.0F, -90.0F);
-        MinecraftServer server = helper.getLevel().getServer();
-        CommandSourceStack source = player.createCommandSourceStack();
+        try {
+            // Aim up at open sky — no farmland center to survey around.
+            player.moveTo(player.getX(), player.getY(), player.getZ(), 0.0F, -90.0F);
+            MinecraftServer server = helper.getLevel().getServer();
+            CommandSourceStack source = player.createCommandSourceStack();
 
-        int result = server.getCommands().getDispatcher().execute("cultivation field", source);
-        helper.assertTrue(result == 0, "field report fails with no farmland in sight");
-        player.discard();
-        helper.succeed();
+            int result = server.getCommands().getDispatcher().execute("cultivation field", source);
+            helper.assertTrue(result == 0, "field report fails with no farmland in sight");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -158,58 +170,67 @@ public class CultivationCommandGameTest implements FabricGameTest {
 
         BlockPos center = helper.absolutePos(new BlockPos(1, 1, 1));
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        aimStraightDownAt(player, center);
-        MinecraftServer server = helper.getLevel().getServer();
+        try {
+            aimStraightDownAt(player, center);
+            MinecraftServer server = helper.getLevel().getServer();
 
-        int result = server.getCommands().getDispatcher()
-                .execute("cultivation field", player.createCommandSourceStack());
-        helper.assertTrue(result > 0, "field survey succeeds over a placed plot");
+            int result = server.getCommands().getDispatcher()
+                    .execute("cultivation field", player.createCommandSourceStack());
+            helper.assertTrue(result > 0, "field survey succeeds over a placed plot");
 
-        // The aggregate carries the per-block reads through: 9 farmland, the one
-        // fertility-0 block exhausted, the one enriched block counted, no doses, and
-        // both remembered crops in spatial encounter order (wheat before carrots).
-        CultivationCommand.FieldReport report = CultivationCommand.surveyField(level, center);
-        CommandText.FieldSummary summary = report.summary();
-        helper.assertTrue(summary.soil() == 9, "survey covers all 9 soil blocks, got " + summary.soil());
-        helper.assertTrue(summary.exhausted() == 1, "one block is exhausted, got " + summary.exhausted());
-        helper.assertTrue(summary.enriched() == 1, "one block is enriched, got " + summary.enriched());
-        helper.assertTrue(summary.fertilized() == 0, "no blocks are fertilized, got " + summary.fertilized());
-        helper.assertTrue(report.crops().equals(List.of(wheat, carrots)),
-                "distinct crops are wheat then carrots, got " + report.crops());
-        player.discard();
-        helper.succeed();
+            // The aggregate carries the per-block reads through: 9 farmland, the one
+            // fertility-0 block exhausted, the one enriched block counted, no doses, and
+            // both remembered crops in spatial encounter order (wheat before carrots).
+            CultivationCommand.FieldReport report = CultivationCommand.surveyField(level, center);
+            CommandText.FieldSummary summary = report.summary();
+            helper.assertTrue(summary.soil() == 9, "survey covers all 9 soil blocks, got " + summary.soil());
+            helper.assertTrue(summary.exhausted() == 1, "one block is exhausted, got " + summary.exhausted());
+            helper.assertTrue(summary.enriched() == 1, "one block is enriched, got " + summary.enriched());
+            helper.assertTrue(summary.fertilized() == 0, "no blocks are fertilized, got " + summary.fertilized());
+            helper.assertTrue(report.crops().equals(List.of(wheat, carrots)),
+                    "distinct crops are wheat then carrots, got " + report.crops());
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void dietResetClearsTheTargetThroughTheStore(GameTestHelper helper) throws CommandSyntaxException {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        ResourceLocation carrot = BuiltInRegistries.ITEM.getKey(Items.CARROT);
-        DietStore.set(player, new DietData(Map.of(carrot, 3), List.of(carrot)));
-        helper.assertFalse(DietStore.get(player).isDefault(), "player is fatigued before the reset");
+        try {
+            ResourceLocation carrot = BuiltInRegistries.ITEM.getKey(Items.CARROT);
+            DietStore.set(player, new DietData(Map.of(carrot, 3), List.of(carrot)));
+            helper.assertFalse(DietStore.get(player).isDefault(), "player is fatigued before the reset");
 
-        MinecraftServer server = helper.getLevel().getServer();
-        CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
-        int result = server.getCommands().getDispatcher().execute("cultivation diet reset", op);
+            MinecraftServer server = helper.getLevel().getServer();
+            CommandSourceStack op = player.createCommandSourceStack().withPermission(2);
+            int result = server.getCommands().getDispatcher().execute("cultivation diet reset", op);
 
-        helper.assertTrue(result > 0, "diet reset succeeds");
-        helper.assertTrue(DietStore.get(player).isDefault(), "diet reset clears the player's diet data");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result > 0, "diet reset succeeds");
+            helper.assertTrue(DietStore.get(player).isDefault(), "diet reset clears the player's diet data");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void dietReadReportsFatigueForTheCaller(GameTestHelper helper) throws CommandSyntaxException {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        ResourceLocation carrot = BuiltInRegistries.ITEM.getKey(Items.CARROT);
-        DietStore.set(player, new DietData(Map.of(carrot, 2), List.of(carrot)));
+        try {
+            ResourceLocation carrot = BuiltInRegistries.ITEM.getKey(Items.CARROT);
+            DietStore.set(player, new DietData(Map.of(carrot, 2), List.of(carrot)));
 
-        MinecraftServer server = helper.getLevel().getServer();
-        CommandSourceStack source = player.createCommandSourceStack();
-        int result = server.getCommands().getDispatcher().execute("cultivation diet", source);
+            MinecraftServer server = helper.getLevel().getServer();
+            CommandSourceStack source = player.createCommandSourceStack();
+            int result = server.getCommands().getDispatcher().execute("cultivation diet", source);
 
-        helper.assertTrue(result > 0, "diet read succeeds for a fatigued caller");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result > 0, "diet read succeeds for a fatigued caller");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE, batch = CONFIG_BATCH)
