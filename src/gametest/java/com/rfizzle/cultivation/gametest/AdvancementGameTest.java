@@ -60,6 +60,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer player = listeningPlayer(helper);
         eatDistinctFoods(player, CultivationConfig.get().fatigueResetDistinctFoods);
         assertGranted(helper, player, "balanced_table");
+        player.discard();
         helper.succeed();
     }
 
@@ -71,6 +72,7 @@ public class AdvancementGameTest implements FabricGameTest {
             DietHandler.consume(player, Items.APPLE);
         }
         assertNotGranted(helper, player, "balanced_table");
+        player.discard();
         helper.succeed();
     }
 
@@ -82,6 +84,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer player = listeningPlayer(helper);
         useFertilizer(helper, player, FARM);
         assertGranted(helper, player, "long_term_investment");
+        player.discard();
         helper.succeed();
     }
 
@@ -92,6 +95,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer bystander = listeningPlayer(helper);
         Fertilizer.applyDose(helper.getLevel(), helper.absolutePos(FARM), null);
         assertNotGranted(helper, bystander, "long_term_investment");
+        bystander.discard();
         helper.succeed();
     }
 
@@ -103,6 +107,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer player = listeningScyther(helper);
         breakCenter(helper, player);
         assertGranted(helper, player, "reap_what_you_sow");
+        player.discard();
         helper.succeed();
     }
 
@@ -114,6 +119,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer player = listeningScyther(helper);
         breakCenter(helper, player);
         assertNotGranted(helper, player, "reap_what_you_sow");
+        player.discard();
         helper.succeed();
     }
 
@@ -173,6 +179,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer player = listeningPlayer(helper);
         harvestFrom(helper, player, 80.0F, 100, 2);
         assertGranted(helper, player, "old_growth");
+        player.discard();
         helper.succeed();
     }
 
@@ -181,6 +188,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer player = listeningPlayer(helper);
         harvestFrom(helper, player, 80.0F, 100, 0);
         assertNotGranted(helper, player, "old_growth");
+        player.discard();
         helper.succeed();
     }
 
@@ -189,6 +197,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer player = listeningPlayer(helper);
         harvestFrom(helper, player, 80.0F, 0, 2);
         assertNotGranted(helper, player, "old_growth");
+        player.discard();
         helper.succeed();
     }
 
@@ -199,6 +208,7 @@ public class AdvancementGameTest implements FabricGameTest {
         ServerPlayer player = listeningPlayer(helper);
         harvestFrom(helper, player, 1.0F, 100, 2);
         assertNotGranted(helper, player, "old_growth");
+        player.discard();
         helper.succeed();
     }
 
@@ -211,6 +221,7 @@ public class AdvancementGameTest implements FabricGameTest {
         List<ItemStack> drops = new ArrayList<>(List.of(new ItemStack(Items.WHEAT)));
         HarvestHandler.onDropsResolved(matureWheat(), helper.getLevel(), helper.absolutePos(CROP), null, drops);
         assertNotGranted(helper, bystander, "old_growth");
+        bystander.discard();
         helper.succeed();
     }
 
