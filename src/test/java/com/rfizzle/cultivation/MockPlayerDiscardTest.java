@@ -19,11 +19,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tier-1 guard that every connected mock player a gametest builds is discarded
- * before the test ends (mc-testing-mock, "Cleanup: always discard").
+ * before the test ends, and discarded unconditionally — from inside a
+ * {@code finally} (mc-testing-mock, "Cleanup: always discard").
  *
  * <p>{@code MockPlayers.serverPlayerInLevel} finishes with
  * {@code PlayerList#placeNewPlayer}, which registers the player both in the
@@ -45,6 +47,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * the cost accumulates silently across the suite. That is why it is checked here
  * rather than left to review — it went unnoticed long enough to need fixing
  * twice.
+ *
+ * <p>Placement is checked as well as presence. A discard reached only by falling
+ * off the end of the test body is skipped the moment an assertion throws, so the
+ * cleanup guarantee is weakest exactly when the suite is unhealthy and the output
+ * is hardest to read. The discard therefore has to sit inside a {@code finally}.
+ * Where a method already owns one for another reason — restoring a config field,
+ * disarming a listener — the discard folds into it rather than nesting a second.
+ *
+ * <p>What that check can and cannot prove: it is lexical. It confirms the discard
+ * is written inside some {@code finally} in the method, not that the corresponding
+ * {@code try} encloses every call that might throw. A discard parked in an
+ * unrelated {@code finally} further down the method would satisfy it. That is a
+ * proxy, and it is kept deliberately — the shape it enforces is the one the tree
+ * uses, and the alternative (reachability analysis over hand-parsed source) buys
+ * little against the failure it actually catches: a new test written in the
+ * happy-path form.
  *
  * <p>The gametest source set is not on the test classpath, so its classes cannot
  * be enumerated reflectively — the guard reads the source tree as text, the same
@@ -88,6 +106,9 @@ class MockPlayerDiscardTest {
 
     /** Matches a local binding, capturing the variable name and its initializer. */
     private static final Pattern LOCAL_BINDING = Pattern.compile("(?:ServerPlayer|var)\\s+(\\w+)\\s*=\\s*([^;]*);");
+
+    /** Matches a {@code finally} block through its opening brace. */
+    private static final Pattern FINALLY_BLOCK = Pattern.compile("\\bfinally\\s*\\{");
 
     /** A method's declared return type, name, and body text with comments and literals stripped. */
     private record Method(String returnType, String name, String body) {
@@ -202,6 +223,45 @@ class MockPlayerDiscardTest {
         return found;
     }
 
+    /**
+     * The {@code [start, end)} extents of every {@code finally} block in a body,
+     * found by the same brace walk that splits methods. Nested blocks are all
+     * reported: a match inside an outer block is still scanned for.
+     */
+    private static List<int[]> finallyRangesOf(String body) {
+        List<int[]> ranges = new ArrayList<>();
+        Matcher matcher = FINALLY_BLOCK.matcher(body);
+        while (matcher.find()) {
+            int open = matcher.end() - 1;
+            int depth = 0;
+            int i = open;
+            for (; i < body.length(); i++) {
+                char c = body.charAt(i);
+                if (c == '{') {
+                    depth++;
+                } else if (c == '}' && --depth == 0) {
+                    break;
+                }
+            }
+            ranges.add(new int[] {open + 1, Math.min(i, body.length())});
+        }
+        return ranges;
+    }
+
+    /** Whether some {@code name.discard()} in this body is written inside a {@code finally}. */
+    private static boolean discardsInFinally(String body, String name) {
+        String call = name + DISCARD;
+        List<int[]> ranges = finallyRangesOf(body);
+        for (int at = body.indexOf(call); at >= 0; at = body.indexOf(call, at + call.length())) {
+            for (int[] range : ranges) {
+                if (at >= range[0] && at < range[1]) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private static int countOf(String haystack, String needle) {
         int count = 0;
         for (int from = haystack.indexOf(needle); from >= 0; from = haystack.indexOf(needle, from + needle.length())) {
@@ -246,6 +306,10 @@ class MockPlayerDiscardTest {
                 for (String name : acquired.boundNames()) {
                     if (!method.body().contains(name + DISCARD)) {
                         offenders.add(file + "#" + method.name() + " never calls " + name + DISCARD);
+                    } else if (!discardsInFinally(method.body(), name)) {
+                        offenders.add(file + "#" + method.name() + " calls " + name + DISCARD
+                                + " only on the happy path — put it in a finally so an assertion that throws"
+                                + " before it cannot leak the player");
                     }
                 }
                 if (acquired.unbound() > 0) {
@@ -257,6 +321,60 @@ class MockPlayerDiscardTest {
         assertTrue(offenders.isEmpty(),
                 "connected mock players must be discarded before the test ends, or they keep being ticked and"
                         + " holding chunk tickets for the rest of the gametest run: " + offenders);
+    }
+
+    @Test
+    void theFinallyCheckTellsGuaranteedCleanupFromTheHappyPath() {
+        // Every method in the tree now ends up in the guarded shape, so a finallyRangesOf that
+        // returned "the whole body" — or a discardsInFinally stuck on true — would pass the check
+        // above while enforcing nothing. These samples pin both answers against fixed input.
+        String happyPath = """
+                ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+                helper.assertTrue(condition, "message");
+                player.discard();
+                helper.succeed();
+                """;
+        assertFalse(discardsInFinally(happyPath, "player"),
+                "a discard reached only by falling off the end of the body is not guaranteed cleanup");
+
+        String guarded = """
+                ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+                try {
+                    helper.assertTrue(condition, "message");
+                    helper.succeed();
+                } finally {
+                    player.discard();
+                }
+                """;
+        assertTrue(discardsInFinally(guarded, "player"), "a discard in a finally is guaranteed cleanup");
+
+        // The shape the seven config-toggle and listener tests use: one finally, two jobs.
+        String foldedIntoAnExistingFinally = """
+                boolean saved = CultivationConfig.get().enableMealBuffs;
+                ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+                try {
+                    CultivationConfig.get().enableMealBuffs = false;
+                    helper.succeed();
+                } finally {
+                    player.discard();
+                    CultivationConfig.get().enableMealBuffs = saved;
+                }
+                """;
+        assertTrue(discardsInFinally(foldedIntoAnExistingFinally, "player"),
+                "folding the discard into a finally that already restores state is guaranteed cleanup");
+
+        // A finally elsewhere in the method must not launder a happy-path discard by its mere presence.
+        String discardOutsideAnUnrelatedFinally = """
+                ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+                player.discard();
+                try {
+                    helper.succeed();
+                } finally {
+                    Denier.disarm();
+                }
+                """;
+        assertFalse(discardsInFinally(discardOutsideAnUnrelatedFinally, "player"),
+                "the check must read where the discard is written, not merely that a finally exists");
     }
 
     @Test
