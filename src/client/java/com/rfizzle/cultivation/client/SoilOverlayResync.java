@@ -52,8 +52,9 @@ public final class SoilOverlayResync {
      * Comfortably under the server's 256/s bucket refill (8 × 20 ticks = 160/s).
      * This is the single budget both the chunk-load pull and the rule-change
      * sweep share, so the rate limiter never sees more than this from the mod no
-     * matter how many chunks stream in at once — with headroom left for the
-     * server's own overlay delta pushes.
+     * matter how many chunks stream in at once. The margin below the refill
+     * absorbs tick and clock jitter across a burst rather than running the bucket
+     * at its ragged edge.
      */
     private static final int REQUESTS_PER_TICK = 8;
 
@@ -163,6 +164,9 @@ public final class SoilOverlayResync {
     }
 
     private static void drain(ClientLevel level) {
+        if (PACER.isEmpty()) {
+            return; // nothing to send this tick — skip building the drain callbacks
+        }
         PACER.drain(
                 chunkPos -> level.getChunkSource().hasChunk(
                         ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos)),
