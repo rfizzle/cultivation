@@ -47,6 +47,15 @@ final class SoilFixtures {
         return BuiltInRegistries.BLOCK.getKey(block);
     }
 
+    /** The 3×3 of farmland centered on {@link #FARM}, empty above. */
+    static void placeFarmlandGrid(GameTestHelper helper) {
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                helper.setBlock(FARM.offset(dx, 0, dz), Blocks.FARMLAND);
+            }
+        }
+    }
+
     /** Places farmland at {@code rel} and pins its tracked fertility. */
     static void placeTrackedFarmland(GameTestHelper helper, BlockPos rel, float fertility, Block lastCrop) {
         placeTrackedGround(helper, rel, Blocks.FARMLAND, fertility, lastCrop);

@@ -152,6 +152,8 @@
   "advancements.cultivation.long_term_investment.description": "Apply Fertilizer to a block of farmland",
   "advancements.cultivation.reap_what_you_sow.title": "Reap What You Sow",
   "advancements.cultivation.reap_what_you_sow.description": "Harvest nine mature crops in a single scythe sweep",
+  "advancements.cultivation.full_broadcast.title": "Full Broadcast",
+  "advancements.cultivation.full_broadcast.description": "Sow a full 3x3 in a single rake pass",
   "advancements.cultivation.old_growth.title": "Old Growth",
   "advancements.cultivation.old_growth.description": "Harvest a crop from enriched soil still carrying a Fertilizer dose"
 }

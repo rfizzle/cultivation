@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.event;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.criteria.CultivationCriteria;
 import com.rfizzle.cultivation.item.RakeItem;
 import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
@@ -143,6 +144,12 @@ public final class BroadcastSowingHandler implements UseBlockCallback {
             level.playSound(null, center.getX() + 0.5, center.getY() + 1.0, center.getZ() + 0.5,
                     sound.getPlaceSound(), SoundSource.BLOCKS,
                     (sound.getVolume() + 1.0F) / 2.0F, sound.getPitch() * 0.8F);
+        }
+        // A full 3×3 sown in one pass is the ceiling; an occupied block, a seed
+        // stack that ran short, or a rake that broke mid-pass falls short and
+        // grants nothing (§10) — the planting mirror of the scythe's full sweep.
+        if (planted >= 9) {
+            CultivationCriteria.FULL_BROADCAST.trigger(player);
         }
         return planted;
     }

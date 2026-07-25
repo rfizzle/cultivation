@@ -27,6 +27,7 @@ import static com.rfizzle.cultivation.gametest.SoilFixtures.FARM;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.TEMPLATE;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.assertFertility;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.matureWheat;
+import static com.rfizzle.cultivation.gametest.SoilFixtures.placeFarmlandGrid;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland;
 
 /**
@@ -192,15 +193,6 @@ public class BroadcastSowingGameTest implements FabricGameTest {
     }
 
     // --- helpers ---
-
-    /** The 3×3 of farmland centered on {@link SoilFixtures#FARM}, empty above. */
-    private static void placeFarmlandGrid(GameTestHelper helper) {
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                helper.setBlock(FARM.offset(dx, 0, dz), Blocks.FARMLAND);
-            }
-        }
-    }
 
     /** Counts positions in the 3×3 crop layer holding {@code crop} freshly sown at age 0. */
     private static int countAge0(GameTestHelper helper, Block crop) {
