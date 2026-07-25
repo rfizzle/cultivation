@@ -25,11 +25,12 @@ class AdvancementResourcesTest {
     private static final Path LANG_SOURCE =
             Path.of("src/main/resources/assets/cultivation/lang/en_us.json");
 
-    // The four advancement ids paired with the criterion key each file declares.
+    // The five advancement ids paired with the criterion key each file declares.
     private static final String[][] ADVANCEMENTS = {
             {"balanced_table", "reset"},
             {"long_term_investment", "dosed"},
             {"reap_what_you_sow", "swept"},
+            {"full_broadcast", "sown"},
             {"old_growth", "reaped"},
     };
 

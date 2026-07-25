@@ -7,6 +7,7 @@ import com.rfizzle.cultivation.diet.DietHandler;
 import com.rfizzle.cultivation.harvest.HarvestHandler;
 import com.rfizzle.cultivation.item.CultivationItems;
 import com.rfizzle.cultivation.soil.Fertilizer;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
@@ -17,6 +18,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -35,13 +37,15 @@ import static com.rfizzle.cultivation.gametest.SoilFixtures.CROP;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.FARM;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.TEMPLATE;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.matureWheat;
+import static com.rfizzle.cultivation.gametest.SoilFixtures.placeFarmlandGrid;
 import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland;
 
 /**
  * The Husbandry-tab advancements ({@code design/SPEC.md} §10). Each trigger
  * grants for the acting player when its condition is met, stays silent on the
- * near-miss (an 8-crop sweep, a repeated food, half of the enriched+dosed
- * combination), and never grants to a bystander or an automated no-player path.
+ * near-miss (an 8-crop sweep, a sow that falls short of nine, a repeated food,
+ * half of the enriched+dosed combination), and never grants to a bystander or an
+ * automated no-player path.
  */
 public class AdvancementGameTest implements FabricGameTest {
     // The 3×3 scythe field, mirroring ScytheSweepGameTest's geometry.
@@ -113,6 +117,55 @@ public class AdvancementGameTest implements FabricGameTest {
         helper.succeed();
     }
 
+    // --- full_broadcast ---
+
+    @GameTest(template = TEMPLATE)
+    public void fullBroadcastGrantsOnNineBlockSow(GameTestHelper helper) {
+        placeFarmlandGrid(helper);
+        ServerPlayer player = listeningRaker(helper, Items.WHEAT_SEEDS, 9);
+        sow(helper, player, FARM);
+        assertGranted(helper, player, "full_broadcast");
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void fullBroadcastSilentOnOccupiedBlock(GameTestHelper helper) {
+        placeFarmlandGrid(helper);
+        // One corner is not farmland and another already carries a crop: seven sown.
+        helper.setBlock(FARM.offset(-1, 0, -1), Blocks.DIRT);
+        helper.setBlock(FARM.offset(1, 0, 1).above(), matureWheat());
+        ServerPlayer player = listeningRaker(helper, Items.WHEAT_SEEDS, 9);
+        assertPartialSow(helper, sow(helper, player, FARM));
+        assertNotGranted(helper, player, "full_broadcast");
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void fullBroadcastSilentWhenSeedsRunShort(GameTestHelper helper) {
+        placeFarmlandGrid(helper);
+        // Three seeds cap the pass at three blocks.
+        ServerPlayer player = listeningRaker(helper, Items.WHEAT_SEEDS, 3);
+        assertPartialSow(helper, sow(helper, player, FARM));
+        assertNotGranted(helper, player, "full_broadcast");
+        player.discard();
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void fullBroadcastSilentWhenRakeBreaksMidPass(GameTestHelper helper) {
+        placeFarmlandGrid(helper);
+        ServerPlayer player = listeningRaker(helper, Items.WHEAT_SEEDS, 9);
+        ItemStack rake = new ItemStack(CultivationItems.IRON_RAKE);
+        rake.setDamageValue(rake.getMaxDamage() - 3); // three uses left, then it breaks
+        player.setItemInHand(InteractionHand.MAIN_HAND, rake);
+        assertPartialSow(helper, sow(helper, player, FARM));
+        assertNotGranted(helper, player, "full_broadcast");
+        player.discard();
+        helper.succeed();
+    }
+
     // --- old_growth ---
 
     @GameTest(template = TEMPLATE)
@@ -176,6 +229,32 @@ public class AdvancementGameTest implements FabricGameTest {
         player.setGameMode(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(CultivationItems.IRON_SCYTHE));
         return player;
+    }
+
+    /** A listening survival player holding an iron rake, {@code count} seeds in the off-hand. */
+    private static ServerPlayer listeningRaker(GameTestHelper helper, Item seed, int count) {
+        ServerPlayer player = listeningPlayer(helper);
+        player.setGameMode(GameType.SURVIVAL);
+        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(CultivationItems.IRON_RAKE));
+        player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(seed, count));
+        return player;
+    }
+
+    /** Fires the real {@link UseBlockCallback} pipeline against the farmland's up-face. */
+    private static InteractionResult sow(GameTestHelper helper, ServerPlayer player, BlockPos farmlandRel) {
+        BlockPos abs = helper.absolutePos(farmlandRel);
+        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false);
+        return UseBlockCallback.EVENT.invoker().interact(player, helper.getLevel(), InteractionHand.MAIN_HAND, hit);
+    }
+
+    /**
+     * Guards the partial-pass cases against a vacuous pass: the handler returns
+     * SUCCESS only when at least one block was sown, so SUCCESS plus an ungranted
+     * advancement pins the pass to somewhere between one and eight blocks.
+     */
+    private static void assertPartialSow(GameTestHelper helper, InteractionResult result) {
+        helper.assertTrue(result == InteractionResult.SUCCESS,
+                "the partial sow must still plant something, or the no-grant assertion proves nothing");
     }
 
     private static void eatDistinctFoods(ServerPlayer player, int count) {
