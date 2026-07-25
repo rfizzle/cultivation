@@ -83,6 +83,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
         helper.assertTrue(result > 0, "soil set on targeted farmland succeeds");
         float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), abs).orElseThrow().fertility();
         helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4, "fertility is set to 40, got " + fertility);
+        player.discard();
         helper.succeed();
     }
 
@@ -105,6 +106,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
         float fertility = CultivationAPI.getSoilInfo(helper.getLevel(), groundAbs).orElseThrow().fertility();
         helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4,
                 "the soul sand below the wart is set to 40, got " + fertility);
+        player.discard();
         helper.succeed();
     }
 
@@ -118,6 +120,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
 
         int result = server.getCommands().getDispatcher().execute("cultivation soil", source);
         helper.assertTrue(result == 0, "soil report fails with no farmland in sight");
+        player.discard();
         helper.succeed();
     }
 
@@ -131,6 +134,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
 
         int result = server.getCommands().getDispatcher().execute("cultivation field", source);
         helper.assertTrue(result == 0, "field report fails with no farmland in sight");
+        player.discard();
         helper.succeed();
     }
 
@@ -172,6 +176,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
         helper.assertTrue(summary.fertilized() == 0, "no blocks are fertilized, got " + summary.fertilized());
         helper.assertTrue(report.crops().equals(List.of(wheat, carrots)),
                 "distinct crops are wheat then carrots, got " + report.crops());
+        player.discard();
         helper.succeed();
     }
 
@@ -188,6 +193,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
 
         helper.assertTrue(result > 0, "diet reset succeeds");
         helper.assertTrue(DietStore.get(player).isDefault(), "diet reset clears the player's diet data");
+        player.discard();
         helper.succeed();
     }
 
@@ -202,6 +208,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
         int result = server.getCommands().getDispatcher().execute("cultivation diet", source);
 
         helper.assertTrue(result > 0, "diet read succeeds for a fatigued caller");
+        player.discard();
         helper.succeed();
     }
 

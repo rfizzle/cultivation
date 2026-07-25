@@ -49,6 +49,7 @@ public class DietFatigueGameTest implements FabricGameTest {
         float next = CultivationAPI.getFoodEffectiveness(player, new ItemStack(Items.CARROT));
         assertClose(helper, next, 0.7F, "the API reports the next eat's multiplier");
         helper.assertTrue(DietStore.get(player).stackCount(idOf(Items.CARROT)) == 3, "three stacks recorded");
+        player.discard();
         helper.succeed();
     }
 
@@ -69,6 +70,7 @@ public class DietFatigueGameTest implements FabricGameTest {
         helper.assertTrue(DietStore.get(player).isDefault(), "three distinct eats clear the whole map");
         assertClose(helper, CultivationAPI.getFoodEffectiveness(player, new ItemStack(Items.CARROT)),
                 1.0F, "the reset restores full effectiveness");
+        player.discard();
         helper.succeed();
     }
 
@@ -90,6 +92,7 @@ public class DietFatigueGameTest implements FabricGameTest {
         helper.assertTrue(DietStore.get(player).stackCount(idOf(Items.CAKE)) == 1, "the slice recorded a cake stack");
         assertClose(helper, CultivationAPI.getFoodEffectiveness(player, new ItemStack(Items.CAKE)),
                 0.9F, "a second slice would eat at reduced strength");
+        player.discard();
         helper.succeed();
     }
 
@@ -114,6 +117,7 @@ public class DietFatigueGameTest implements FabricGameTest {
                 "cake saturation scales by effectiveness once, not twice");
         helper.assertTrue(player.getFoodData().getFoodLevel() == 7,
                 "cake nutrition scales to 1 at the floor (6 + 1)");
+        player.discard();
         helper.succeed();
     }
 
@@ -136,6 +140,7 @@ public class DietFatigueGameTest implements FabricGameTest {
                 "steak saturation scales by effectiveness exactly once");
         helper.assertTrue(player.getFoodData().getFoodLevel() == 10,
                 "steak nutrition scales to 4 at the floor (6 + 4)");
+        player.discard();
         helper.succeed();
     }
 
@@ -154,6 +159,7 @@ public class DietFatigueGameTest implements FabricGameTest {
             helper.assertTrue(DietStore.get(player).isDefault(), "no fatigue is accumulated while disabled");
             assertClose(helper, CultivationAPI.getFoodEffectiveness(player, new ItemStack(Items.CARROT)),
                     1.0F, "the API reports full strength while disabled");
+            player.discard();
             helper.succeed();
         } finally {
             CultivationConfig.get().enableDietaryFatigue = saved;

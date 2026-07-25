@@ -47,6 +47,7 @@ public class MealBuffGameTest implements FabricGameTest {
                 (float) (baseSpeed * 1.05), "Nimble I raises movement speed 5%");
         helper.assertTrue(player.getEffect(CultivationEffects.DILIGENT) == null, "only Nimble is granted");
         helper.assertTrue(player.getEffect(CultivationEffects.SATED) == null, "only Nimble is granted");
+        player.discard();
         helper.succeed();
     }
 
@@ -69,6 +70,8 @@ public class MealBuffGameTest implements FabricGameTest {
         helper.assertTrue(sated != null && sated.getAmplifier() == 0, "mushroom stew grants Sated I");
         helper.assertTrue(stewEater.getEffect(CultivationEffects.NIMBLE) == null
                 && stewEater.getEffect(CultivationEffects.DILIGENT) == null, "only Sated is granted");
+        soupEater.discard();
+        stewEater.discard();
         helper.succeed();
     }
 
@@ -83,6 +86,7 @@ public class MealBuffGameTest implements FabricGameTest {
                 "the second meal removed Nimble before applying its own grant");
         helper.assertTrue(player.getEffect(CultivationEffects.DILIGENT) != null, "Diligent replaced it");
         helper.assertTrue(activeBuffCount(player) == 1, "exactly one meal buff is active — buffs never stack");
+        player.discard();
         helper.succeed();
     }
 
@@ -94,6 +98,7 @@ public class MealBuffGameTest implements FabricGameTest {
         helper.assertTrue(activeBuffCount(player) == 1, "suspicious stew grants exactly one of the three buffs");
         MobEffectInstance granted = firstActiveBuff(player);
         helper.assertTrue(granted != null && granted.getAmplifier() == 1, "the granted buff is level II");
+        player.discard();
         helper.succeed();
     }
 
@@ -116,6 +121,8 @@ public class MealBuffGameTest implements FabricGameTest {
         helper.assertTrue(sated.getDuration() == snackDuration,
                 "pie's Sated lasts snackBuffDurationTicks, got " + sated.getDuration());
         helper.assertTrue(activeBuffCount(pieEater) == 1, "pumpkin pie grants exactly one buff, not the trio");
+        cookieEater.discard();
+        pieEater.discard();
         helper.succeed();
     }
 
@@ -139,6 +146,7 @@ public class MealBuffGameTest implements FabricGameTest {
             helper.assertTrue(instance.getDuration() == cakeDuration,
                     "cake buffs last cakeBuffDurationTicks, got " + instance.getDuration());
         }
+        player.discard();
         helper.succeed();
     }
 
@@ -158,6 +166,8 @@ public class MealBuffGameTest implements FabricGameTest {
         sated.causeFoodExhaustion(2.0F);
         assertClose(helper, sated.getFoodData().getExhaustionLevel() - satedBefore, 1.8F,
                 "Sated I cuts accrued exhaustion by 10%");
+        plain.discard();
+        sated.discard();
         helper.succeed();
     }
 
@@ -169,6 +179,7 @@ public class MealBuffGameTest implements FabricGameTest {
             CultivationConfig.get().enableMealBuffs = false;
             eat(helper, player, Items.RABBIT_STEW);
             helper.assertTrue(activeBuffCount(player) == 0, "no meal buff is granted while disabled");
+            player.discard();
             helper.succeed();
         } finally {
             CultivationConfig.get().enableMealBuffs = saved;
