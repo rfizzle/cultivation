@@ -4,10 +4,10 @@ import com.rfizzle.cultivation.Cultivation;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.config.SyncedConfig;
 import com.rfizzle.cultivation.network.SoilOverlayRequestC2SPayload;
+import com.rfizzle.cultivation.soil.OverlayRequestPacer;
 import com.rfizzle.cultivation.soil.SoilOverlaySyncPolicy;
 import com.rfizzle.cultivation.soil.SoilOverlaySyncPolicy.Action;
 import com.rfizzle.cultivation.soil.SoilOverlaySyncPolicy.OverlayRules;
-import it.unimi.dsi.fastutil.longs.LongArrayFIFOQueue;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -18,22 +18,29 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 
 /**
- * Keeps the client's soil overlay cache honest when the rules behind it move
- * mid-session ({@code design/SPEC.md} §1).
+ * Owns the client's soil-overlay request traffic and keeps the overlay cache
+ * honest ({@code design/SPEC.md} §1). Two jobs, one paced queue:
  *
- * <p>Overlays are pulled per chunk on chunk load, so a rule change while chunks
- * stay loaded leaves the cache stale — blank where it should draw when the player
- * turns {@code showSoilOverlays} on, or drawing bands the server no longer
- * produces after {@code /cultivation reload}. Rather than hook each mutation site
- * (the config screen's save runnable, the config-sync receiver, an integrated
- * server's reload), this watches the resulting state: a four-field snapshot
- * compared once per client tick, which no path can slip past. The comparison is
- * the whole standing cost; {@link SoilOverlaySyncPolicy} decides what a change owes.
+ * <ul>
+ *   <li><b>Chunk-load pull.</b> {@code CultivationClient}'s
+ *       {@code ClientChunkEvents.CHUNK_LOAD} routes each chunk here via
+ *       {@link #onChunkLoaded}; a join at a large view distance would otherwise
+ *       fire thousands of requests at once and overflow the server's rate
+ *       limiter, silently dropping half.
+ *   <li><b>Mid-session re-pull.</b> A rule behind the overlays can move while
+ *       chunks stay loaded — {@code showSoilOverlays} through the config screen,
+ *       the server rules through {@code /cultivation reload} — leaving the cache
+ *       blank where it should draw or drawing bands the server no longer
+ *       produces. Rather than hook each mutation site, this watches the
+ *       resulting state: a four-field snapshot compared once per client tick,
+ *       which no path can slip past. {@link SoilOverlaySyncPolicy} decides what
+ *       a change owes.
+ * </ul>
  *
- * <p>A re-pull is paced at {@link #REQUESTS_PER_TICK} chunks per tick rather than
- * fired at once: {@code SoilOverlayNetworking}'s token bucket refills at 256/s, so
- * an unpaced sweep of a large view distance would silently drop requests and leave
- * the cache half-filled — the bug this class exists to prevent.
+ * <p>Both sources feed one {@link OverlayRequestPacer}, drained at
+ * {@link #REQUESTS_PER_TICK} chunks per tick. Sharing the queue is what keeps
+ * their <em>combined</em> send rate under {@code SoilOverlayNetworking}'s token
+ * bucket, so neither a join burst nor a rule-change sweep can overflow it.
  *
  * <p>Everything here runs on the client main thread, so it shares
  * {@link ClientSoilOverlayData}'s confinement and needs no synchronization
@@ -43,16 +50,16 @@ import net.minecraft.world.level.Level;
 public final class SoilOverlayResync {
     /**
      * Comfortably under the server's 256/s bucket refill (8 × 20 ticks = 160/s).
-     * The headroom is deliberate: {@code ClientChunkEvents.CHUNK_LOAD} sends its own
-     * unpaced request per chunk, so a sweep that ran right up to the refill rate
-     * would start losing requests to the rate limiter whenever chunks are streaming
-     * in at the same time — leaving exactly the blank patches this class prevents.
+     * This is the single budget both the chunk-load pull and the rule-change
+     * sweep share, so the rate limiter never sees more than this from the mod no
+     * matter how many chunks stream in at once — with headroom left for the
+     * server's own overlay delta pushes.
      */
     private static final int REQUESTS_PER_TICK = 8;
 
     private static OverlayRules lastRules;
     private static ResourceKey<Level> lastDimension;
-    private static final LongArrayFIFOQueue PENDING = new LongArrayFIFOQueue();
+    private static final OverlayRequestPacer PACER = new OverlayRequestPacer(REQUESTS_PER_TICK);
 
     private SoilOverlayResync() {
     }
@@ -62,10 +69,20 @@ public final class SoilOverlayResync {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> reset());
     }
 
+    /**
+     * Queues a chunk's overlay pull as it loads. Called from
+     * {@code CultivationClient}'s {@code CHUNK_LOAD} handler in place of an inline
+     * send, so the join burst is paced through the shared queue rather than fired
+     * at the rate limiter all at once. Client main thread only.
+     */
+    public static void onChunkLoaded(int chunkX, int chunkZ) {
+        PACER.enqueue(ChunkPos.asLong(chunkX, chunkZ));
+    }
+
     private static void reset() {
         lastRules = null;
         lastDimension = null;
-        PENDING.clear();
+        PACER.clear();
     }
 
     private static void onClientTick(Minecraft client) {
@@ -73,32 +90,37 @@ public final class SoilOverlayResync {
         if (level == null || client.player == null) {
             return;
         }
-        // Wait for the server's rules before establishing a baseline: diffing against
-        // the local file's values would fire a spurious full re-pull on join, on top
-        // of the chunk-load burst that is already filling the cache.
-        CultivationConfig serverRules = SyncedConfig.serverConfig();
-        if (serverRules == null) {
-            return;
-        }
         try {
-            // A portal swaps the ClientLevel without disconnecting, so a sweep in
-            // flight is left holding the old dimension's chunk coordinates.
+            // A portal swaps the ClientLevel without disconnecting, so requests queued
+            // for the old dimension must be dropped. The first observation only records
+            // the dimension: the chunk-load burst already sitting in the queue is ours
+            // to send, not a stale cross-dimension sweep.
             ResourceKey<Level> dimension = level.dimension();
-            if (!dimension.equals(lastDimension)) {
+            if (lastDimension == null) {
                 lastDimension = dimension;
-                PENDING.clear();
+            } else if (!dimension.equals(lastDimension)) {
+                lastDimension = dimension;
+                PACER.clear();
             }
-            OverlayRules current = new OverlayRules(
-                    CultivationConfig.get().showSoilOverlays,
-                    serverRules.enableSoilFertility,
-                    serverRules.tiredThreshold,
-                    serverRules.enableNonFarmlandSoil);
-            if (lastRules == null) {
-                lastRules = current;
-            } else if (!lastRules.equals(current)) {
-                OverlayRules previous = lastRules;
-                lastRules = current;
-                apply(SoilOverlaySyncPolicy.decide(previous, current), client, level);
+            // The rule-change baseline needs the server's rules; until they arrive —
+            // and on a server without the mod, never — skip the diff but keep draining,
+            // so the chunk-load queue can't grow unbounded. Waiting for the rules also
+            // avoids diffing against the local file's values and firing a spurious full
+            // re-pull on join, on top of the chunk-load burst already filling the cache.
+            CultivationConfig serverRules = SyncedConfig.serverConfig();
+            if (serverRules != null) {
+                OverlayRules current = new OverlayRules(
+                        CultivationConfig.get().showSoilOverlays,
+                        serverRules.enableSoilFertility,
+                        serverRules.tiredThreshold,
+                        serverRules.enableNonFarmlandSoil);
+                if (lastRules == null) {
+                    lastRules = current;
+                } else if (!lastRules.equals(current)) {
+                    OverlayRules previous = lastRules;
+                    lastRules = current;
+                    apply(SoilOverlaySyncPolicy.decide(previous, current), client, level);
+                }
             }
             drain(level);
         } catch (Exception e) {
@@ -111,8 +133,8 @@ public final class SoilOverlayResync {
         if (action == Action.NONE) {
             return;
         }
-        // Drop any in-flight sweep first — it was queued under the old rules.
-        PENDING.clear();
+        // Drop any in-flight requests first — they were queued under the old rules.
+        PACER.clear();
         if (action == Action.CLEAR) {
             ClientSoilOverlayData.clear();
             return;
@@ -135,20 +157,16 @@ public final class SoilOverlayResync {
                 center.x, center.z, client.options.getEffectiveRenderDistance(),
                 (x, z) -> {
                     if (level.getChunkSource().hasChunk(x, z)) {
-                        PENDING.enqueue(ChunkPos.asLong(x, z));
+                        PACER.enqueue(ChunkPos.asLong(x, z));
                     }
                 });
     }
 
     private static void drain(ClientLevel level) {
-        for (int sent = 0; sent < REQUESTS_PER_TICK && !PENDING.isEmpty(); sent++) {
-            long chunkPos = PENDING.dequeueLong();
-            int x = ChunkPos.getX(chunkPos);
-            int z = ChunkPos.getZ(chunkPos);
-            if (!level.getChunkSource().hasChunk(x, z)) {
-                continue; // unloaded while queued; a reload fires CHUNK_LOAD's own pull
-            }
-            ClientPlayNetworking.send(new SoilOverlayRequestC2SPayload(x, z));
-        }
+        PACER.drain(
+                chunkPos -> level.getChunkSource().hasChunk(
+                        ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos)),
+                chunkPos -> ClientPlayNetworking.send(new SoilOverlayRequestC2SPayload(
+                        ChunkPos.getX(chunkPos), ChunkPos.getZ(chunkPos))));
     }
 }

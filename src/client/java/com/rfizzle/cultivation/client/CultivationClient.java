@@ -6,7 +6,6 @@ import com.rfizzle.cultivation.network.ConfigSyncS2CPayload;
 import com.rfizzle.cultivation.network.DietSyncS2CPayload;
 import com.rfizzle.cultivation.network.SoilBandDeltaS2CPayload;
 import com.rfizzle.cultivation.network.SoilBandsS2CPayload;
-import com.rfizzle.cultivation.network.SoilOverlayRequestC2SPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -27,12 +26,13 @@ public class CultivationClient implements ClientModInitializer {
                 (payload, context) -> context.client().execute(() -> ClientSoilOverlayData.acceptDelta(
                         payload.chunkPos(), payload.packedPos(), payload.present(), payload.flags())));
 
-        // Pull a chunk's overlay set as it loads; honor the client's display toggle
-        // so an opted-out player never asks. Prune the cache as chunks unload.
+        // Queue a chunk's overlay pull as it loads; honor the client's display toggle
+        // so an opted-out player never asks. SoilOverlayResync paces the send through
+        // its shared queue so a large-view-distance join can't overflow the server's
+        // request rate limiter. Prune the cache as chunks unload.
         ClientChunkEvents.CHUNK_LOAD.register((level, chunk) -> {
             if (CultivationConfig.get().showSoilOverlays) {
-                ClientPlayNetworking.send(
-                        new SoilOverlayRequestC2SPayload(chunk.getPos().x, chunk.getPos().z));
+                SoilOverlayResync.onChunkLoaded(chunk.getPos().x, chunk.getPos().z);
             }
         });
         ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) ->
