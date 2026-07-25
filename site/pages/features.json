@@ -134,12 +134,12 @@
     {
       "id": "advancements",
       "title": "Marks of Mastery",
-      "intro": "Four advancements in the vanilla Husbandry tab acknowledge the systems as you learn them.",
+      "intro": "Five advancements in the vanilla Husbandry tab acknowledge the systems as you learn them.",
       "blocks": [
         {
           "type": "prose",
           "html": [
-            "Cultivation extends the vanilla Husbandry tab rather than opening its own. <strong>A Balanced Table</strong> marks the first time three different foods reset your dietary fatigue; <strong>Long-Term Investment</strong> the first Fertilizer dose applied to farmland; <strong>Reap What You Sow</strong> a single scythe sweep that fells all nine crops around it; and <strong>Old Growth</strong> a harvest from soil that is both enriched and still carrying a dose. No custom tab and no fanfare beyond the game's own — just the quiet acknowledgment vanilla already gives."
+            "Cultivation extends the vanilla Husbandry tab rather than opening its own. <strong>A Balanced Table</strong> marks the first time three different foods reset your dietary fatigue; <strong>Long-Term Investment</strong> the first Fertilizer dose applied to farmland; <strong>Reap What You Sow</strong> a single scythe sweep that fells all nine crops around it; <strong>Full Broadcast</strong> its planting mirror, a rake pass that sows all nine blocks of a 3×3; and <strong>Old Growth</strong> a harvest from soil that is both enriched and still carrying a dose. No custom tab and no fanfare beyond the game's own — just the quiet acknowledgment vanilla already gives."
           ]
         }
       ]

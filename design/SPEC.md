@@ -624,16 +624,17 @@ All feedback is localized (`command.cultivation.*`). Diagnostic density is favor
 
 ## 10. Advancements
 
-Four entries, parented into the **vanilla Husbandry tab** (vanilla-deferential: this mod extends that tab's story rather than opening its own).
+Five entries, parented into the **vanilla Husbandry tab** (vanilla-deferential: this mod extends that tab's story rather than opening its own).
 
 | Id | Title | Trigger |
 |---|---|---|
 | `balanced_table` | A Balanced Table | trigger a §3 fatigue reset by eating 3 distinct foods |
 | `long_term_investment` | Long-Term Investment | apply Fertilizer to farmland |
 | `reap_what_you_sow` | Reap What You Sow | harvest 9 mature crops in a single scythe sweep |
+| `full_broadcast` | Full Broadcast | sow all 9 blocks of a 3×3 in a single rake pass |
 | `old_growth` | Old Growth | harvest a crop from a block that is both enriched and carrying an active Fertilizer dose |
 
-Custom criterion triggers fired from the §1 choke point, §3 reset check, §6 application, and §7 sweep. Icons reuse the mod's item sprites.
+Custom criterion triggers fired from the §1 choke point, §3 reset check, §6 application, and the §7 sweep and sowing pass. The sweep and the sow each grant only on a complete 9: for the sweep, a denied block or a scythe that broke mid-sweep falls short; for the sow, an occupied or unsuitable position, a seed stack that ran short, or a rake that broke mid-pass. Icons reuse the mod's item sprites.
 
 ---
 
