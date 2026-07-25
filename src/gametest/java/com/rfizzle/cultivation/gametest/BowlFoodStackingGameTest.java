@@ -50,6 +50,7 @@ public class BowlFoodStackingGameTest implements FabricGameTest {
                 "one stew consumed, two remain (got " + stew.getCount() + ")");
         helper.assertTrue(player.getInventory().contains(new ItemStack(Items.BOWL)),
                 "the returned bowl lands in the inventory");
+        player.discard();
         helper.succeed();
     }
 
@@ -70,6 +71,7 @@ public class BowlFoodStackingGameTest implements FabricGameTest {
                 player.getBoundingBox().inflate(6.0),
                 e -> e.getItem().is(Items.BOWL));
         helper.assertTrue(!dropped.isEmpty(), "the returned bowl is dropped in-world, not lost");
+        player.discard();
         helper.succeed();
     }
 
