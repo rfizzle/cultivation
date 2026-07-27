@@ -34,141 +34,167 @@ public class MealBuffGameTest implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void rabbitStewGrantsNimbleAtLevelOne(GameTestHelper helper) {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        double baseSpeed = player.getAttributeValue(Attributes.MOVEMENT_SPEED);
-        eat(helper, player, Items.RABBIT_STEW);
+        try {
+            double baseSpeed = player.getAttributeValue(Attributes.MOVEMENT_SPEED);
+            eat(helper, player, Items.RABBIT_STEW);
 
-        MobEffectInstance nimble = player.getEffect(CultivationEffects.NIMBLE);
-        helper.assertTrue(nimble != null, "rabbit stew grants Nimble");
-        helper.assertTrue(nimble.getAmplifier() == 0, "Nimble is level I");
-        helper.assertTrue(nimble.getDuration() == CultivationConfig.get().mealBuffDurationTicks,
-                "Nimble lasts mealBuffDurationTicks, got " + nimble.getDuration());
-        // The buff's payoff: +5% movement speed (multiply-total) actually lands on the attribute.
-        assertClose(helper, (float) player.getAttributeValue(Attributes.MOVEMENT_SPEED),
-                (float) (baseSpeed * 1.05), "Nimble I raises movement speed 5%");
-        helper.assertTrue(player.getEffect(CultivationEffects.DILIGENT) == null, "only Nimble is granted");
-        helper.assertTrue(player.getEffect(CultivationEffects.SATED) == null, "only Nimble is granted");
-        player.discard();
-        helper.succeed();
+            MobEffectInstance nimble = player.getEffect(CultivationEffects.NIMBLE);
+            helper.assertTrue(nimble != null, "rabbit stew grants Nimble");
+            helper.assertTrue(nimble.getAmplifier() == 0, "Nimble is level I");
+            helper.assertTrue(nimble.getDuration() == CultivationConfig.get().mealBuffDurationTicks,
+                    "Nimble lasts mealBuffDurationTicks, got " + nimble.getDuration());
+            // The buff's payoff: +5% movement speed (multiply-total) actually lands on the attribute.
+            assertClose(helper, (float) player.getAttributeValue(Attributes.MOVEMENT_SPEED),
+                    (float) (baseSpeed * 1.05), "Nimble I raises movement speed 5%");
+            helper.assertTrue(player.getEffect(CultivationEffects.DILIGENT) == null, "only Nimble is granted");
+            helper.assertTrue(player.getEffect(CultivationEffects.SATED) == null, "only Nimble is granted");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void beetrootSoupGrantsDiligentAndMushroomStewGrantsSated(GameTestHelper helper) {
+        // Both players are built up front so one finally can release them: the two are
+        // independent (separate effect sets, separate FoodData) and no tick runs between
+        // the statements below, so building the second early changes nothing the test sees.
         ServerPlayer soupEater = MockPlayers.serverPlayerInLevel(helper);
-        double baseBreak = soupEater.getAttributeValue(Attributes.BLOCK_BREAK_SPEED);
-        eat(helper, soupEater, Items.BEETROOT_SOUP);
-        MobEffectInstance diligent = soupEater.getEffect(CultivationEffects.DILIGENT);
-        helper.assertTrue(diligent != null && diligent.getAmplifier() == 0, "beetroot soup grants Diligent I");
-        // The buff's payoff: +10% block-break speed (multiply-total) actually lands on the attribute.
-        assertClose(helper, (float) soupEater.getAttributeValue(Attributes.BLOCK_BREAK_SPEED),
-                (float) (baseBreak * 1.10), "Diligent I raises block-break speed 10%");
-        helper.assertTrue(soupEater.getEffect(CultivationEffects.NIMBLE) == null
-                && soupEater.getEffect(CultivationEffects.SATED) == null, "only Diligent is granted");
-
         ServerPlayer stewEater = MockPlayers.serverPlayerInLevel(helper);
-        eat(helper, stewEater, Items.MUSHROOM_STEW);
-        MobEffectInstance sated = stewEater.getEffect(CultivationEffects.SATED);
-        helper.assertTrue(sated != null && sated.getAmplifier() == 0, "mushroom stew grants Sated I");
-        helper.assertTrue(stewEater.getEffect(CultivationEffects.NIMBLE) == null
-                && stewEater.getEffect(CultivationEffects.DILIGENT) == null, "only Sated is granted");
-        soupEater.discard();
-        stewEater.discard();
-        helper.succeed();
+        try {
+            double baseBreak = soupEater.getAttributeValue(Attributes.BLOCK_BREAK_SPEED);
+            eat(helper, soupEater, Items.BEETROOT_SOUP);
+            MobEffectInstance diligent = soupEater.getEffect(CultivationEffects.DILIGENT);
+            helper.assertTrue(diligent != null && diligent.getAmplifier() == 0, "beetroot soup grants Diligent I");
+            // The buff's payoff: +10% block-break speed (multiply-total) actually lands on the attribute.
+            assertClose(helper, (float) soupEater.getAttributeValue(Attributes.BLOCK_BREAK_SPEED),
+                    (float) (baseBreak * 1.10), "Diligent I raises block-break speed 10%");
+            helper.assertTrue(soupEater.getEffect(CultivationEffects.NIMBLE) == null
+                    && soupEater.getEffect(CultivationEffects.SATED) == null, "only Diligent is granted");
+
+            eat(helper, stewEater, Items.MUSHROOM_STEW);
+            MobEffectInstance sated = stewEater.getEffect(CultivationEffects.SATED);
+            helper.assertTrue(sated != null && sated.getAmplifier() == 0, "mushroom stew grants Sated I");
+            helper.assertTrue(stewEater.getEffect(CultivationEffects.NIMBLE) == null
+                    && stewEater.getEffect(CultivationEffects.DILIGENT) == null, "only Sated is granted");
+            helper.succeed();
+        } finally {
+            soupEater.discard();
+            stewEater.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void oneMealAtATimeReplacesTheBuff(GameTestHelper helper) {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        eat(helper, player, Items.RABBIT_STEW);
-        helper.assertTrue(player.getEffect(CultivationEffects.NIMBLE) != null, "Nimble applied first");
+        try {
+            eat(helper, player, Items.RABBIT_STEW);
+            helper.assertTrue(player.getEffect(CultivationEffects.NIMBLE) != null, "Nimble applied first");
 
-        eat(helper, player, Items.BEETROOT_SOUP);
-        helper.assertTrue(player.getEffect(CultivationEffects.NIMBLE) == null,
-                "the second meal removed Nimble before applying its own grant");
-        helper.assertTrue(player.getEffect(CultivationEffects.DILIGENT) != null, "Diligent replaced it");
-        helper.assertTrue(activeBuffCount(player) == 1, "exactly one meal buff is active — buffs never stack");
-        player.discard();
-        helper.succeed();
+            eat(helper, player, Items.BEETROOT_SOUP);
+            helper.assertTrue(player.getEffect(CultivationEffects.NIMBLE) == null,
+                    "the second meal removed Nimble before applying its own grant");
+            helper.assertTrue(player.getEffect(CultivationEffects.DILIGENT) != null, "Diligent replaced it");
+            helper.assertTrue(activeBuffCount(player) == 1, "exactly one meal buff is active — buffs never stack");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void suspiciousStewGrantsOneBuffAtLevelTwo(GameTestHelper helper) {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        eat(helper, player, Items.SUSPICIOUS_STEW);
+        try {
+            eat(helper, player, Items.SUSPICIOUS_STEW);
 
-        helper.assertTrue(activeBuffCount(player) == 1, "suspicious stew grants exactly one of the three buffs");
-        MobEffectInstance granted = firstActiveBuff(player);
-        helper.assertTrue(granted != null && granted.getAmplifier() == 1, "the granted buff is level II");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(activeBuffCount(player) == 1, "suspicious stew grants exactly one of the three buffs");
+            MobEffectInstance granted = firstActiveBuff(player);
+            helper.assertTrue(granted != null && granted.getAmplifier() == 1, "the granted buff is level II");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void snackFoodsGrantOneBuffForTheSnackDuration(GameTestHelper helper) {
         int snackDuration = CultivationConfig.get().snackBuffDurationTicks;
 
+        // Built up front so one finally releases both — see the note on the beetroot/mushroom test.
         ServerPlayer cookieEater = MockPlayers.serverPlayerInLevel(helper);
-        eat(helper, cookieEater, Items.COOKIE);
-        MobEffectInstance nimble = cookieEater.getEffect(CultivationEffects.NIMBLE);
-        helper.assertTrue(nimble != null && nimble.getAmplifier() == 0, "cookie grants Nimble I");
-        helper.assertTrue(nimble.getDuration() == snackDuration,
-                "cookie's Nimble lasts snackBuffDurationTicks, got " + nimble.getDuration());
-        helper.assertTrue(activeBuffCount(cookieEater) == 1, "cookie grants exactly one buff, not the trio");
-
         ServerPlayer pieEater = MockPlayers.serverPlayerInLevel(helper);
-        eat(helper, pieEater, Items.PUMPKIN_PIE);
-        MobEffectInstance sated = pieEater.getEffect(CultivationEffects.SATED);
-        helper.assertTrue(sated != null && sated.getAmplifier() == 0, "pumpkin pie grants Sated I");
-        helper.assertTrue(sated.getDuration() == snackDuration,
-                "pie's Sated lasts snackBuffDurationTicks, got " + sated.getDuration());
-        helper.assertTrue(activeBuffCount(pieEater) == 1, "pumpkin pie grants exactly one buff, not the trio");
-        cookieEater.discard();
-        pieEater.discard();
-        helper.succeed();
+        try {
+            eat(helper, cookieEater, Items.COOKIE);
+            MobEffectInstance nimble = cookieEater.getEffect(CultivationEffects.NIMBLE);
+            helper.assertTrue(nimble != null && nimble.getAmplifier() == 0, "cookie grants Nimble I");
+            helper.assertTrue(nimble.getDuration() == snackDuration,
+                    "cookie's Nimble lasts snackBuffDurationTicks, got " + nimble.getDuration());
+            helper.assertTrue(activeBuffCount(cookieEater) == 1, "cookie grants exactly one buff, not the trio");
+
+            eat(helper, pieEater, Items.PUMPKIN_PIE);
+            MobEffectInstance sated = pieEater.getEffect(CultivationEffects.SATED);
+            helper.assertTrue(sated != null && sated.getAmplifier() == 0, "pumpkin pie grants Sated I");
+            helper.assertTrue(sated.getDuration() == snackDuration,
+                    "pie's Sated lasts snackBuffDurationTicks, got " + sated.getDuration());
+            helper.assertTrue(activeBuffCount(pieEater) == 1, "pumpkin pie grants exactly one buff, not the trio");
+            helper.succeed();
+        } finally {
+            cookieEater.discard();
+            pieEater.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void cakeSliceGrantsTheWholeTrio(GameTestHelper helper) {
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        player.getFoodData().setFoodLevel(6); // must be hungry to eat cake
+        try {
+            player.getFoodData().setFoodLevel(6); // must be hungry to eat cake
 
-        BlockPos cake = new BlockPos(1, 1, 1);
-        helper.setBlock(cake, Blocks.CAKE);
-        BlockPos abs = helper.absolutePos(cake);
-        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false);
-        helper.getLevel().getBlockState(abs).useWithoutItem(helper.getLevel(), player, hit);
+            BlockPos cake = new BlockPos(1, 1, 1);
+            helper.setBlock(cake, Blocks.CAKE);
+            BlockPos abs = helper.absolutePos(cake);
+            BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false);
+            helper.getLevel().getBlockState(abs).useWithoutItem(helper.getLevel(), player, hit);
 
-        int cakeDuration = CultivationConfig.get().cakeBuffDurationTicks;
-        for (Holder<MobEffect> effect : java.util.List.of(
-                CultivationEffects.NIMBLE, CultivationEffects.DILIGENT, CultivationEffects.SATED)) {
-            MobEffectInstance instance = player.getEffect(effect);
-            helper.assertTrue(instance != null, "cake grants all three buffs");
-            helper.assertTrue(instance.getAmplifier() == 0, "each cake buff is level I");
-            helper.assertTrue(instance.getDuration() == cakeDuration,
-                    "cake buffs last cakeBuffDurationTicks, got " + instance.getDuration());
+            int cakeDuration = CultivationConfig.get().cakeBuffDurationTicks;
+            for (Holder<MobEffect> effect : java.util.List.of(
+                    CultivationEffects.NIMBLE, CultivationEffects.DILIGENT, CultivationEffects.SATED)) {
+                MobEffectInstance instance = player.getEffect(effect);
+                helper.assertTrue(instance != null, "cake grants all three buffs");
+                helper.assertTrue(instance.getAmplifier() == 0, "each cake buff is level I");
+                helper.assertTrue(instance.getDuration() == cakeDuration,
+                        "cake buffs last cakeBuffDurationTicks, got " + instance.getDuration());
+            }
+            helper.succeed();
+        } finally {
+            player.discard();
         }
-        player.discard();
-        helper.succeed();
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void satedSlowsRealExhaustion(GameTestHelper helper) {
+        // Built up front so one finally releases both — see the note on the beetroot/mushroom test.
         ServerPlayer plain = MockPlayers.serverPlayerInLevel(helper);
-        plain.getAbilities().invulnerable = false; // causeFoodExhaustion no-ops while invulnerable
-        float plainBefore = plain.getFoodData().getExhaustionLevel();
-        plain.causeFoodExhaustion(2.0F);
-        assertClose(helper, plain.getFoodData().getExhaustionLevel() - plainBefore, 2.0F,
-                "without Sated, exhaustion accrues in full");
-
         ServerPlayer sated = MockPlayers.serverPlayerInLevel(helper);
-        sated.getAbilities().invulnerable = false;
-        sated.addEffect(new MobEffectInstance(CultivationEffects.SATED, 200, 0));
-        float satedBefore = sated.getFoodData().getExhaustionLevel();
-        sated.causeFoodExhaustion(2.0F);
-        assertClose(helper, sated.getFoodData().getExhaustionLevel() - satedBefore, 1.8F,
-                "Sated I cuts accrued exhaustion by 10%");
-        plain.discard();
-        sated.discard();
-        helper.succeed();
+        try {
+            plain.getAbilities().invulnerable = false; // causeFoodExhaustion no-ops while invulnerable
+            float plainBefore = plain.getFoodData().getExhaustionLevel();
+            plain.causeFoodExhaustion(2.0F);
+            assertClose(helper, plain.getFoodData().getExhaustionLevel() - plainBefore, 2.0F,
+                    "without Sated, exhaustion accrues in full");
+
+            sated.getAbilities().invulnerable = false;
+            sated.addEffect(new MobEffectInstance(CultivationEffects.SATED, 200, 0));
+            float satedBefore = sated.getFoodData().getExhaustionLevel();
+            sated.causeFoodExhaustion(2.0F);
+            assertClose(helper, sated.getFoodData().getExhaustionLevel() - satedBefore, 1.8F,
+                    "Sated I cuts accrued exhaustion by 10%");
+            helper.succeed();
+        } finally {
+            plain.discard();
+            sated.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
@@ -179,10 +205,12 @@ public class MealBuffGameTest implements FabricGameTest {
             CultivationConfig.get().enableMealBuffs = false;
             eat(helper, player, Items.RABBIT_STEW);
             helper.assertTrue(activeBuffCount(player) == 0, "no meal buff is granted while disabled");
-            player.discard();
             helper.succeed();
         } finally {
+            // The config field first: it cannot throw, so the process-wide toggle is
+            // restored even if the entity cleanup below does.
             CultivationConfig.get().enableMealBuffs = saved;
+            player.discard();
         }
     }
 

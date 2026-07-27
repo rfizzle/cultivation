@@ -74,16 +74,18 @@ public class SecondWaveSoilGameTest implements FabricGameTest {
         placeTrackedGround(helper, FARM, Blocks.DIRT, 100.0F, Blocks.SWEET_BERRY_BUSH);
         helper.setBlock(CROP, berryBush(3));
         ServerPlayer player = bareHand(helper);
+        try {
+            pick(helper, player, CROP);
 
-        pick(helper, player, CROP);
-
-        assertFertility(helper, FARM, 97.0F, "picking a ripe bush drains its dirt");
-        helper.assertTrue(helper.getBlockState(CROP).is(Blocks.SWEET_BERRY_BUSH)
-                        && helper.getBlockState(CROP).getValue(BlockStateProperties.AGE_3) == 1,
-                "the bush persists and resets to age 1, as vanilla picking does");
-        helper.assertItemEntityPresent(Items.SWEET_BERRIES, CROP, 2.0);
-        player.discard();
-        helper.succeed();
+            assertFertility(helper, FARM, 97.0F, "picking a ripe bush drains its dirt");
+            helper.assertTrue(helper.getBlockState(CROP).is(Blocks.SWEET_BERRY_BUSH)
+                            && helper.getBlockState(CROP).getValue(BlockStateProperties.AGE_3) == 1,
+                    "the bush persists and resets to age 1, as vanilla picking does");
+            helper.assertItemEntityPresent(Items.SWEET_BERRIES, CROP, 2.0);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -92,14 +94,16 @@ public class SecondWaveSoilGameTest implements FabricGameTest {
         placeTrackedGround(helper, FARM, Blocks.DIRT, 1.0F, Blocks.SWEET_BERRY_BUSH);
         helper.setBlock(CROP, berryBush(3));
         ServerPlayer player = bareHand(helper);
+        try {
+            pick(helper, player, CROP);
 
-        pick(helper, player, CROP);
-
-        assertFertility(helper, FARM, 0.0F, "the draining pick must clamp at 0");
-        // A ripe bush pops 2–3 berries; the exhausted clamp makes exactly 1 deterministic.
-        helper.assertItemEntityCountIs(Items.SWEET_BERRIES, CROP, 2.0, 1);
-        player.discard();
-        helper.succeed();
+            assertFertility(helper, FARM, 0.0F, "the draining pick must clamp at 0");
+            // A ripe bush pops 2–3 berries; the exhausted clamp makes exactly 1 deterministic.
+            helper.assertItemEntityCountIs(Items.SWEET_BERRIES, CROP, 2.0, 1);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -117,13 +121,15 @@ public class SecondWaveSoilGameTest implements FabricGameTest {
         placeTrackedGround(helper, FARM, Blocks.DIRT, 100.0F, Blocks.SWEET_BERRY_BUSH);
         helper.setBlock(CROP, berryBush(1));
         ServerPlayer player = bareHand(helper);
+        try {
+            pick(helper, player, CROP);
 
-        pick(helper, player, CROP);
-
-        assertFertility(helper, FARM, 100.0F, "picking a bush too young to fruit must not drain");
-        helper.assertItemEntityNotPresent(Items.SWEET_BERRIES, CROP, 2.0);
-        player.discard();
-        helper.succeed();
+            assertFertility(helper, FARM, 100.0F, "picking a bush too young to fruit must not drain");
+            helper.assertItemEntityNotPresent(Items.SWEET_BERRIES, CROP, 2.0);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     // --- growth slows as the ground tires (deterministic, on the roll bound) ---
@@ -178,18 +184,21 @@ public class SecondWaveSoilGameTest implements FabricGameTest {
         helper.setBlock(FARM, Blocks.DIRT);
         helper.setBlock(CROP, berryBush(3));
         ServerPlayer player = bareHand(helper);
-        BlockPos abs = helper.absolutePos(CROP);
-        BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false);
+        try {
+            BlockPos abs = helper.absolutePos(CROP);
+            BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false);
 
-        InteractionResult result = UseBlockCallback.EVENT.invoker()
-                .interact(player, helper.getLevel(), InteractionHand.MAIN_HAND, hit);
+            InteractionResult result = UseBlockCallback.EVENT.invoker()
+                    .interact(player, helper.getLevel(), InteractionHand.MAIN_HAND, hit);
 
-        helper.assertTrue(result == InteractionResult.PASS,
-                "the right-click harvest must pass a bush through — it is not a replant crop");
-        helper.assertTrue(helper.getBlockState(CROP).getValue(BlockStateProperties.AGE_3) == 3,
-                "the callback must not disturb the bush");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.PASS,
+                    "the right-click harvest must pass a bush through — it is not a replant crop");
+            helper.assertTrue(helper.getBlockState(CROP).getValue(BlockStateProperties.AGE_3) == 3,
+                    "the callback must not disturb the bush");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     // --- helpers ---

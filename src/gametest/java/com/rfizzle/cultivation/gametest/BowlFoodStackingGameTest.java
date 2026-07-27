@@ -40,39 +40,45 @@ public class BowlFoodStackingGameTest implements FabricGameTest {
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void eatingFromAStackReturnsBowlToInventory(GameTestHelper helper) {
         ServerPlayer player = survivalPlayer(helper);
-        ItemStack stew = new ItemStack(Items.RABBIT_STEW, 3);
-        FoodProperties food = stew.get(DataComponents.FOOD);
-        helper.assertTrue(food != null, "rabbit stew has a food component");
+        try {
+            ItemStack stew = new ItemStack(Items.RABBIT_STEW, 3);
+            FoodProperties food = stew.get(DataComponents.FOOD);
+            helper.assertTrue(food != null, "rabbit stew has a food component");
 
-        player.eat(helper.getLevel(), stew, food);
+            player.eat(helper.getLevel(), stew, food);
 
-        helper.assertTrue(stew.getCount() == 2,
-                "one stew consumed, two remain (got " + stew.getCount() + ")");
-        helper.assertTrue(player.getInventory().contains(new ItemStack(Items.BOWL)),
-                "the returned bowl lands in the inventory");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(stew.getCount() == 2,
+                    "one stew consumed, two remain (got " + stew.getCount() + ")");
+            helper.assertTrue(player.getInventory().contains(new ItemStack(Items.BOWL)),
+                    "the returned bowl lands in the inventory");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void bowlIsDroppedWhenInventoryIsFull(GameTestHelper helper) {
         ServerPlayer player = survivalPlayer(helper);
-        // Fill every main inventory slot so the returned bowl cannot be stored.
-        for (int slot = 0; slot < 36; slot++) {
-            player.getInventory().setItem(slot, new ItemStack(Items.STONE, 64));
+        try {
+            // Fill every main inventory slot so the returned bowl cannot be stored.
+            for (int slot = 0; slot < 36; slot++) {
+                player.getInventory().setItem(slot, new ItemStack(Items.STONE, 64));
+            }
+            ItemStack stew = new ItemStack(Items.RABBIT_STEW, 3);
+            FoodProperties food = stew.get(DataComponents.FOOD);
+            helper.assertTrue(food != null, "rabbit stew has a food component");
+
+            player.eat(helper.getLevel(), stew, food);
+
+            List<ItemEntity> dropped = player.level().getEntitiesOfClass(ItemEntity.class,
+                    player.getBoundingBox().inflate(6.0),
+                    e -> e.getItem().is(Items.BOWL));
+            helper.assertTrue(!dropped.isEmpty(), "the returned bowl is dropped in-world, not lost");
+            helper.succeed();
+        } finally {
+            player.discard();
         }
-        ItemStack stew = new ItemStack(Items.RABBIT_STEW, 3);
-        FoodProperties food = stew.get(DataComponents.FOOD);
-        helper.assertTrue(food != null, "rabbit stew has a food component");
-
-        player.eat(helper.getLevel(), stew, food);
-
-        List<ItemEntity> dropped = player.level().getEntitiesOfClass(ItemEntity.class,
-                player.getBoundingBox().inflate(6.0),
-                e -> e.getItem().is(Items.BOWL));
-        helper.assertTrue(!dropped.isEmpty(), "the returned bowl is dropped in-world, not lost");
-        player.discard();
-        helper.succeed();
     }
 
     private static ServerPlayer survivalPlayer(GameTestHelper helper) {

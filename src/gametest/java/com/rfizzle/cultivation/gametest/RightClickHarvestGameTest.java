@@ -43,21 +43,23 @@ public class RightClickHarvestGameTest implements FabricGameTest {
         placeTrackedFarmland(helper, NEIGHBOR_FARM, 100.0F, Blocks.CARROTS);
         helper.setBlock(NEIGHBOR, matureCarrots());
         ServerPlayer player = bareHand(helper);
+        try {
+            InteractionResult result = rightClick(helper, player, CROP);
 
-        InteractionResult result = rightClick(helper, player, CROP);
-
-        helper.assertTrue(result == InteractionResult.SUCCESS, "a bare-hand harvest consumes the interaction");
-        var harvested = helper.getBlockState(CROP);
-        helper.assertTrue(harvested.is(Blocks.CARROTS) && harvested.getValue(CropBlock.AGE) == 0,
-                "the harvested crop must replant carrots at age 0");
-        helper.assertItemEntityPresent(Items.CARROT, CROP, 2.0);
-        assertFertility(helper, FARM, 97.0F, "a same-crop harvest drains the full amount");
-        // Single-block: the neighbor is left mature and its soil untouched.
-        helper.assertTrue(helper.getBlockState(NEIGHBOR).getValue(CropBlock.AGE) == CropBlock.MAX_AGE,
-                "the neighboring crop must be untouched — this is not a sweep");
-        assertFertility(helper, NEIGHBOR_FARM, 100.0F, "the neighbor's soil must not drain");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS, "a bare-hand harvest consumes the interaction");
+            var harvested = helper.getBlockState(CROP);
+            helper.assertTrue(harvested.is(Blocks.CARROTS) && harvested.getValue(CropBlock.AGE) == 0,
+                    "the harvested crop must replant carrots at age 0");
+            helper.assertItemEntityPresent(Items.CARROT, CROP, 2.0);
+            assertFertility(helper, FARM, 97.0F, "a same-crop harvest drains the full amount");
+            // Single-block: the neighbor is left mature and its soil untouched.
+            helper.assertTrue(helper.getBlockState(NEIGHBOR).getValue(CropBlock.AGE) == CropBlock.MAX_AGE,
+                    "the neighboring crop must be untouched — this is not a sweep");
+            assertFertility(helper, NEIGHBOR_FARM, 100.0F, "the neighbor's soil must not drain");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -66,14 +68,16 @@ public class RightClickHarvestGameTest implements FabricGameTest {
         var immature = Blocks.CARROTS.defaultBlockState().setValue(CropBlock.AGE, 3);
         helper.setBlock(CROP, immature);
         ServerPlayer player = bareHand(helper);
+        try {
+            InteractionResult result = rightClick(helper, player, CROP);
 
-        InteractionResult result = rightClick(helper, player, CROP);
-
-        helper.assertTrue(result == InteractionResult.PASS, "an immature crop is left to vanilla (no harvest)");
-        helper.assertTrue(helper.getBlockState(CROP).equals(immature), "an immature crop must be untouched");
-        assertFertility(helper, FARM, 100.0F, "an immature crop must not drain soil");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.PASS, "an immature crop is left to vanilla (no harvest)");
+            helper.assertTrue(helper.getBlockState(CROP).equals(immature), "an immature crop must be untouched");
+            assertFertility(helper, FARM, 100.0F, "an immature crop must not drain soil");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -81,35 +85,38 @@ public class RightClickHarvestGameTest implements FabricGameTest {
         placeTrackedFarmland(helper, FARM, 100.0F, Blocks.CARROTS);
         helper.setBlock(CROP, matureCarrots());
         ServerPlayer player = bareHand(helper);
-        player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
+        try {
+            player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_SWORD));
 
-        InteractionResult result = rightClick(helper, player, CROP);
+            InteractionResult result = rightClick(helper, player, CROP);
 
-        helper.assertTrue(result == InteractionResult.PASS, "a held item takes its own use, never a harvest");
-        helper.assertTrue(helper.getBlockState(CROP).getValue(CropBlock.AGE) == CropBlock.MAX_AGE,
-                "a crop right-clicked with a held item must be left mature");
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.PASS, "a held item takes its own use, never a harvest");
+            helper.assertTrue(helper.getBlockState(CROP).getValue(CropBlock.AGE) == CropBlock.MAX_AGE,
+                    "a crop right-clicked with a held item must be left mature");
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
     public void disabledConfigDoesNotHarvest(GameTestHelper helper) {
         boolean saved = CultivationConfig.get().enableRightClickHarvest;
+        ServerPlayer player = bareHand(helper);
         try {
             CultivationConfig.get().enableRightClickHarvest = false;
             placeTrackedFarmland(helper, FARM, 100.0F, Blocks.CARROTS);
             helper.setBlock(CROP, matureCarrots());
-            ServerPlayer player = bareHand(helper);
 
             InteractionResult result = rightClick(helper, player, CROP);
 
             helper.assertTrue(result == InteractionResult.PASS, "with the toggle off, a bare-hand right-click is inert");
             helper.assertTrue(helper.getBlockState(CROP).getValue(CropBlock.AGE) == CropBlock.MAX_AGE,
                     "with the toggle off, the crop must be left mature");
-            player.discard();
             helper.succeed();
         } finally {
             CultivationConfig.get().enableRightClickHarvest = saved;
+            player.discard();
         }
     }
 
@@ -118,17 +125,20 @@ public class RightClickHarvestGameTest implements FabricGameTest {
         placeTrackedFarmland(helper, FARM, 100.0F, Blocks.CARROTS);
         helper.setBlock(CROP, matureCarrots());
         ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-        player.setGameMode(GameType.CREATIVE);
+        try {
+            player.setGameMode(GameType.CREATIVE);
 
-        InteractionResult result = rightClick(helper, player, CROP);
+            InteractionResult result = rightClick(helper, player, CROP);
 
-        helper.assertTrue(result == InteractionResult.SUCCESS, "creative harvests identically");
-        var state = helper.getBlockState(CROP);
-        helper.assertTrue(state.is(Blocks.CARROTS) && state.getValue(CropBlock.AGE) == 0,
-                "creative must harvest and replant at age 0");
-        helper.assertItemEntityPresent(Items.CARROT, CROP, 2.0);
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS, "creative harvests identically");
+            var state = helper.getBlockState(CROP);
+            helper.assertTrue(state.is(Blocks.CARROTS) && state.getValue(CropBlock.AGE) == 0,
+                    "creative must harvest and replant at age 0");
+            helper.assertItemEntityPresent(Items.CARROT, CROP, 2.0);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     @GameTest(template = TEMPLATE)
@@ -137,15 +147,17 @@ public class RightClickHarvestGameTest implements FabricGameTest {
         placeTrackedFarmland(helper, FARM, 100.0F, Blocks.TORCHFLOWER_CROP);
         helper.setBlock(CROP, Blocks.TORCHFLOWER);
         ServerPlayer player = bareHand(helper);
+        try {
+            InteractionResult result = rightClick(helper, player, CROP);
 
-        InteractionResult result = rightClick(helper, player, CROP);
-
-        helper.assertTrue(result == InteractionResult.SUCCESS, "a seedless crop is still harvested");
-        helper.assertBlockPresent(Blocks.AIR, CROP);
-        helper.assertBlockPresent(Blocks.FARMLAND, FARM);
-        helper.assertItemEntityPresent(Items.TORCHFLOWER, CROP, 2.0);
-        player.discard();
-        helper.succeed();
+            helper.assertTrue(result == InteractionResult.SUCCESS, "a seedless crop is still harvested");
+            helper.assertBlockPresent(Blocks.AIR, CROP);
+            helper.assertBlockPresent(Blocks.FARMLAND, FARM);
+            helper.assertItemEntityPresent(Items.TORCHFLOWER, CROP, 2.0);
+            helper.succeed();
+        } finally {
+            player.discard();
+        }
     }
 
     // --- helpers ---
