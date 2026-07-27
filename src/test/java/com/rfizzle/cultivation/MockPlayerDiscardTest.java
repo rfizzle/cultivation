@@ -20,27 +20,33 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tier-1 guard that every connected mock player a gametest builds is discarded
- * before the test ends, and discarded unconditionally — from inside a
- * {@code finally} (mc-testing-mock, "Cleanup: always discard").
+ * before the test ends (mc-testing-mock, "Cleanup: always discard"), and
+ * discarded unconditionally, from inside a {@code finally}.
  *
  * <p>{@code MockPlayers.serverPlayerInLevel} finishes with
  * {@code PlayerList#placeNewPlayer}, which registers the player both in the
  * {@code ServerLevel} and in the player list. A test that returns without
- * calling {@code discard()} leaves it in {@code entityTickList} — ticked every
- * tick for the rest of the run — and holding a {@code DistanceManager} chunk
- * ticket. {@code discard()} releases exactly those two: it clears
- * {@code ServerLevel.players} and the tracker and ticket state through
- * {@code EntityCallbacks#onTrackingEnd}.
+ * calling {@code discard()} leaves it in {@code entityTickList} and holding a
+ * {@code DistanceManager} chunk ticket — and the two compound, because that
+ * ticket is what keeps the player's own chunk in entity-ticking range, so the
+ * leak sustains the ticking that makes it cost. {@code discard()} releases both
+ * through the level's entity callbacks: {@code onTickingEnd} clears
+ * {@code entityTickList}, and {@code onTrackingEnd} clears
+ * {@code ServerLevel.players} along with the tracker and ticket state.
  *
  * <p>The player-list entry is deliberately left in place. {@code PlayerList#remove}
- * is the only path that clears it, so the retained player and its connection are
- * not reclaimed until shutdown — that boundary is accepted here rather than
- * papered over, because the per-tick and per-ticket cost is what actually grows
- * with the size of the suite.
+ * is the only path that clears it, and it opens with a synchronous
+ * {@code save(player)} NBT write — trading a bounded residual for one disk write
+ * per mock player is the worse deal across a suite this size. The retained entry
+ * is not free: {@code MinecraftServer#tickChildren} walks the player list twice a
+ * tick. For a discarded player both walks are effectively O(1), which is why the
+ * per-tick and per-ticket cost released above is what actually grows with the
+ * suite, and this residual is not.
  *
  * <p>The omission is invisible to every other signal: the player still behaves
  * correctly for the test that built it, so assertions pass, CI stays green, and
@@ -109,6 +115,13 @@ class MockPlayerDiscardTest {
 
     /** Matches a {@code finally} block through its opening brace. */
     private static final Pattern FINALLY_BLOCK = Pattern.compile("\\bfinally\\s*\\{");
+
+    /** A brace-matched {@code finally} block's body, as {@code [start, end)} offsets into a method body. */
+    private record Range(int start, int end) {
+        boolean contains(int index) {
+            return index >= start && index < end;
+        }
+    }
 
     /** A method's declared return type, name, and body text with comments and literals stripped. */
     private record Method(String returnType, String name, String body) {
@@ -224,12 +237,18 @@ class MockPlayerDiscardTest {
     }
 
     /**
-     * The {@code [start, end)} extents of every {@code finally} block in a body,
-     * found by the same brace walk that splits methods. Nested blocks are all
-     * reported: a match inside an outer block is still scanned for.
+     * The extent of every {@code finally} block in a body, found by the same brace
+     * walk that splits methods. Nested blocks are all reported: a match inside an
+     * outer block is still scanned for.
+     *
+     * <p>A walk that runs off the end fails here rather than recording a range to
+     * end-of-body. That range would read as "everything after this point is
+     * guarded" — the one outcome that leaves the check silently passing while
+     * enforcing nothing, and the reason this failure is loud on its own rather
+     * than resting on the brace balance {@link #methodsOf} established earlier.
      */
-    private static List<int[]> finallyRangesOf(String body) {
-        List<int[]> ranges = new ArrayList<>();
+    private static List<Range> finallyRangesOf(String body) {
+        List<Range> ranges = new ArrayList<>();
         Matcher matcher = FINALLY_BLOCK.matcher(body);
         while (matcher.find()) {
             int open = matcher.end() - 1;
@@ -243,23 +262,35 @@ class MockPlayerDiscardTest {
                     break;
                 }
             }
-            ranges.add(new int[] {open + 1, Math.min(i, body.length())});
+            if (depth != 0) {
+                throw new AssertionError("unbalanced braces after a finally block — the discard"
+                        + " placement check cannot be trusted until the parser handles this method");
+            }
+            ranges.add(new Range(open + 1, i));
         }
         return ranges;
     }
 
-    /** Whether some {@code name.discard()} in this body is written inside a {@code finally}. */
-    private static boolean discardsInFinally(String body, String name) {
+    /**
+     * Offsets of every {@code name.discard()} call in a body, matched as a whole
+     * identifier so a longer variable ending in this one — {@code soupEater}
+     * against {@code Eater} — cannot stand in for it.
+     */
+    private static List<Integer> discardCallsIn(String body, String name) {
         String call = name + DISCARD;
-        List<int[]> ranges = finallyRangesOf(body);
+        List<Integer> found = new ArrayList<>();
         for (int at = body.indexOf(call); at >= 0; at = body.indexOf(call, at + call.length())) {
-            for (int[] range : ranges) {
-                if (at >= range[0] && at < range[1]) {
-                    return true;
-                }
+            if (at == 0 || !Character.isJavaIdentifierPart(body.charAt(at - 1))) {
+                found.add(at);
             }
         }
-        return false;
+        return found;
+    }
+
+    /** Whether some {@code name.discard()} in this body is written inside one of {@code ranges}. */
+    private static boolean discardsInFinally(String body, List<Range> ranges, String name) {
+        List<Integer> calls = discardCallsIn(body, name);
+        return ranges.stream().anyMatch(range -> calls.stream().anyMatch(range::contains));
     }
 
     private static int countOf(String haystack, String needle) {
@@ -303,10 +334,11 @@ class MockPlayerDiscardTest {
                     continue; // Hands the player to its caller, which owes the discard.
                 }
                 Acquired acquired = acquisitionsIn(method, fileMethods);
+                List<Range> finallyRanges = finallyRangesOf(method.body());
                 for (String name : acquired.boundNames()) {
-                    if (!method.body().contains(name + DISCARD)) {
+                    if (discardCallsIn(method.body(), name).isEmpty()) {
                         offenders.add(file + "#" + method.name() + " never calls " + name + DISCARD);
-                    } else if (!discardsInFinally(method.body(), name)) {
+                    } else if (!discardsInFinally(method.body(), finallyRanges, name)) {
                         offenders.add(file + "#" + method.name() + " calls " + name + DISCARD
                                 + " only on the happy path — put it in a finally so an assertion that throws"
                                 + " before it cannot leak the player");
@@ -323,9 +355,14 @@ class MockPlayerDiscardTest {
                         + " holding chunk tickets for the rest of the gametest run: " + offenders);
     }
 
+    /** Runs the placement check the way {@link #everyAcquiredMockPlayerIsDiscarded} does. */
+    private static boolean guarded(String body, String name) {
+        return discardsInFinally(body, finallyRangesOf(body), name);
+    }
+
     @Test
     void theFinallyCheckTellsGuaranteedCleanupFromTheHappyPath() {
-        // Every method in the tree now ends up in the guarded shape, so a finallyRangesOf that
+        // Every method in the tree ends up in the guarded shape, so a finallyRangesOf that
         // returned "the whole body" — or a discardsInFinally stuck on true — would pass the check
         // above while enforcing nothing. These samples pin both answers against fixed input.
         String happyPath = """
@@ -334,10 +371,10 @@ class MockPlayerDiscardTest {
                 player.discard();
                 helper.succeed();
                 """;
-        assertFalse(discardsInFinally(happyPath, "player"),
+        assertFalse(guarded(happyPath, "player"),
                 "a discard reached only by falling off the end of the body is not guaranteed cleanup");
 
-        String guarded = """
+        String wrapped = """
                 ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
                 try {
                     helper.assertTrue(condition, "message");
@@ -346,9 +383,9 @@ class MockPlayerDiscardTest {
                     player.discard();
                 }
                 """;
-        assertTrue(discardsInFinally(guarded, "player"), "a discard in a finally is guaranteed cleanup");
+        assertTrue(guarded(wrapped, "player"), "a discard in a finally is guaranteed cleanup");
 
-        // The shape the seven config-toggle and listener tests use: one finally, two jobs.
+        // The shape the config-toggle and listener tests use: one finally, two jobs.
         String foldedIntoAnExistingFinally = """
                 boolean saved = CultivationConfig.get().enableMealBuffs;
                 ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
@@ -356,11 +393,11 @@ class MockPlayerDiscardTest {
                     CultivationConfig.get().enableMealBuffs = false;
                     helper.succeed();
                 } finally {
-                    player.discard();
                     CultivationConfig.get().enableMealBuffs = saved;
+                    player.discard();
                 }
                 """;
-        assertTrue(discardsInFinally(foldedIntoAnExistingFinally, "player"),
+        assertTrue(guarded(foldedIntoAnExistingFinally, "player"),
                 "folding the discard into a finally that already restores state is guaranteed cleanup");
 
         // A finally elsewhere in the method must not launder a happy-path discard by its mere presence.
@@ -373,8 +410,29 @@ class MockPlayerDiscardTest {
                     Denier.disarm();
                 }
                 """;
-        assertFalse(discardsInFinally(discardOutsideAnUnrelatedFinally, "player"),
+        assertFalse(guarded(discardOutsideAnUnrelatedFinally, "player"),
                 "the check must read where the discard is written, not merely that a finally exists");
+
+        // Two players whose names share a suffix: the guarded one must not answer for the leaked one.
+        String suffixSharingNames = """
+                ServerPlayer eater = MockPlayers.serverPlayerInLevel(helper);
+                ServerPlayer soupEater = MockPlayers.serverPlayerInLevel(helper);
+                try {
+                    helper.succeed();
+                } finally {
+                    soupEater.discard();
+                }
+                """;
+        assertTrue(guarded(suffixSharingNames, "soupEater"), "soupEater is discarded in the finally");
+        assertFalse(guarded(suffixSharingNames, "eater"),
+                "soupEater.discard() must not be read as a discard of eater");
+
+        // A finally the brace walk cannot close must fail loudly. Recording it as running to
+        // end-of-body would read as "everything after this is guarded" — passing while enforcing
+        // nothing, which is the one failure mode this guard cannot be allowed to have.
+        assertThrows(AssertionError.class,
+                () -> finallyRangesOf("try { helper.succeed(); } finally { player.discard();"),
+                "an unclosed finally must fail the scan rather than swallow the rest of the body");
     }
 
     @Test

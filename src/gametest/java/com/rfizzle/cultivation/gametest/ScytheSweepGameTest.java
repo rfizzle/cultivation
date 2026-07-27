@@ -160,8 +160,8 @@ public class ScytheSweepGameTest implements FabricGameTest {
                     "with the sweep disabled, neighbors must be untouched");
             helper.succeed();
         } finally {
-            player.discard();
             CultivationConfig.get().enableScytheHarvest = saved;
+            player.discard();
         }
     }
 
@@ -189,9 +189,11 @@ public class ScytheSweepGameTest implements FabricGameTest {
     @GameTest(template = TEMPLATE)
     public void protectionDeniedBlockIsSkipped(GameTestHelper helper) {
         fillField(helper, matureWheat());
-        Denier.armAt(helper.absolutePos(EDGE));
         ServerPlayer player = survivalScyther(helper, CultivationItems.IRON_SCYTHE);
         try {
+            // Armed inside the try so the finally below is what disarms it: the denier is
+            // process-wide, and leaving it armed would deny breaks for the rest of the run.
+            Denier.armAt(helper.absolutePos(EDGE));
             breakCenter(helper, player);
 
             BlockState guarded = helper.getBlockState(EDGE);
@@ -202,17 +204,19 @@ public class ScytheSweepGameTest implements FabricGameTest {
                     "unprotected blocks must still be harvested and replanted");
             helper.succeed();
         } finally {
-            player.discard();
+            // Process-wide state first: it cannot throw, so it is repaired even if the
+            // entity cleanup below does.
             Denier.disarm();
+            player.discard();
         }
     }
 
     @GameTest(template = TEMPLATE)
     public void protectionDeniedCenterIsSkipped(GameTestHelper helper) {
         fillField(helper, matureWheat());
-        Denier.armAt(helper.absolutePos(CENTER));
         ServerPlayer player = survivalScyther(helper, CultivationItems.IRON_SCYTHE);
         try {
+            Denier.armAt(helper.absolutePos(CENTER));
             breakCenter(helper, player);
 
             BlockState center = helper.getBlockState(CENTER);
@@ -223,8 +227,8 @@ public class ScytheSweepGameTest implements FabricGameTest {
                     "unprotected neighbors must still be harvested when only the center is denied");
             helper.succeed();
         } finally {
-            player.discard();
             Denier.disarm();
+            player.discard();
         }
     }
 

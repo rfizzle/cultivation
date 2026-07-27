@@ -207,8 +207,10 @@ public class MealBuffGameTest implements FabricGameTest {
             helper.assertTrue(activeBuffCount(player) == 0, "no meal buff is granted while disabled");
             helper.succeed();
         } finally {
-            player.discard();
+            // The config field first: it cannot throw, so the process-wide toggle is
+            // restored even if the entity cleanup below does.
             CultivationConfig.get().enableMealBuffs = saved;
+            player.discard();
         }
     }
 

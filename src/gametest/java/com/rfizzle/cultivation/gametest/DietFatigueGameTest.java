@@ -175,8 +175,8 @@ public class DietFatigueGameTest implements FabricGameTest {
                     1.0F, "the API reports full strength while disabled");
             helper.succeed();
         } finally {
-            player.discard();
             CultivationConfig.get().enableDietaryFatigue = saved;
+            player.discard();
         }
     }
 

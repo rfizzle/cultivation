@@ -165,8 +165,8 @@ public class BroadcastSowingGameTest implements FabricGameTest {
             helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "with the toggle off nothing is broadcast");
             helper.succeed();
         } finally {
-            player.discard();
             CultivationConfig.get().enableBroadcastSowing = saved;
+            player.discard();
         }
     }
 

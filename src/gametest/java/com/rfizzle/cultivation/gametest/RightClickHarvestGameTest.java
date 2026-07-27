@@ -115,8 +115,8 @@ public class RightClickHarvestGameTest implements FabricGameTest {
                     "with the toggle off, the crop must be left mature");
             helper.succeed();
         } finally {
-            player.discard();
             CultivationConfig.get().enableRightClickHarvest = saved;
+            player.discard();
         }
     }
 
