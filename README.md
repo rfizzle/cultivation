@@ -22,9 +22,6 @@ dimensions, and no vanilla recipe is taken away.
 
 ## Download
 
-**Not yet released.** The store pages are live and the first beta is close; until it is
-tagged, build from source with `./gradlew build`.
-
 | [Modrinth](https://modrinth.com/mod/cultivation-agriculture-overhaul) | [CurseForge](https://www.curseforge.com/minecraft/mc-mods/cultivation-agriculture-overhaul) | [GitHub Releases](https://github.com/rfizzle/cultivation/releases) | [Website](https://cultivation.rfizzle.com) | [Report an issue](https://github.com/rfizzle/cultivation/issues) |
 | --- | --- | --- | --- | --- |
 
