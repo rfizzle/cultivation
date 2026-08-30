@@ -4,6 +4,7 @@ import com.rfizzle.cultivation.api.CultivationAPI;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -51,7 +52,7 @@ public class DietFatigueGameTest implements FabricGameTest {
             helper.assertTrue(DietStore.get(player).stackCount(idOf(Items.CARROT)) == 3, "three stacks recorded");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -74,7 +75,7 @@ public class DietFatigueGameTest implements FabricGameTest {
                     1.0F, "the reset restores full effectiveness");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -100,7 +101,7 @@ public class DietFatigueGameTest implements FabricGameTest {
                     0.9F, "a second slice would eat at reduced strength");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -128,7 +129,7 @@ public class DietFatigueGameTest implements FabricGameTest {
                     "cake nutrition scales to 1 at the floor (6 + 1)");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -154,7 +155,7 @@ public class DietFatigueGameTest implements FabricGameTest {
                     "steak nutrition scales to 4 at the floor (6 + 4)");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -176,7 +177,7 @@ public class DietFatigueGameTest implements FabricGameTest {
             helper.succeed();
         } finally {
             CultivationConfig.get().enableDietaryFatigue = saved;
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 

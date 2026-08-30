@@ -40,6 +40,14 @@ import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland
  * {@code CROP} is its own work position.
  */
 public class VillagerStewardshipGameTest implements FabricGameTest {
+    /**
+     * Double the 100-tick default. These are the config-toggle tests: each flips a
+     * field, drives the full in-world path behind it, and restores the field in a
+     * finally. They pay for a config reload plus the same tick budget the untoggled
+     * test needs, and a timeout here fails the restore as well as the assertion.
+     */
+    private static final int CONFIG_TOGGLE_TIMEOUT = 200;
+
     private static final String CONFIG_BATCH = "cultivationStewardshipConfig";
 
     // --- Fallow discipline & hysteresis ---
@@ -265,7 +273,7 @@ public class VillagerStewardshipGameTest implements FabricGameTest {
 
     // --- Config toggles (own batch) ---
 
-    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = CONFIG_TOGGLE_TIMEOUT)
     public void disabledStewardshipRestoresTheVanillaTask(GameTestHelper helper) {
         CultivationConfig config = CultivationConfig.get();
         boolean saved = config.enableVillagerStewardship;
@@ -281,7 +289,7 @@ public class VillagerStewardshipGameTest implements FabricGameTest {
         }
     }
 
-    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = CONFIG_TOGGLE_TIMEOUT)
     public void disabledFertilizingSkipsDosingAndPickup(GameTestHelper helper) {
         CultivationConfig config = CultivationConfig.get();
         boolean saved = config.enableVillagerFertilizing;

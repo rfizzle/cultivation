@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import com.rfizzle.cultivation.item.CultivationItems;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -54,7 +55,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
                     "the scythe must lose one durability per crop harvested (9)");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -79,7 +80,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
             assertFertility(helper, farmOf(EDGE), 97.0F, "the same-crop wheat harvest drains the full amount");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -99,7 +100,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
             helper.assertBlockPresent(Blocks.STONE, stonePos);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -117,7 +118,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
             helper.assertItemEntityPresent(Items.TORCHFLOWER, CENTER, 2.0);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -141,7 +142,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
             helper.assertItemEntityPresent(Items.PITCHER_PLANT, CENTER, 2.0);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -161,7 +162,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
             helper.succeed();
         } finally {
             CultivationConfig.get().enableScytheHarvest = saved;
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -182,7 +183,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
                     "a creative sweep must not spend durability");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -207,7 +208,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
             // Process-wide state first: it cannot throw, so it is repaired even if the
             // entity cleanup below does.
             Denier.disarm();
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -228,7 +229,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
             helper.succeed();
         } finally {
             Denier.disarm();
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -252,7 +253,7 @@ public class ScytheSweepGameTest implements FabricGameTest {
                     "the sweep must stop once the tool breaks, leaving later blocks unharvested");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 

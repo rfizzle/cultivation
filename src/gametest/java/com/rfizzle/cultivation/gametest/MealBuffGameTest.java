@@ -2,6 +2,7 @@ package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.effect.CultivationEffects;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -50,7 +51,7 @@ public class MealBuffGameTest implements FabricGameTest {
             helper.assertTrue(player.getEffect(CultivationEffects.SATED) == null, "only Nimble is granted");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -79,8 +80,8 @@ public class MealBuffGameTest implements FabricGameTest {
                     && stewEater.getEffect(CultivationEffects.DILIGENT) == null, "only Sated is granted");
             helper.succeed();
         } finally {
-            soupEater.discard();
-            stewEater.discard();
+            MockPlayers.retire(soupEater);
+            MockPlayers.retire(stewEater);
         }
     }
 
@@ -98,7 +99,7 @@ public class MealBuffGameTest implements FabricGameTest {
             helper.assertTrue(activeBuffCount(player) == 1, "exactly one meal buff is active — buffs never stack");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -113,7 +114,7 @@ public class MealBuffGameTest implements FabricGameTest {
             helper.assertTrue(granted != null && granted.getAmplifier() == 1, "the granted buff is level II");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -140,8 +141,8 @@ public class MealBuffGameTest implements FabricGameTest {
             helper.assertTrue(activeBuffCount(pieEater) == 1, "pumpkin pie grants exactly one buff, not the trio");
             helper.succeed();
         } finally {
-            cookieEater.discard();
-            pieEater.discard();
+            MockPlayers.retire(cookieEater);
+            MockPlayers.retire(pieEater);
         }
     }
 
@@ -168,7 +169,7 @@ public class MealBuffGameTest implements FabricGameTest {
             }
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -192,8 +193,8 @@ public class MealBuffGameTest implements FabricGameTest {
                     "Sated I cuts accrued exhaustion by 10%");
             helper.succeed();
         } finally {
-            plain.discard();
-            sated.discard();
+            MockPlayers.retire(plain);
+            MockPlayers.retire(sated);
         }
     }
 
@@ -210,7 +211,7 @@ public class MealBuffGameTest implements FabricGameTest {
             // The config field first: it cannot throw, so the process-wide toggle is
             // restored even if the entity cleanup below does.
             CultivationConfig.get().enableMealBuffs = saved;
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
