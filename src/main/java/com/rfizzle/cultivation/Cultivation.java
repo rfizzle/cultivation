@@ -42,6 +42,12 @@ public class Cultivation implements ModInitializer {
         ScytheHarvestHandler.register();
         RightClickHarvestHandler.register();
         BroadcastSowingHandler.register();
+        // Networking is registered per domain rather than through one CultivationNetworking
+        // registrar, and stays that way: mc-networking sanctions the split for a mod large
+        // enough that one registrar becomes unwieldy, and names these very classes as its
+        // example. SoilOverlayNetworking is the reason — it owns a C2S receiver and a
+        // token-bucket rate limiter that have nothing to do with config or diet, and folding
+        // them into a single class would put three unrelated lifetimes behind one name.
         ConfigNetworking.register();
         DietNetworking.register();
         SoilOverlayNetworking.register();

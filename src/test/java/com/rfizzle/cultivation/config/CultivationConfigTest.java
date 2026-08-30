@@ -380,6 +380,29 @@ class CultivationConfigTest {
     }
 
     @Test
+    void infiniteValuesClampToTheBoundRatherThanTheDefault() {
+        // The other half of the non-finite rule, and the half a bare isNaN guard is often
+        // wrongly assumed to miss. +Infinity satisfies every lower bound, so an open-topped
+        // helper would need its own isFinite gate — but clampDouble always carries a finite
+        // ceiling, and Math.clamp orders correctly against both infinities. So the bound is
+        // the right answer here, not the default: a player who wrote Infinity asked for "as
+        // much as possible", and the maximum is exactly that.
+        CultivationConfig config = new CultivationConfig();
+        config.polycultureGrowthMultiplier = Double.POSITIVE_INFINITY;
+        config.tiredGrowthMultiplier = Double.NEGATIVE_INFINITY;
+        config.harvestDrain = Double.POSITIVE_INFINITY;
+
+        config.clamp();
+
+        assertTrue(Double.isFinite(config.polycultureGrowthMultiplier),
+                "an infinite multiplier must not survive the clamp");
+        assertTrue(Double.isFinite(config.tiredGrowthMultiplier),
+                "an infinite multiplier must not survive the clamp");
+        assertEquals(100.0, config.harvestDrain,
+                "+Infinity must clamp to the field's maximum, not fold to its default");
+    }
+
+    @Test
     void nanValuesInFileResetToDefaultsOnLoad(@TempDir Path dir) throws IOException {
         Path path = dir.resolve("cultivation.json");
         // Gson's lenient parse accepts a bare NaN token, so a hand-edited file

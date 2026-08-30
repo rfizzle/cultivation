@@ -5,6 +5,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
@@ -43,6 +45,45 @@ class SyncedConfigTest {
 
         assertSame(afterReload, SyncedConfig.effective(),
                 "a post-reload re-broadcast must supersede the join-time copy");
+    }
+
+    @Test
+    void acceptJsonPublishesAClampedConfig() {
+        CultivationConfig fromServer = new CultivationConfig();
+        fromServer.harvestDrain = 9999.0; // past the [0, 100] clamp range
+
+        SyncedConfig.acceptJson(fromServer.toSyncJson());
+
+        CultivationConfig synced = SyncedConfig.serverConfig();
+        assertNotNull(synced, "a readable sync must be published");
+        assertEquals(100.0, synced.harvestDrain,
+                "the decoded config must be clamped before it is published — the bytes came off"
+                        + " the network, and a server on a different build can send a value this"
+                        + " client's bounds reject");
+    }
+
+    @Test
+    void anUnreadableSyncKeepsThePreviousCopyRatherThanSeatingDefaults() {
+        CultivationConfig fromServer = new CultivationConfig();
+        fromServer.enablePolyculture = false;
+        SyncedConfig.acceptJson(fromServer.toSyncJson());
+
+        SyncedConfig.acceptJson("this is not json");
+
+        CultivationConfig synced = SyncedConfig.serverConfig();
+        assertNotNull(synced, "an unreadable sync must not clear a good previous copy");
+        assertEquals(false, synced.enablePolyculture,
+                "healing to defaults would flip a feature the server had disabled back on —"
+                        + " precisely the direction server-authoritative config exists to prevent");
+    }
+
+    @Test
+    void anUnreadableFirstSyncLeavesNothingSeated() {
+        SyncedConfig.acceptJson("{{{ not json");
+
+        assertNull(SyncedConfig.serverConfig(),
+                "a failed first sync must leave the holder unset so effective() falls back to the"
+                        + " local file, rather than publishing a config the server never sent");
     }
 
     @Test
