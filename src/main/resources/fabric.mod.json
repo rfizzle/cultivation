@@ -16,6 +16,7 @@
     "entrypoints": {
         "main": ["com.rfizzle.cultivation.Cultivation"],
         "client": ["com.rfizzle.cultivation.client.CultivationClient"],
+        "fabric-datagen": ["com.rfizzle.cultivation.data.CultivationDataGenerator"],
         "modmenu": ["com.rfizzle.cultivation.compat.modmenu.CultivationModMenu"],
         "jade": ["com.rfizzle.cultivation.compat.jade.CultivationJadePlugin"],
         "emi": ["com.rfizzle.cultivation.compat.emi.CultivationEmiPlugin"],

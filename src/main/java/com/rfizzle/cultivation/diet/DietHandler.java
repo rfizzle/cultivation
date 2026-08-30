@@ -4,7 +4,7 @@ import com.rfizzle.cultivation.api.CultivationFoodCallback;
 import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.config.CultivationConfig;
-import com.rfizzle.cultivation.criteria.CultivationCriteria;
+import com.rfizzle.cultivation.advancement.CultivationCriteria;
 import com.rfizzle.cultivation.network.DietNetworking;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;

@@ -12,7 +12,7 @@ import java.util.function.Function;
  * client imports) is what makes the "screen covers every field" contract
  * unit-testable: a new config field without a matching {@link Spec} here fails
  * {@code ConfigFieldsTest}, and a {@link Spec} without a lang key fails
- * {@code CompatResourcesTest}.
+ * {@code CompatResourceContractTest}.
  *
  * <p>Field names are the Java camelCase identifiers; the {@code config.cultivation.*}
  * lang keys are their snake_case form (SPEC §Localization, e.g. {@code harvestDrain}

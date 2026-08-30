@@ -1,3 +1,5 @@
+import java.util.concurrent.TimeUnit
+
 plugins {
     id 'fabric-loom' version "${loom_version}"
     id 'jacoco'
@@ -20,8 +22,9 @@ tasks.register('printVersion') {
 //   - N commits past the last matching tag       → "0.0.0+N.gSHA[.dirty]"
 //   - no matching tag yet                        → "0.0.0+gSHA[.dirty]"
 //   - git unavailable or describe fails          → "0.0.0"
-// The base ("0.0.0") comes from gradle.properties and is bumped via
-// scripts/release.sh. Tag pattern is `v*`.
+// The base ("0.0.0") comes from gradle.properties and is bumped by hand; the tag that
+// makes a release is cut by the `release` make target, which validates the version
+// against SemVer before tagging. Tag pattern is `v*`.
 def computeModVersion() {
     def base = project.mod_version
     def tagPrefix = "v"
@@ -58,7 +61,20 @@ def runGitDescribe(String tagPrefix) {
                 .directory(rootDir)
                 .redirectErrorStream(true)
                 .start()
-        proc.waitFor()
+        // Bounded, never a bare waitFor(): this runs in the configuration phase, so a hung
+        // git wedges every task in the build, not just the version computation. Git does
+        // hang — a stale index.lock from a killed process, an unresponsive network
+        // filesystem, a credential helper waiting on a prompt with no terminal.
+        def finished = proc.waitFor(10, TimeUnit.SECONDS)
+        if (!finished) {
+            // destroyForcibly so the orphaned git process cannot outlive the daemon.
+            proc.destroyForcibly()
+            // Degrading to the mod_version base is right; doing it silently is not. On a
+            // machine where git is merely slow, every invocation pays the full ten seconds
+            // and then produces a jar versioned from the base with nothing in the log.
+            logger.warn('git describe timed out after 10s — version falls back to the mod_version base')
+            return null
+        }
         def out = proc.inputStream.text.trim()
         if (proc.exitValue() != 0) return null
         return out
@@ -373,7 +389,10 @@ tasks.register('verifyDatagenIdempotent') {
                              : lines.join('\n')
         }
 
-        def statusResult = runGit(['git', 'status', '--porcelain', '--', genDir])
+        // --no-optional-locks keeps a read-only check from taking .git/index.lock: git status
+        // rewrites the index when cached stat info is stale, which is exactly the state
+        // runDatagen leaves behind after rewriting every generated file.
+        def statusResult = runGit(['git', '--no-optional-locks', 'status', '--porcelain', '--', genDir])
         def statusExit = statusResult.result.get().exitValue
         if (statusExit != 0) {
             throw new GradleException(

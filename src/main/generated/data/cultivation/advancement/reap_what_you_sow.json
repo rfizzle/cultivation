@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "criteria": {
+    "swept": {
+      "trigger": "cultivation:reap_what_you_sow"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.cultivation.reap_what_you_sow.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "cultivation:iron_scythe"
+    },
+    "title": {
+      "translate": "advancements.cultivation.reap_what_you_sow.title"
+    }
+  },
+  "requirements": [
+    [
+      "swept"
+    ]
+  ]
+}

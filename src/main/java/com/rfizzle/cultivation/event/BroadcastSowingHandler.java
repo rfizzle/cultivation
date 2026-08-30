@@ -1,7 +1,7 @@
 package com.rfizzle.cultivation.event;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
-import com.rfizzle.cultivation.criteria.CultivationCriteria;
+import com.rfizzle.cultivation.advancement.CultivationCriteria;
 import com.rfizzle.cultivation.item.RakeItem;
 import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;

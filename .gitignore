@@ -72,3 +72,7 @@ art/audio/**/*.report.png
 # themselves — icon-128.png, icon-512.png, logo.png — are committed).
 art/*@*x.png
 art/*@*x-anim.png
+
+# The generated assets/data under src/main/generated are committed; datagen's own
+# hash cache beside them is not — it is per-machine state, rewritten every run.
+src/main/generated/.cache/

@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "criteria": {
+    "reaped": {
+      "trigger": "cultivation:old_growth"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.cultivation.old_growth.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "count": 1,
+      "id": "minecraft:wheat"
+    },
+    "title": {
+      "translate": "advancements.cultivation.old_growth.title"
+    }
+  },
+  "requirements": [
+    [
+      "reaped"
+    ]
+  ]
+}
