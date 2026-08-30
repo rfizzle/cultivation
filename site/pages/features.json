@@ -145,17 +145,19 @@
       ]
     },
     {
-      "title": "Better Together",
-      "intro": "With siblings from the Concord collection installed, Cultivation lights up further — never required, and with none installed nothing is missing.",
+      "title": "Part of Concord",
+      "intro": "Cultivation is one of eight independent overhauls in the Concord collection. Install any, combine all — each stands alone, and with none of the others installed nothing here is missing.",
       "blocks": [
         {
           "type": "list",
           "items": [
-            "<strong class='text-bone'>Meridian</strong> — scythes and hoes are first-class enchanting targets; a charted enchantment on a netherite scythe is the endgame of the harvest.",
-            "<strong class='text-bone'>Mercantile</strong> — farmer villagers who remember you deal in the good stuff: high-reputation trades offer Fertilizer and buy your surplus at its worth.",
-            "<strong class='text-bone'>Tribulation</strong> — when the world pushes back, a stocked and varied pantry is armor you can eat.",
-            "<strong class='text-bone'>Prosperity</strong> — chests far from home can hold caches of Fertilizer and rare seeds worth carrying back to your fields.",
-            "<strong class='text-bone'>Distillation</strong> — the still drinks from your fields: crops you grow turn up among its brews' ingredients."
+            "<strong class='text-bone'>Meridian</strong> — Chart your enchantments.",
+            "<strong class='text-bone'>Mercantile</strong> — Every villager remembers.",
+            "<strong class='text-bone'>Tribulation</strong> — Survive what comes next.",
+            "<strong class='text-bone'>Prosperity</strong> — Every chest, yours to discover.",
+            "<strong class='text-bone'>Respite</strong> — Make the night count.",
+            "<strong class='text-bone'>Distillation</strong> — Every drop counts.",
+            "<strong class='text-bone'>Instinct</strong> — Worth raising."
           ]
         }
       ]
