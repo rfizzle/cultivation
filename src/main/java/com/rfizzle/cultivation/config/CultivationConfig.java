@@ -7,6 +7,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.rfizzle.cultivation.Cultivation;
 import net.fabricmc.loader.api.FabricLoader;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -28,6 +29,17 @@ public class CultivationConfig {
     private static volatile CultivationConfig INSTANCE;
 
     static final Gson GSON = new GsonBuilder().setPrettyPrinting().setLenient().create();
+
+    /**
+     * The wire serializer. Compact, not pretty: the on-disk file is written for a
+     * human to hand-edit, but the sync blob is read only by Gson on the other end,
+     * where the indentation and newlines are roughly 40% of the bytes sent to every
+     * player on join and after every reload.
+     *
+     * <p>Lenient like {@link #GSON} so a server running a slightly different build
+     * cannot desync a client over a token this parser would otherwise reject.
+     */
+    private static final Gson SYNC_GSON = new GsonBuilder().setLenient().create();
 
     // A real config is a few KB; anything near this size is not a config file.
     // Refusing it before the read keeps a pathological file from ballooning the heap.
@@ -186,27 +198,37 @@ public class CultivationConfig {
      * (client-only presentation keys stay local — see {@link SyncedConfig}).
      */
     public String toSyncJson() {
-        return GSON.toJson(this);
+        return SYNC_GSON.toJson(this);
     }
 
     /**
-     * Rebuilds a config from a {@link #toSyncJson()} blob: deserialize, then clamp
+     * Rebuilds a config from a {@link #toSyncJson()} blob: deserialize, then clamp,
      * so a hostile or malformed payload can never seat an out-of-range rule on the
      * client. No migration runs — the sending server already carries the current
-     * schema. A parse failure degrades to defaults rather than dropping the
-     * connection.
+     * schema.
+     *
+     * <p>Returns {@code null} on an unreadable blob rather than a default config.
+     * Handing back defaults reads as success and is the worse answer: it seats a
+     * config the server never sent, and every default is <em>on</em>, so a client
+     * would enable features the server had disabled. The caller keeps whatever it
+     * already had and logs — see {@code SyncedConfig#acceptJson}.
+     *
+     * <p>Must not be called from a netty thread. The clamp inside it logs one
+     * synchronous line per correction, and on this path a remote peer controls
+     * both how many corrections there are and how often they arrive.
      */
+    @Nullable
     public static CultivationConfig fromSyncJson(String json) {
         try {
-            CultivationConfig config = GSON.fromJson(json, CultivationConfig.class);
+            CultivationConfig config = SYNC_GSON.fromJson(json, CultivationConfig.class);
             if (config == null) {
-                config = new CultivationConfig();
+                return null;
             }
             config.clamp();
             return config;
         } catch (Exception e) {
-            Cultivation.LOGGER.warn("Failed to parse synced config; using defaults", e);
-            return new CultivationConfig();
+            Cultivation.LOGGER.error("Failed to parse synced config from the server", e);
+            return null;
         }
     }
 

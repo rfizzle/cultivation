@@ -2,7 +2,7 @@ package com.rfizzle.cultivation.client;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.config.SyncedConfig;
-import com.rfizzle.cultivation.network.ConfigSyncS2CPayload;
+import com.rfizzle.cultivation.network.ConfigSyncPayload;
 import com.rfizzle.cultivation.network.DietSyncS2CPayload;
 import com.rfizzle.cultivation.network.SoilBandDeltaS2CPayload;
 import com.rfizzle.cultivation.network.SoilBandsS2CPayload;
@@ -16,8 +16,10 @@ public class CultivationClient implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        ClientPlayNetworking.registerGlobalReceiver(ConfigSyncS2CPayload.TYPE,
-                (payload, context) -> context.client().execute(() -> SyncedConfig.accept(payload.config())));
+        // The parse and the clamp both run inside client.execute — never in decode() or on the
+        // netty callback. See SyncedConfig#acceptJson for why that boundary matters here.
+        ClientPlayNetworking.registerGlobalReceiver(ConfigSyncPayload.TYPE,
+                (payload, context) -> context.client().execute(() -> SyncedConfig.acceptJson(payload.json())));
         ClientPlayNetworking.registerGlobalReceiver(DietSyncS2CPayload.TYPE,
                 (payload, context) -> context.client().execute(() -> ClientDietData.accept(payload)));
         ClientPlayNetworking.registerGlobalReceiver(SoilBandsS2CPayload.TYPE,

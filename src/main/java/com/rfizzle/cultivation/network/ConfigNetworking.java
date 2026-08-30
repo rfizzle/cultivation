@@ -18,13 +18,13 @@ public final class ConfigNetworking {
     }
 
     public static void register() {
-        PayloadTypeRegistry.playS2C().register(ConfigSyncS2CPayload.TYPE, ConfigSyncS2CPayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ConfigSyncPayload.TYPE, ConfigSyncPayload.CODEC);
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> sync(handler.getPlayer()));
     }
 
     /** Pushes the current server config to one player. */
     public static void sync(ServerPlayer player) {
-        ServerPlayNetworking.send(player, new ConfigSyncS2CPayload(CultivationConfig.get()));
+        ServerPlayNetworking.send(player, ConfigSyncPayload.of(CultivationConfig.get()));
     }
 
     /** Re-broadcasts the current server config to every connected player (post-reload). */

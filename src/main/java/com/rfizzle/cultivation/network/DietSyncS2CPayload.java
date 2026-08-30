@@ -15,7 +15,7 @@ import java.util.Map;
  * Pushes the owning player's dietary-fatigue stacks to their client for tooltip
  * feedback ({@code design/SPEC.md} §3). The fatigue formula's knobs
  * ({@code fatiguePerRepeat}, {@code fatigueFloor}) ride the server→client config
- * sync ({@link ConfigSyncS2CPayload}), so this payload carries only the per-food
+ * sync ({@link ConfigSyncPayload}), so this payload carries only the per-food
  * stack counts — the client recomputes effectiveness with the same formula the
  * server uses. No restoration math ever runs on the client.
  *

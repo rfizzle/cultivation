@@ -1,10 +1,11 @@
 package com.rfizzle.cultivation.config;
 
+import com.rfizzle.cultivation.Cultivation;
 import org.jetbrains.annotations.Nullable;
 
 /**
  * The client's copy of the server's authoritative {@link CultivationConfig},
- * delivered by {@link com.rfizzle.cultivation.network.ConfigSyncS2CPayload} on
+ * delivered by {@link com.rfizzle.cultivation.network.ConfigSyncPayload} on
  * join and after a server-side reload. Held behind a single {@code volatile}
  * reference so a read on the render thread always sees a whole config, never a
  * torn one, and cleared on disconnect so one server's rules never bleed into
@@ -42,6 +43,35 @@ public final class SyncedConfig {
 
     public static void accept(CultivationConfig config) {
         serverConfig = config;
+    }
+
+    /**
+     * Parses, clamps and publishes a config-sync blob. <strong>Call this on the
+     * client thread</strong> — from inside {@code client.execute(...)}, never from
+     * {@code decode()} or the netty callback. The clamp emits one synchronous log
+     * line per correction, and on this path a remote peer chooses both how many
+     * corrections a payload contains and how often it resends: a config packed
+     * with out-of-range values, looped, is a write primitive against the client's
+     * log file and its event loop.
+     *
+     * <p>An unreadable blob is <em>not</em> healed to defaults. Defaults would read
+     * as a successful sync while seating a config the server never sent — and every
+     * default here is the permissive one, so the client would enable features the
+     * server had disabled, which is the exact direction this whole mechanism exists
+     * to prevent. The previous synced copy is kept instead (or none, on a failed
+     * first sync, which falls back to the local file as when standalone), and the
+     * failure is logged at error rather than passed off as a warning.
+     */
+    public static void acceptJson(String json) {
+        CultivationConfig parsed = CultivationConfig.fromSyncJson(json);
+        if (parsed == null) {
+            Cultivation.LOGGER.error(
+                    "Ignoring an unreadable config sync from the server; keeping the {} config."
+                            + " Server-authoritative rules may not match this session.",
+                    serverConfig != null ? "previously synced" : "local");
+            return;
+        }
+        serverConfig = parsed;
     }
 
     public static void clear() {
