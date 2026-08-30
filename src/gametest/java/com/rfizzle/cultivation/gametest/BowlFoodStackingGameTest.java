@@ -1,5 +1,6 @@
 package com.rfizzle.cultivation.gametest;
 
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import com.rfizzle.cultivation.meal.BowlFoodStacking;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.component.DataComponents;
@@ -53,7 +54,7 @@ public class BowlFoodStackingGameTest implements FabricGameTest {
                     "the returned bowl lands in the inventory");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -77,7 +78,7 @@ public class BowlFoodStackingGameTest implements FabricGameTest {
             helper.assertTrue(!dropped.isEmpty(), "the returned bowl is dropped in-world, not lost");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 

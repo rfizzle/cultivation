@@ -24,9 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Tier-1 guard that every connected mock player a gametest builds is discarded
- * before the test ends (mc-testing-mock, "Cleanup: always discard"), and
- * discarded unconditionally, from inside a {@code finally}.
+ * Tier-1 guard that every connected mock player a gametest builds is retired
+ * before the test ends (mc-testing-mock, "Cleanup: always retire"), and retired
+ * unconditionally, from inside a {@code finally}.
+ *
+ * <p>The class name is kept as-is on purpose: the {@code mc-testing-mock} skill
+ * names this file as the canonical example of the source-scanning technique, and
+ * that skill is synced verbatim into every member repo. Renaming it here would
+ * dangle the reference in eight checkouts at once, so the rename belongs with a
+ * hub edit rather than ahead of one.
  *
  * <p>{@code MockPlayers.serverPlayerInLevel} finishes with
  * {@code PlayerList#placeNewPlayer}, which registers the player both in the
@@ -39,14 +45,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * {@code entityTickList}, and {@code onTrackingEnd} clears
  * {@code ServerLevel.players} along with the tracker and ticket state.
  *
- * <p>The player-list entry is deliberately left in place. {@code PlayerList#remove}
- * is the only path that clears it, and it opens with a synchronous
- * {@code save(player)} NBT write — trading a bounded residual for one disk write
- * per mock player is the worse deal across a suite this size. The retained entry
- * is not free: {@code MinecraftServer#tickChildren} walks the player list twice a
- * tick. For a discarded player both walks are effectively O(1), which is why the
- * per-tick and per-ticket cost released above is what actually grows with the
- * suite, and this residual is not.
+ * <p>The player-list entry has to go too, which is why the matched call is
+ * {@code MockPlayers.retire(player)} rather than a bare {@code discard()}. The
+ * earlier rule here stopped at {@code discard()} on the grounds that
+ * {@code PlayerList#remove} opens with a synchronous {@code save(player)} NBT
+ * write, and that one disk write per mock was the worse trade against a
+ * residual whose per-tick cost is O(1). That accounting was incomplete: it
+ * priced the list walk and nothing else. A retained entry keeps the player's
+ * advancement listeners registered, so every criterion Cultivation fires — and
+ * the harvest seam fires several per broken crop — keeps evaluating against a
+ * player no test is watching, for the rest of the run. The cost is proportional
+ * to the mod's criterion traffic, not to the list walk, and it is paid by every
+ * later test rather than by the one that leaked. {@code retire} is the full
+ * reclaim, and it is idempotent so the {@code finally} this guard requires can
+ * never double-save.
  *
  * <p>The omission is invisible to every other signal: the player still behaves
  * correctly for the test that built it, so assertions pass, CI stays green, and
@@ -54,16 +66,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * rather than left to review — it went unnoticed long enough to need fixing
  * twice.
  *
- * <p>Placement is checked as well as presence. A discard reached only by falling
+ * <p>Placement is checked as well as presence. A retire reached only by falling
  * off the end of the test body is skipped the moment an assertion throws, so the
  * cleanup guarantee is weakest exactly when the suite is unhealthy and the output
- * is hardest to read. The discard therefore has to sit inside a {@code finally}.
+ * is hardest to read. The retire therefore has to sit inside a {@code finally}.
  * Where a method already owns one for another reason — restoring a config field,
- * disarming a listener — the discard folds into it rather than nesting a second.
+ * disarming a listener — the retire folds into it rather than nesting a second.
  *
- * <p>What that check can and cannot prove: it is lexical. It confirms the discard
+ * <p>What that check can and cannot prove: it is lexical. It confirms the retire
  * is written inside some {@code finally} in the method, not that the corresponding
- * {@code try} encloses every call that might throw. A discard parked in an
+ * {@code try} encloses every call that might throw. A retire parked in an
  * unrelated {@code finally} further down the method would satisfy it. That is a
  * proxy, and it is kept deliberately — the shape it enforces is the one the tree
  * uses, and the alternative (reachability analysis over hand-parsed source) buys
@@ -76,9 +88,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>Ownership is decided by return type. A method returning {@code ServerPlayer}
  * is a factory: it hands the player to its caller, so the caller owes the
- * discard and the factory itself is exempt. Every other method must discard each
+ * retire and the factory itself is exempt. Every other method must retire each
  * player it binds, counting both direct {@code serverPlayerInLevel} calls and
- * calls to a factory declared in the same file. Discards are matched against the
+ * calls to a factory declared in the same file. Retires are matched against the
  * variable each player was bound to rather than tallied loosely, so an unrelated
  * {@code entity.discard()} in the same method cannot stand in for a leaked
  * player. Checking per method rather than per file is what catches the case that
@@ -88,22 +100,31 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * <p>Scope is the connected replica only. The lightweight
  * {@code GameTestHelper#makeMockPlayer} stub is never added to the level or the
- * player list, so it cannot accrue this cost and is not required to discard.
+ * player list, so it accrues none of this cost, is not a {@code ServerPlayer}
+ * that {@code retire} could even accept, and keeps its plain {@code discard()}.
  *
  * <p>Because a regex cannot see everything Java can express — constructors carry
  * no return type, and a declaration the pattern misses would drop a whole method
- * from the scan — {@link #theScanSeesEveryAcquisitionAndDiscard()} asserts that
- * every acquisition and discard token in each file lands inside some parsed
+ * from the scan — {@link #theScanSeesEveryAcquisitionAndRetire()} asserts that
+ * every acquisition and retire token in each file lands inside some parsed
  * method body. A parser blind spot then fails loudly instead of quietly
  * exempting the code it cannot read.
  */
 class MockPlayerDiscardTest {
     private static final Path GAMETEST_SOURCES = Path.of("src/gametest/java");
 
-    /** The connected-replica factory whose product must be discarded. */
+    /** The connected-replica factory whose product must be retired. */
     private static final String ACQUIRE = "MockPlayers.serverPlayerInLevel";
 
-    private static final String DISCARD = ".discard()";
+    /**
+     * The teardown call, matched on its <em>argument</em> rather than a receiver:
+     * {@code MockPlayers.retire(player)}, not {@code player.discard()}. Everything
+     * below composes the token as {@code RETIRE_PREFIX + name + ")"}.
+     */
+    private static final String RETIRE_PREFIX = "MockPlayers.retire(";
+
+    /** The bare token, for the parser-coverage check that counts occurrences file-wide. */
+    private static final String RETIRE = RETIRE_PREFIX;
 
     /** Matches a method declaration through its opening brace, capturing return type and name. */
     private static final Pattern METHOD_DECLARATION = Pattern.compile(
@@ -125,7 +146,7 @@ class MockPlayerDiscardTest {
 
     /** A method's declared return type, name, and body text with comments and literals stripped. */
     private record Method(String returnType, String name, String body) {
-        /** A method handing a player to its caller: the caller owes the discard, not this method. */
+        /** A method handing a player to its caller: the caller owes the retire, not this method. */
         boolean isPlayerFactory() {
             return returnType.endsWith("ServerPlayer");
         }
@@ -150,7 +171,7 @@ class MockPlayerDiscardTest {
     /**
      * Blanks comment and string/char literal contents so brace matching cannot be
      * thrown off by a brace inside an assertion message, and so the word
-     * {@code discard} in prose is never counted as a call.
+     * {@code retire} in prose is never counted as a call.
      */
     private static String stripCommentsAndLiterals(String source) {
         StringBuilder out = new StringBuilder(source.length());
@@ -263,7 +284,7 @@ class MockPlayerDiscardTest {
                 }
             }
             if (depth != 0) {
-                throw new AssertionError("unbalanced braces after a finally block — the discard"
+                throw new AssertionError("unbalanced braces after a finally block — the retire"
                         + " placement check cannot be trusted until the parser handles this method");
             }
             ranges.add(new Range(open + 1, i));
@@ -271,25 +292,31 @@ class MockPlayerDiscardTest {
         return ranges;
     }
 
+    /** The teardown call this guard requires for a player bound to {@code name}. */
+    private static String retireCall(String name) {
+        return RETIRE_PREFIX + name + ")";
+    }
+
     /**
-     * Offsets of every {@code name.discard()} call in a body, matched as a whole
-     * identifier so a longer variable ending in this one — {@code soupEater}
-     * against {@code Eater} — cannot stand in for it.
+     * Offsets of every {@code MockPlayers.retire(name)} call in a body. Matching on
+     * the argument anchors the name at both ends — the fixed prefix on the left and
+     * the closing paren on the right — so a longer variable containing this one
+     * ({@code soupEater} against {@code eater}) cannot stand in for it. That came
+     * free with the receiver form only because the name started the token; it has
+     * to be asserted deliberately now that the name sits inside the parentheses.
      */
-    private static List<Integer> discardCallsIn(String body, String name) {
-        String call = name + DISCARD;
+    private static List<Integer> retireCallsIn(String body, String name) {
+        String call = retireCall(name);
         List<Integer> found = new ArrayList<>();
         for (int at = body.indexOf(call); at >= 0; at = body.indexOf(call, at + call.length())) {
-            if (at == 0 || !Character.isJavaIdentifierPart(body.charAt(at - 1))) {
-                found.add(at);
-            }
+            found.add(at);
         }
         return found;
     }
 
-    /** Whether some {@code name.discard()} in this body is written inside one of {@code ranges}. */
-    private static boolean discardsInFinally(String body, List<Range> ranges, String name) {
-        List<Integer> calls = discardCallsIn(body, name);
+    /** Whether some {@code MockPlayers.retire(name)} in this body is written inside one of {@code ranges}. */
+    private static boolean retiresInFinally(String body, List<Range> ranges, String name) {
+        List<Integer> calls = retireCallsIn(body, name);
         return ranges.stream().anyMatch(range -> calls.stream().anyMatch(range::contains));
     }
 
@@ -326,53 +353,54 @@ class MockPlayerDiscardTest {
     }
 
     @Test
-    void everyAcquiredMockPlayerIsDiscarded() {
+    void everyAcquiredMockPlayerIsRetired() {
         TreeSet<String> offenders = new TreeSet<>();
         methods.forEach((file, fileMethods) -> {
             for (Method method : fileMethods) {
                 if (method.isPlayerFactory()) {
-                    continue; // Hands the player to its caller, which owes the discard.
+                    continue; // Hands the player to its caller, which owes the retire.
                 }
                 Acquired acquired = acquisitionsIn(method, fileMethods);
                 List<Range> finallyRanges = finallyRangesOf(method.body());
                 for (String name : acquired.boundNames()) {
-                    if (discardCallsIn(method.body(), name).isEmpty()) {
-                        offenders.add(file + "#" + method.name() + " never calls " + name + DISCARD);
-                    } else if (!discardsInFinally(method.body(), finallyRanges, name)) {
-                        offenders.add(file + "#" + method.name() + " calls " + name + DISCARD
+                    if (retireCallsIn(method.body(), name).isEmpty()) {
+                        offenders.add(file + "#" + method.name() + " never calls " + retireCall(name));
+                    } else if (!retiresInFinally(method.body(), finallyRanges, name)) {
+                        offenders.add(file + "#" + method.name() + " calls " + retireCall(name)
                                 + " only on the happy path — put it in a finally so an assertion that throws"
                                 + " before it cannot leak the player");
                     }
                 }
                 if (acquired.unbound() > 0) {
                     offenders.add(file + "#" + method.name() + " builds " + acquired.unbound()
-                            + " mock player(s) without binding them to a local, so the discard cannot be checked");
+                            + " mock player(s) without binding them to a local, so the retire cannot be checked");
                 }
             }
         });
         assertTrue(offenders.isEmpty(),
-                "connected mock players must be discarded before the test ends, or they keep being ticked and"
-                        + " holding chunk tickets for the rest of the gametest run: " + offenders);
+                "connected mock players must be retired before the test ends, or they keep being ticked,"
+                        + " holding chunk tickets, and evaluating advancement criteria from a stale player-list"
+                        + " entry for the rest of the gametest run: " + offenders);
     }
 
-    /** Runs the placement check the way {@link #everyAcquiredMockPlayerIsDiscarded} does. */
+    /** Runs the placement check the way {@link #everyAcquiredMockPlayerIsRetired} does. */
     private static boolean guarded(String body, String name) {
-        return discardsInFinally(body, finallyRangesOf(body), name);
+        return retiresInFinally(body, finallyRangesOf(body), name);
     }
 
     @Test
     void theFinallyCheckTellsGuaranteedCleanupFromTheHappyPath() {
         // Every method in the tree ends up in the guarded shape, so a finallyRangesOf that
-        // returned "the whole body" — or a discardsInFinally stuck on true — would pass the check
+        // returned "the whole body" — or a retiresInFinally stuck on true — would pass the check
         // above while enforcing nothing. These samples pin both answers against fixed input.
         String happyPath = """
                 ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
                 helper.assertTrue(condition, "message");
-                player.discard();
+                MockPlayers.retire(player);
                 helper.succeed();
                 """;
         assertFalse(guarded(happyPath, "player"),
-                "a discard reached only by falling off the end of the body is not guaranteed cleanup");
+                "a retire reached only by falling off the end of the body is not guaranteed cleanup");
 
         String wrapped = """
                 ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
@@ -380,10 +408,10 @@ class MockPlayerDiscardTest {
                     helper.assertTrue(condition, "message");
                     helper.succeed();
                 } finally {
-                    player.discard();
+                    MockPlayers.retire(player);
                 }
                 """;
-        assertTrue(guarded(wrapped, "player"), "a discard in a finally is guaranteed cleanup");
+        assertTrue(guarded(wrapped, "player"), "a retire in a finally is guaranteed cleanup");
 
         // The shape the config-toggle and listener tests use: one finally, two jobs.
         String foldedIntoAnExistingFinally = """
@@ -394,55 +422,70 @@ class MockPlayerDiscardTest {
                     helper.succeed();
                 } finally {
                     CultivationConfig.get().enableMealBuffs = saved;
-                    player.discard();
+                    MockPlayers.retire(player);
                 }
                 """;
         assertTrue(guarded(foldedIntoAnExistingFinally, "player"),
-                "folding the discard into a finally that already restores state is guaranteed cleanup");
+                "folding the retire into a finally that already restores state is guaranteed cleanup");
 
-        // A finally elsewhere in the method must not launder a happy-path discard by its mere presence.
-        String discardOutsideAnUnrelatedFinally = """
+        // A finally elsewhere in the method must not launder a happy-path retire by its mere presence.
+        String retireOutsideAnUnrelatedFinally = """
                 ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
-                player.discard();
+                MockPlayers.retire(player);
                 try {
                     helper.succeed();
                 } finally {
                     Denier.disarm();
                 }
                 """;
-        assertFalse(guarded(discardOutsideAnUnrelatedFinally, "player"),
-                "the check must read where the discard is written, not merely that a finally exists");
+        assertFalse(guarded(retireOutsideAnUnrelatedFinally, "player"),
+                "the check must read where the retire is written, not merely that a finally exists");
 
-        // Two players whose names share a suffix: the guarded one must not answer for the leaked one.
-        String suffixSharingNames = """
+        // Two players whose names contain one another: the guarded one must not answer for the
+        // leaked one. With the argument form this cuts both ways — a substring on either side —
+        // so both directions are pinned.
+        String substringNames = """
                 ServerPlayer eater = MockPlayers.serverPlayerInLevel(helper);
                 ServerPlayer soupEater = MockPlayers.serverPlayerInLevel(helper);
                 try {
                     helper.succeed();
                 } finally {
-                    soupEater.discard();
+                    MockPlayers.retire(soupEater);
                 }
                 """;
-        assertTrue(guarded(suffixSharingNames, "soupEater"), "soupEater is discarded in the finally");
-        assertFalse(guarded(suffixSharingNames, "eater"),
-                "soupEater.discard() must not be read as a discard of eater");
+        assertTrue(guarded(substringNames, "soupEater"), "soupEater is retired in the finally");
+        assertFalse(guarded(substringNames, "eater"),
+                "MockPlayers.retire(soupEater) must not be read as a retire of eater");
+
+        String prefixNames = """
+                ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+                ServerPlayer playerTwo = MockPlayers.serverPlayerInLevel(helper);
+                try {
+                    helper.succeed();
+                } finally {
+                    MockPlayers.retire(player);
+                }
+                """;
+        assertTrue(guarded(prefixNames, "player"), "player is retired in the finally");
+        assertFalse(guarded(prefixNames, "playerTwo"),
+                "MockPlayers.retire(player) must not be read as a retire of playerTwo");
 
         // A finally the brace walk cannot close must fail loudly. Recording it as running to
         // end-of-body would read as "everything after this is guarded" — passing while enforcing
         // nothing, which is the one failure mode this guard cannot be allowed to have.
         assertThrows(AssertionError.class,
-                () -> finallyRangesOf("try { helper.succeed(); } finally { player.discard();"),
+                () -> finallyRangesOf("try { helper.succeed(); } finally { MockPlayers.retire(player);"),
                 "an unclosed finally must fail the scan rather than swallow the rest of the body");
     }
 
     @Test
-    void theScanSeesEveryAcquisitionAndDiscard() {
+    void theScanSeesEveryAcquisitionAndRetire() {
         // A declaration the regex cannot match would drop its whole method from the scan and exempt it
-        // silently — the one failure mode a guard like this must not have. Every acquisition and discard
+        // silently — the one failure mode a guard like this must not have. Every acquisition and retire
         // token in a file has to land inside some parsed body, or the parser is behind the source.
         TreeSet<String> unseen = new TreeSet<>();
         sources.forEach((file, source) -> {
-            for (String token : List.of(ACQUIRE, DISCARD)) {
+            for (String token : List.of(ACQUIRE, RETIRE)) {
                 int inFile = countOf(source, token);
                 int inMethods = methods.get(file).stream().mapToInt(m -> countOf(m.body(), token)).sum();
                 if (inFile != inMethods) {
@@ -452,7 +495,7 @@ class MockPlayerDiscardTest {
             }
         });
         assertTrue(unseen.isEmpty(),
-                "the method parser cannot see part of the gametest source, so the discard check silently"
+                "the method parser cannot see part of the gametest source, so the retire check silently"
                         + " skips it: " + unseen);
     }
 
@@ -474,7 +517,7 @@ class MockPlayerDiscardTest {
         }
         assertTrue(total >= 20,
                 "the scan found only " + total + " mock-player acquisitions across " + GAMETEST_SOURCES
-                        + " — the parser or the " + ACQUIRE + " token is stale, so the discard check is vacuous");
+                        + " — the parser or the " + ACQUIRE + " token is stale, so the retire check is vacuous");
         assertTrue(factories.size() >= 2,
                 "expected the ServerPlayer-returning factories to be recognized as ownership handoffs,"
                         + " found: " + factories);

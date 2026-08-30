@@ -44,6 +44,21 @@ import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland
  * exhausted ground, stacking with §5. Config-flipping tests run in their own batch.
  */
 public class FertilizerGameTest implements FabricGameTest {
+    /**
+     * Double the 100-tick default. These are the config-toggle tests: each flips a
+     * field, drives the full in-world path behind it, and restores the field in a
+     * finally. They pay for a config reload plus the same tick budget the untoggled
+     * test needs, and a timeout here fails the restore as well as the assertion.
+     */
+    private static final int CONFIG_TOGGLE_TIMEOUT = 200;
+    /**
+     * The 100-tick default, restated rather than inherited. The hopper transfer is
+     * the one test here whose runtime is set by vanilla's transfer cooldown rather
+     * than by Cultivation's own work, so it should not silently inherit a future
+     * change to the framework default.
+     */
+    private static final int HOPPER_TIMEOUT = 100;
+
     private static final String CONFIG_BATCH = "cultivationFertilizerConfig";
 
     // --- Composter seam ---
@@ -59,7 +74,7 @@ public class FertilizerGameTest implements FabricGameTest {
         helper.succeed();
     }
 
-    @GameTest(template = TEMPLATE, timeoutTicks = 100)
+    @GameTest(template = TEMPLATE, timeoutTicks = HOPPER_TIMEOUT)
     public void hopperExtractionYieldsFertilizer(GameTestHelper helper) {
         // Composter (level 8) above a hopper above a chest: the hopper pulls the
         // output down on its cooldown, exercising getContainer + the output
@@ -212,7 +227,7 @@ public class FertilizerGameTest implements FabricGameTest {
 
     // --- Config toggles (own batch) ---
 
-    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = CONFIG_TOGGLE_TIMEOUT)
     public void composterRevertsToBoneMealWhenProductionOff(GameTestHelper helper) {
         CultivationConfig config = CultivationConfig.get();
         boolean saved = config.composterProducesFertilizer;
@@ -230,7 +245,7 @@ public class FertilizerGameTest implements FabricGameTest {
         }
     }
 
-    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = CONFIG_TOGGLE_TIMEOUT)
     public void disabledFertilizerIsInertButRetainsCounters(GameTestHelper helper) {
         CultivationConfig config = CultivationConfig.get();
         boolean saved = config.enableFertilizer;

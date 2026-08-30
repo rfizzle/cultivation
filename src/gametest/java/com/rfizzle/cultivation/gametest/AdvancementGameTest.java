@@ -4,6 +4,7 @@ import com.rfizzle.cultivation.Cultivation;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.diet.DietHandler;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import com.rfizzle.cultivation.harvest.HarvestHandler;
 import com.rfizzle.cultivation.item.CultivationItems;
 import com.rfizzle.cultivation.soil.Fertilizer;
@@ -63,7 +64,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertGranted(helper, player, "balanced_table");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -78,7 +79,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, player, "balanced_table");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -93,7 +94,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertGranted(helper, player, "long_term_investment");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -107,7 +108,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, bystander, "long_term_investment");
             helper.succeed();
         } finally {
-            bystander.discard();
+            MockPlayers.retire(bystander);
         }
     }
 
@@ -122,7 +123,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertGranted(helper, player, "reap_what_you_sow");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -137,7 +138,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, player, "reap_what_you_sow");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -152,7 +153,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertGranted(helper, player, "full_broadcast");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -168,7 +169,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, player, "full_broadcast");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -182,7 +183,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, player, "full_broadcast");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -198,7 +199,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, player, "full_broadcast");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -212,7 +213,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertGranted(helper, player, "old_growth");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -224,7 +225,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, player, "old_growth");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -236,7 +237,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, player, "old_growth");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -250,7 +251,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, player, "old_growth");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -266,7 +267,7 @@ public class AdvancementGameTest implements FabricGameTest {
             assertNotGranted(helper, bystander, "old_growth");
             helper.succeed();
         } finally {
-            bystander.discard();
+            MockPlayers.retire(bystander);
         }
     }
 

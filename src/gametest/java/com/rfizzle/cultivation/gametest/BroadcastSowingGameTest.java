@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import com.rfizzle.cultivation.item.CultivationItems;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -52,7 +53,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
                     "the rake spends one durability per block");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -71,7 +72,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
             helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "no broadcast sowing happens without a rake");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -86,7 +87,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
             helper.assertTrue(countAge0(helper, Blocks.WHEAT) == 0, "nothing is sown without a seed");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -108,7 +109,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
                     "only the 7 planted blocks spend durability");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -125,7 +126,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
             helper.assertTrue(player.getOffhandItem().isEmpty(), "the seed stack is emptied");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -147,7 +148,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
             helper.assertTrue(player.getOffhandItem().getCount() == 6, "only the 3 planted blocks spend a seed");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -166,7 +167,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
             helper.succeed();
         } finally {
             CultivationConfig.get().enableBroadcastSowing = saved;
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -185,7 +186,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
             helper.assertTrue(player.getMainHandItem().getDamageValue() == 0, "creative spends no durability");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -201,7 +202,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
             assertFertility(helper, FARM, 100.0F, "sowing must not drain fertility");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -217,7 +218,7 @@ public class BroadcastSowingGameTest implements FabricGameTest {
                     "each block sows a pitcher crop at age 0");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 

@@ -40,6 +40,14 @@ import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland
  * exhausted clamp suppresses it. Config-flipping tests run in their own batch.
  */
 public class EnrichedTillingGameTest implements FabricGameTest {
+    /**
+     * Double the 100-tick default. These are the config-toggle tests: each flips a
+     * field, drives the full in-world path behind it, and restores the field in a
+     * finally. They pay for a config reload plus the same tick budget the untoggled
+     * test needs, and a timeout here fails the restore as well as the assertion.
+     */
+    private static final int CONFIG_TOGGLE_TIMEOUT = 200;
+
     private static final String CONFIG_BATCH = "cultivationEnrichedConfig";
 
     @GameTest(template = TEMPLATE)
@@ -202,7 +210,7 @@ public class EnrichedTillingGameTest implements FabricGameTest {
         helper.succeed();
     }
 
-    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = CONFIG_TOGGLE_TIMEOUT)
     public void disabledToggleIsInert(GameTestHelper helper) {
         CultivationConfig config = CultivationConfig.get();
         boolean saved = config.enableEnrichedTilling;
@@ -226,7 +234,7 @@ public class EnrichedTillingGameTest implements FabricGameTest {
         }
     }
 
-    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = CONFIG_BATCH, timeoutTicks = CONFIG_TOGGLE_TIMEOUT)
     public void configuredChanceIsRespectedEndToEnd(GameTestHelper helper) {
         CultivationConfig config = CultivationConfig.get();
         int saved = config.diamondHoeEnrichChance;

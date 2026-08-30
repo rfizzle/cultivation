@@ -9,6 +9,7 @@ import com.rfizzle.cultivation.attachment.DietData;
 import com.rfizzle.cultivation.attachment.DietStore;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.commands.CommandSourceStack;
@@ -86,7 +87,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
             helper.assertTrue(Math.abs(fertility - 40.0F) < 1e-4, "fertility is set to 40, got " + fertility);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -112,7 +113,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
                     "the soul sand below the wart is set to 40, got " + fertility);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -129,7 +130,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
             helper.assertTrue(result == 0, "soil report fails with no farmland in sight");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -146,7 +147,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
             helper.assertTrue(result == 0, "field report fails with no farmland in sight");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -191,7 +192,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
                     "distinct crops are wheat then carrots, got " + report.crops());
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -211,7 +212,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
             helper.assertTrue(DietStore.get(player).isDefault(), "diet reset clears the player's diet data");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -229,7 +230,7 @@ public class CultivationCommandGameTest implements FabricGameTest {
             helper.assertTrue(result > 0, "diet read succeeds for a fatigued caller");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 

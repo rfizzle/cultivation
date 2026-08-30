@@ -39,6 +39,19 @@ import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland
  * is weather-proof (the exact-gain test blocks its own sky with a roof block).
  */
 public class SoilRecoveryGameTest implements FabricGameTest {
+    /**
+     * The weather tests set rain on the whole level, which is state a concurrent
+     * sibling in the same batch would read — so they take a batch of their own.
+     */
+    private static final String WEATHER_BATCH = "cultivationWeather";
+
+    /**
+     * Double the 100-tick default. The weather tests set rain on the level and then
+     * wait out real random-tick recovery, so they are the slowest in the suite by a
+     * margin that has nothing to do with the code under test.
+     */
+    private static final int WEATHER_TIMEOUT = 200;
+
     private static final BlockPos ROOF = FARM.above(2);
 
     @GameTest(template = TEMPLATE)
@@ -120,7 +133,7 @@ public class SoilRecoveryGameTest implements FabricGameTest {
         helper.succeed();
     }
 
-    @GameTest(template = TEMPLATE, batch = "cultivationWeather", timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = WEATHER_BATCH, timeoutTicks = WEATHER_TIMEOUT)
     public void rainDoublesLiveRecovery(GameTestHelper helper) {
         placeTrackedFarmland(helper, FARM, 50.0F, Blocks.WHEAT);
         ServerLevel level = helper.getLevel();
@@ -141,7 +154,7 @@ public class SoilRecoveryGameTest implements FabricGameTest {
         });
     }
 
-    @GameTest(template = TEMPLATE, batch = "cultivationWeather", timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = WEATHER_BATCH, timeoutTicks = WEATHER_TIMEOUT)
     public void retillSettlesLazyRecoveryRainBlind(GameTestHelper helper) {
         placeTrackedFarmland(helper, FARM, 40.0F, Blocks.WHEAT);
         helper.setBlock(FARM, Blocks.DIRT); // reversion: fertility, memory, and bookkeeping stay put

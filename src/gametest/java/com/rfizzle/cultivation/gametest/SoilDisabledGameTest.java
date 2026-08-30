@@ -37,9 +37,17 @@ import static com.rfizzle.cultivation.gametest.SoilFixtures.placeTrackedFarmland
  * yield clamp shares the exact guard the frozen-drain assertion covers.
  */
 public class SoilDisabledGameTest implements FabricGameTest {
+    /**
+     * Double the 100-tick default. These are the config-toggle tests: each flips a
+     * field, drives the full in-world path behind it, and restores the field in a
+     * finally. They pay for a config reload plus the same tick budget the untoggled
+     * test needs, and a timeout here fails the restore as well as the assertion.
+     */
+    private static final int CONFIG_TOGGLE_TIMEOUT = 200;
+
     private static final String BATCH = "cultivationFrozen";
 
-    @GameTest(template = TEMPLATE, batch = BATCH, timeoutTicks = 200)
+    @GameTest(template = TEMPLATE, batch = BATCH, timeoutTicks = CONFIG_TOGGLE_TIMEOUT)
     public void disabledSoilSystemIsFrozen(GameTestHelper helper) {
         HarvestRecorder.ensureRegistered();
         CultivationConfig config = CultivationConfig.get();

@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
@@ -58,7 +59,7 @@ public class RightClickHarvestGameTest implements FabricGameTest {
             assertFertility(helper, NEIGHBOR_FARM, 100.0F, "the neighbor's soil must not drain");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -76,7 +77,7 @@ public class RightClickHarvestGameTest implements FabricGameTest {
             assertFertility(helper, FARM, 100.0F, "an immature crop must not drain soil");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -95,7 +96,7 @@ public class RightClickHarvestGameTest implements FabricGameTest {
                     "a crop right-clicked with a held item must be left mature");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -116,7 +117,7 @@ public class RightClickHarvestGameTest implements FabricGameTest {
             helper.succeed();
         } finally {
             CultivationConfig.get().enableRightClickHarvest = saved;
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -137,7 +138,7 @@ public class RightClickHarvestGameTest implements FabricGameTest {
             helper.assertItemEntityPresent(Items.CARROT, CROP, 2.0);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -156,7 +157,7 @@ public class RightClickHarvestGameTest implements FabricGameTest {
             helper.assertItemEntityPresent(Items.TORCHFLOWER, CROP, 2.0);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 

@@ -2,6 +2,7 @@ package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import com.rfizzle.cultivation.soil.SoilRecovery;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
@@ -87,7 +88,7 @@ public class SoilDrainGameTest implements FabricGameTest {
             helper.assertItemEntityPresent(Items.WHEAT, CROP, 2.0);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -106,7 +107,7 @@ public class SoilDrainGameTest implements FabricGameTest {
             helper.assertItemEntityNotPresent(Items.WHEAT, CROP, 2.0);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 

@@ -1,6 +1,7 @@
 package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
+import com.rfizzle.cultivation.gametest.util.MockPlayers;
 import com.rfizzle.cultivation.soil.SoilGrowth;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -84,7 +85,7 @@ public class SecondWaveSoilGameTest implements FabricGameTest {
             helper.assertItemEntityPresent(Items.SWEET_BERRIES, CROP, 2.0);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -102,7 +103,7 @@ public class SecondWaveSoilGameTest implements FabricGameTest {
             helper.assertItemEntityCountIs(Items.SWEET_BERRIES, CROP, 2.0, 1);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -128,7 +129,7 @@ public class SecondWaveSoilGameTest implements FabricGameTest {
             helper.assertItemEntityNotPresent(Items.SWEET_BERRIES, CROP, 2.0);
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
@@ -197,7 +198,7 @@ public class SecondWaveSoilGameTest implements FabricGameTest {
                     "the callback must not disturb the bush");
             helper.succeed();
         } finally {
-            player.discard();
+            MockPlayers.retire(player);
         }
     }
 
