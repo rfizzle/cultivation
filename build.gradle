@@ -132,6 +132,14 @@ sourceSets {
     }
 }
 
+// Deliberately NOT adding `sourceSets.client.output` to the test compile classpath. It reads as
+// free reach for a client-facing Tier-1 guard, but nothing here can use it: the one client guard,
+// SoilOverlayResourceContractTest, pins texture *paths*, and the class that owns them
+// (SoilOverlayRenderTypes) builds RenderTypes against blaze3d in its static initializer. Binding
+// it from a test compiles and then dies on class-load, because `test` has no client runtime — a
+// failure the classpath entry invites rather than prevents. The guard reads the resources by path
+// instead, which is what it should do, and stays honest about the client boundary.
+
 configurations {
     gametestImplementation.extendsFrom implementation
     gametestRuntimeOnly.extendsFrom runtimeOnly
