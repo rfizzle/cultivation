@@ -44,7 +44,9 @@ instantly, and `/cultivation soil` reads any block exactly.
 
 A crop bordered by two different crops grows **20% faster**. Alternating rows —
 wheat, carrots, potatoes — beat the monoculture slab, which is never punished,
-just outgrown.
+just outgrown. A **sniffer** in the field doubles that bonus, and crops within
+**8 blocks of a beehive** grow a further **10% faster** — so a farm that keeps
+bees and a sniffer is a farm that compounds.
 
 ### A Varied Table
 
@@ -72,12 +74,21 @@ an extra drop per harvest (**netherite: 15%**). The composter produces
 composter loop alive for the life of the farm. Enrichment lasts until the
 block reverts to dirt, and the two stack.
 
-### The Scythe
+### The Scythe and the Rake
 
-A new tool in iron, diamond, and netherite: one swing harvests a full **3×3**
-of mature crops and replants each block from its own drops. Immature crops are
-skipped, Fortune applies per block, and large-scale manual farming becomes
-rhythm instead of tedium.
+A new tool in iron, diamond, and netherite: one swing of the **scythe** harvests
+a full **3×3** of mature crops and replants each block from its own drops.
+Immature crops are skipped, Fortune applies per block, and large-scale manual
+farming becomes rhythm instead of tedium.
+
+The **iron rake** is its other half: hold the rake and put seed in your
+off-hand, and one right-click sows a **3×3** of farmland at once — one seed and
+one durability point per block actually planted, occupied ground skipped. So
+replanting a field is one action instead of nine.
+
+And with an **empty hand**, right-clicking a mature crop harvests and replants
+it in place, through the same drain and bonuses as every other harvest — no
+more break-and-replant on every block.
 
 ### Farmers Who Farm
 
@@ -104,7 +115,7 @@ bundled** — install whichever you already use.
 - [Jade](https://www.curseforge.com/minecraft/mc-mods/jade) / [WTHIT](https://www.curseforge.com/minecraft/mc-mods/wthit)
   — farmland fertility and crop growth modifiers at a glance
 - [EMI](https://www.curseforge.com/minecraft/mc-mods/emi) / [REI](https://www.curseforge.com/minecraft/mc-mods/roughly-enough-items) /
-  [JEI](https://www.curseforge.com/minecraft/mc-mods/jei) — scythe recipes and Fertilizer source info
+  [JEI](https://www.curseforge.com/minecraft/mc-mods/jei) — scythe and rake recipes, and Fertilizer source info
 
 **Enhanced by** its Concord siblings, never required: with
 [Meridian](https://www.curseforge.com/minecraft/mc-mods/meridian-enchanting-overhaul) scythes and

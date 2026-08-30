@@ -1,0 +1,5 @@
+// 1.21.1	2026-08-30T15:10:11.54239664	Cultivation/Tags for minecraft:item
+bf95aad173fb7975cf8e31d9ecf89ef47700d6e3 data/cultivation/tags/item/rakes.json
+384c079e9db5a74e38a674c373d59369778838cc data/minecraft/tags/item/enchantable/mining.json
+384c079e9db5a74e38a674c373d59369778838cc data/cultivation/tags/item/scythes.json
+20cd0893a9ea26e48323fb5994b5278506188996 data/minecraft/tags/item/enchantable/durability.json
