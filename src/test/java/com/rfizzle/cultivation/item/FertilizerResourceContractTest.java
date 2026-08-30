@@ -16,9 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * renders as a raw translation string, a missing texture as the purple-black
  * "missing texture" placeholder. Neither surfaces in a headless build otherwise.
  */
-class FertilizerAssetsTest {
+class FertilizerResourceContractTest {
     private static JsonObject readJson(String path) {
-        try (InputStream in = FertilizerAssetsTest.class.getClassLoader().getResourceAsStream(path)) {
+        try (InputStream in = FertilizerResourceContractTest.class.getClassLoader().getResourceAsStream(path)) {
             assertNotNull(in, "resource must ship: " + path);
             String json = new String(in.readAllBytes(), StandardCharsets.UTF_8);
             return JsonParser.parseString(json).getAsJsonObject();
@@ -28,7 +28,7 @@ class FertilizerAssetsTest {
     }
 
     private static boolean resourceExists(String path) {
-        return FertilizerAssetsTest.class.getClassLoader().getResource(path) != null;
+        return FertilizerResourceContractTest.class.getClassLoader().getResource(path) != null;
     }
 
     @Test

@@ -17,6 +17,7 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -145,6 +146,34 @@ class GametestRegistrationTest {
                 "FabricGameTest implementors must be named *GameTest: " + misnamedSuites);
         assertTrue(impostors.isEmpty(),
                 "classes named *GameTest must implement FabricGameTest: " + impostors);
+    }
+
+    /** The mod ids the given manifest declares in its {@code depends} block. */
+    private static Set<String> declaredDependencies(Path manifest) {
+        try {
+            JsonObject parsed = JsonParser.parseString(
+                    Files.readString(manifest, StandardCharsets.UTF_8)).getAsJsonObject();
+            JsonObject depends = parsed.getAsJsonObject("depends");
+            assertNotNull(depends, manifest + " declares no depends object");
+            return new TreeSet<>(depends.keySet());
+        } catch (IOException e) {
+            throw new AssertionError("could not read " + manifest, e);
+        }
+    }
+
+    @Test
+    void gametestManifestDependsOnExactlyTheMainMod() {
+        // Set equality, not containment. The companion mod exists only to carry the
+        // entrypoints, and it already inherits the real dependency set — loader, Minecraft,
+        // Java, fabric-api — transitively through `cultivation`. Restating any of them here
+        // creates a second place to bump on a version move, and the copy that gets forgotten
+        // fails the gametest run at load against a manifest nobody thinks to look at. A
+        // missing dependency is self-announcing; an extra one is not, so exclusivity is the
+        // half worth asserting.
+        assertEquals(
+                Set.of("cultivation"),
+                declaredDependencies(GAMETEST_MANIFEST),
+                GAMETEST_MANIFEST + " must depend on the main mod alone.");
     }
 
     @Test

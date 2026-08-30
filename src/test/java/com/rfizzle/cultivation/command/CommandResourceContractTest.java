@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * every {@code command.cultivation.*} key the tree emits has a non-blank lang
  * entry, so a client never sees a raw translation key in command feedback.
  */
-class CommandResourcesTest {
+class CommandResourceContractTest {
     private static final String LANG_RESOURCE = "/assets/cultivation/lang/en_us.json";
     private static final Path LANG_SOURCE = Path.of("src/main/resources/assets/cultivation/lang/en_us.json");
 
@@ -47,7 +47,7 @@ class CommandResourcesTest {
     };
 
     private static JsonObject lang() {
-        try (InputStream in = CommandResourcesTest.class.getResourceAsStream(LANG_RESOURCE)) {
+        try (InputStream in = CommandResourceContractTest.class.getResourceAsStream(LANG_RESOURCE)) {
             String json = in != null
                     ? new String(in.readAllBytes(), StandardCharsets.UTF_8)
                     : Files.readString(LANG_SOURCE, StandardCharsets.UTF_8);
