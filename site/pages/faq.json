@@ -13,7 +13,7 @@
           "items": [
             {
               "q": "Is Cultivation released?",
-              "a": "No published build yet. Every system described here is implemented and tested on <code>master</code>, and the first release will be cut from it. Watch <a href='https://github.com/rfizzle/cultivation/releases' class='text-accent hover:text-accent2 underline'>GitHub Releases</a>."
+              "a": "Yes — <code>v1.0.0-beta.1</code> is published on Modrinth and CurseForge. Every system described here is implemented and tested; the beta has not had a long public soak yet. Watch <a href='https://github.com/rfizzle/cultivation/releases' class='text-accent hover:text-accent2 underline'>GitHub Releases</a>."
             },
             {
               "q": "Does soil fertility punish farming?",

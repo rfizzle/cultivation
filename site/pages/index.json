@@ -16,7 +16,7 @@
     {
       "title": "What Cultivation Does",
       "band": true,
-      "lede": "Four systems carry the mod. No build is published yet — the first release will be cut from <code>master</code>.",
+      "lede": "Four systems carry the mod. <code>v1.0.0-beta.1</code> is published — complete and tested, and still early.",
       "blocks": [
         {
           "type": "cards",
