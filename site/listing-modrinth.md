@@ -18,8 +18,9 @@ makes farming a practice instead of a chore: soil that tires under harvest and
 rewards rotation, fields worth planning, food worth varying — all on vanilla
 crops and vanilla blocks.
 
-**In development.** The design and full behavioral spec are committed and
-features are being built against them; this page describes the first release.
+**Beta.** The first public release is out and every system is complete, but it
+has not had a long public soak yet — back up a world before adding it to one
+you care about.
 
 ## At a glance
 
@@ -117,19 +118,22 @@ bundled** — install whichever you already use.
 - [EMI](https://modrinth.com/mod/emi) / [REI](https://modrinth.com/mod/rei) /
   [JEI](https://modrinth.com/mod/jei) — scythe and rake recipes, and Fertilizer source info
 
-**Enhanced by** its Concord siblings, never required: with
-[Meridian](https://modrinth.com/mod/meridian-enchanting-overhaul) scythes and
-hoes become first-class enchanting targets; with
-[Mercantile](https://modrinth.com/mod/mercantile-villager-overhaul) high
-reputation puts Fertilizer on a farmer's counter; with
-[Prosperity](https://modrinth.com/mod/prosperity-loot-overhaul) far-flung
-chests can hold Fertilizer caches and rare seeds; with Tribulation a hard
-world makes a varied pantry real preparation; with Distillation your crops
-feed the still.
-
 ## Requirements
 
 - Minecraft **1.21.1**
 - Fabric Loader **0.16.10+**
 - Fabric API
 - Java **21+**
+
+## Companion mods
+
+Cultivation is part of [Concord](https://github.com/rfizzle/concord) — a modular collection of
+system overhauls. Install any, combine all:
+
+- [Meridian](https://meridian.rfizzle.com) — Chart your enchantments.
+- [Mercantile](https://mercantile.rfizzle.com) — Every villager remembers.
+- [Tribulation](https://tribulation.rfizzle.com) — Survive what comes next.
+- [Prosperity](https://prosperity.rfizzle.com) — Every chest, yours to discover.
+- [Respite](https://respite.rfizzle.com) — Make the night count.
+- [Distillation](https://distillation.rfizzle.com) — Every drop counts.
+- [Instinct](https://instinct.rfizzle.com) — Worth raising.
