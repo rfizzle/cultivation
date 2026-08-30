@@ -22,8 +22,9 @@ tasks.register('printVersion') {
 //   - N commits past the last matching tag       → "0.0.0+N.gSHA[.dirty]"
 //   - no matching tag yet                        → "0.0.0+gSHA[.dirty]"
 //   - git unavailable or describe fails          → "0.0.0"
-// The base ("0.0.0") comes from gradle.properties and is bumped via
-// scripts/release.sh. Tag pattern is `v*`.
+// The base ("0.0.0") comes from gradle.properties and is bumped by hand; the tag that
+// makes a release is cut by the `release` make target, which validates the version
+// against SemVer before tagging. Tag pattern is `v*`.
 def computeModVersion() {
     def base = project.mod_version
     def tagPrefix = "v"
