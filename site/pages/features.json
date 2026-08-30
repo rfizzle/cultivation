@@ -151,11 +151,6 @@
         {
           "type": "list",
           "items": [
-            "<strong class='text-bone'>Meridian</strong> — scythes and hoes are first-class enchanting targets; a charted enchantment on a netherite scythe is the endgame of the harvest.",
-            "<strong class='text-bone'>Mercantile</strong> — farmer villagers who remember you deal in the good stuff: high-reputation trades offer Fertilizer and buy your surplus at its worth.",
-            "<strong class='text-bone'>Tribulation</strong> — when the world pushes back, a stocked and varied pantry is armor you can eat.",
-            "<strong class='text-bone'>Prosperity</strong> — chests far from home can hold caches of Fertilizer and rare seeds worth carrying back to your fields.",
-            "<strong class='text-bone'>Distillation</strong> — the still drinks from your fields: crops you grow turn up among its brews' ingredients."
           ]
         }
       ]
