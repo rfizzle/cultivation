@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "criteria": {
+    "reset": {
+      "trigger": "cultivation:balanced_table"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.cultivation.balanced_table.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "minecraft:bread"
+    },
+    "title": {
+      "translate": "advancements.cultivation.balanced_table.title"
+    }
+  },
+  "requirements": [
+    [
+      "reset"
+    ]
+  ]
+}

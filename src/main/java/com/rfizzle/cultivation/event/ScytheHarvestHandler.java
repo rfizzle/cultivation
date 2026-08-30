@@ -1,7 +1,7 @@
 package com.rfizzle.cultivation.event;
 
 import com.rfizzle.cultivation.config.CultivationConfig;
-import com.rfizzle.cultivation.criteria.CultivationCriteria;
+import com.rfizzle.cultivation.advancement.CultivationCriteria;
 import com.rfizzle.cultivation.harvest.CropReplanter;
 import com.rfizzle.cultivation.harvest.HarvestHandler;
 import com.rfizzle.cultivation.harvest.SeedWithdrawal;

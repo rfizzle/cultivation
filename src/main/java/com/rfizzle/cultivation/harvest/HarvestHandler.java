@@ -4,7 +4,7 @@ import com.rfizzle.cultivation.api.CultivationHarvestCallback;
 import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
-import com.rfizzle.cultivation.criteria.CultivationCriteria;
+import com.rfizzle.cultivation.advancement.CultivationCriteria;
 import com.rfizzle.cultivation.soil.EnrichedTilling;
 import com.rfizzle.cultivation.soil.Fertilizer;
 import com.rfizzle.cultivation.soil.SoilMath;

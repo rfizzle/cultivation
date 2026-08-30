@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "criteria": {
+    "sown": {
+      "trigger": "cultivation:full_broadcast"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.cultivation.full_broadcast.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "count": 1,
+      "id": "cultivation:iron_rake"
+    },
+    "title": {
+      "translate": "advancements.cultivation.full_broadcast.title"
+    }
+  },
+  "requirements": [
+    [
+      "sown"
+    ]
+  ]
+}

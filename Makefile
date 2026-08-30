@@ -61,7 +61,15 @@ version:
 	@echo "computed: $$($(GRADLE) -q printVersion 2>/dev/null || echo '(gradle failed; falling back to base)')"
 
 release:
-	@test -n "$(VERSION)" || (echo "Usage: make release VERSION=X.Y.Z [NO_PUSH=1]" && exit 1)
+	@test -n "$(VERSION)" || { echo "Usage: make release VERSION=X.Y.Z[-prerelease] [NO_PUSH=1]"; exit 1; }
+# Validate the shape before tagging, not after. The sibling repos' release.sh had a bug
+# where the arg glob accepted a prerelease that the version regex then rejected, leaving
+# the version unset and offering to push a tag named literally `v`. There is no unset
+# variable to guard against here, but there was also nothing stopping `make release
+# VERSION=beta1` from creating `vbeta1` — a tag the release workflow triggers on and
+# cannot parse. Full SemVer, so the first beta tags cleanly.
+	@echo "$(VERSION)" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?(\+[0-9A-Za-z.-]+)?$$' \
+		|| { echo "Not a SemVer version: '$(VERSION)' (expected X.Y.Z, optionally -prerelease and +build)"; exit 1; }
 	git tag "v$(VERSION)"
 	@$(if $(NO_PUSH),echo "Tagged v$(VERSION) — push it with: git push origin v$(VERSION)",git push origin "v$(VERSION)")
 

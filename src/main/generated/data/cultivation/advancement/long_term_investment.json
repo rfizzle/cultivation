@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:husbandry/root",
+  "criteria": {
+    "dosed": {
+      "trigger": "cultivation:long_term_investment"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "description": {
+      "translate": "advancements.cultivation.long_term_investment.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "cultivation:fertilizer"
+    },
+    "title": {
+      "translate": "advancements.cultivation.long_term_investment.title"
+    }
+  },
+  "requirements": [
+    [
+      "dosed"
+    ]
+  ]
+}

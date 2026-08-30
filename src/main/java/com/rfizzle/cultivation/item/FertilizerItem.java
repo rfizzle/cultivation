@@ -1,7 +1,7 @@
 package com.rfizzle.cultivation.item;
 
 import com.rfizzle.cultivation.config.SyncedConfig;
-import com.rfizzle.cultivation.criteria.CultivationCriteria;
+import com.rfizzle.cultivation.advancement.CultivationCriteria;
 import com.rfizzle.cultivation.soil.Fertilizer;
 import com.rfizzle.cultivation.soil.SupportedCrops;
 import net.minecraft.core.BlockPos;
