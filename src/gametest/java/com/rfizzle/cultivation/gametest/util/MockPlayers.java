@@ -108,11 +108,11 @@ public final class MockPlayers {
      * <p><strong>Unused in Cultivation today, and not safe to call from most of
      * this suite.</strong> It reads the whole level, and same-batch gametests run
      * concurrently in one level — {@code GameTestRunner.runBatch} spawns a whole
-     * batch's structures and then tickers them together. Cultivation runs 187
-     * tests over 8 named batches, and 174 of those tests sit in the shared
-     * default batch, so a sweep from any one of them would retire a sibling's
-     * live player out from under it. Give a test a {@code batch} of its own
-     * before calling this. It is provided so the API matches the rest of the
+     * batch's structures and then tickers them together. Cultivation declares 9
+     * named batches, but they cover only 16 of its 189 tests — the other 173
+     * share the default batch, so a sweep from any one of them would retire a
+     * sibling's live player out from under it. Give a test a {@code batch} of its
+     * own before calling this. It is provided so the API matches the rest of the
      * suite and the next player-count-sensitive test has the safe form to reach
      * for rather than hand-rolling a level walk.
      */
