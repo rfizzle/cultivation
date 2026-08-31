@@ -11,6 +11,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Fired server-side from the harvest choke point whenever a supported crop is
@@ -32,13 +33,29 @@ import java.util.List;
 @Stable
 @FunctionalInterface
 public interface CultivationHarvestCallback {
+
+    /**
+     * One-shot gate so a listener that throws on every harvest logs its stack
+     * trace once — this event fires once per harvested crop block, so an
+     * ungated log turns one explosion in a farm into a hundred traces in a tick.
+     */
+    AtomicBoolean LISTENER_FAILURE_LOGGED = new AtomicBoolean(false);
+
     Event<CultivationHarvestCallback> EVENT = EventFactory.createArrayBacked(CultivationHarvestCallback.class,
             listeners -> (level, pos, crop, drops, harvester) -> {
                 for (CultivationHarvestCallback listener : listeners) {
                     try {
                         listener.onHarvest(level, pos, crop, drops, harvester);
+                    } catch (VirtualMachineError e) {
+                        throw e; // OOME/SOE: the JVM is gone, not the guest
                     } catch (Throwable t) {
-                        Cultivation.LOGGER.error("CultivationHarvestCallback listener threw; skipping it", t);
+                        // Throwable, not Exception: a listener compiled against an older
+                        // signature throws Error (AbstractMethodError, NoClassDefFoundError),
+                        // which an Exception catch would let escape and kill the server tick.
+                        if (LISTENER_FAILURE_LOGGED.compareAndSet(false, true)) {
+                            Cultivation.LOGGER.warn("A CultivationHarvestCallback listener {} threw; skipping",
+                                    listener.getClass().getName(), t);
+                        }
                     }
                 }
             });

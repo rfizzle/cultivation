@@ -362,10 +362,24 @@ jacocoTestReport {
     }
 }
 
+tasks.register('cleanDatagenCache', Delete) {
+    description = 'Removes the Fabric datagen hash cache so the next runDatagen rewrites every file'
+    group = 'verification'
+    delete 'src/main/generated/.cache'
+}
+
+// Fabric datagen skips rewriting any file whose provider hash is unchanged in the
+// gitignored src/main/generated/.cache index — so without clearing it first, a hand
+// edit to a generated file survives runDatagen and verifyDatagenIdempotent compares
+// the edit to itself: falsely green locally, red only on a fresh CI checkout.
+tasks.matching { it.name == 'runDatagen' }.configureEach {
+    mustRunAfter 'cleanDatagenCache'
+}
+
 tasks.register('verifyDatagenIdempotent') {
     description = 'Runs datagen and asserts git reports no changes in src/main/generated/'
     group = 'verification'
-    dependsOn 'runDatagen'
+    dependsOn 'cleanDatagenCache', 'runDatagen'
     notCompatibleWithConfigurationCache('shells out to git against live working-tree state')
     doLast {
         def genDir = file('src/main/generated').absolutePath
