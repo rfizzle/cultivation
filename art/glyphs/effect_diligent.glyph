@@ -4,6 +4,8 @@
 # the striking (right) tip. Grey metal ramp lit from the upper-left,
 # ink silhouette outline.
 size: 18
+kind: sprite
+ships: src/main/resources/assets/cultivation/textures/mob_effect/diligent.png
 
 legend:
   . transparent

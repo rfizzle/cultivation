@@ -7,6 +7,8 @@
 # across adjacent blocks without doubling density at the seam. Code-bound (not on the
 # block atlas), so no outline and no margin.
 size: 16
+kind: particle
+ships: src/main/resources/assets/cultivation/textures/overlay/soil_enriched.png
 
 legend:
   . transparent

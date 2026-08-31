@@ -7,6 +7,8 @@
 # re-enter the top/bottom edges at columns 4, 8, and 10. Code-bound (not on the block
 # atlas), so no outline and no margin.
 size: 16
+kind: particle
+ships: src/main/resources/assets/cultivation/textures/overlay/soil_exhausted.png
 
 legend:
   . transparent

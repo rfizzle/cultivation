@@ -4,6 +4,8 @@
 # ramp (Harvest highlight -> Wheat Amber -> shadow -> Rich Earth sole),
 # light from the upper-left, ink silhouette outline.
 size: 18
+kind: sprite
+ships: src/main/resources/assets/cultivation/textures/mob_effect/nimble.png
 
 legend:
   . transparent

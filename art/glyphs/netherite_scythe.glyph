@@ -4,6 +4,8 @@
 # blade sweeping left across the top. Blade recolored to the netherite ramp —
 # dark grey-brown with a subtle warm highlight on the cutting edge.
 size: 16
+kind: sprite
+ships: src/main/resources/assets/cultivation/textures/item/netherite_scythe.png
 
 legend:
   . transparent

@@ -5,6 +5,7 @@
 # at the bottom-left. Harvest -> Wheat Amber -> shadow ramp, light
 # upper-left, ink outline.
 size: 16
+kind: sprite
 
 legend:
   . transparent

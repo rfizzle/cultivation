@@ -4,6 +4,8 @@
 # blade sweeping left across the top. Blade recolored to the diamond ramp —
 # pale cyan edge glint, `diamond` base, darkening teal toward the socket core.
 size: 16
+kind: sprite
+ships: src/main/resources/assets/cultivation/textures/item/diamond_scythe.png
 
 legend:
   . transparent

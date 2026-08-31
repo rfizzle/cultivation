@@ -6,6 +6,8 @@
 # crack exits the bottom at column 10 and re-enters the top at column 10. Code-bound
 # (not on the block atlas), so no outline and no margin.
 size: 16
+kind: particle
+ships: src/main/resources/assets/cultivation/textures/overlay/soil_tired.png
 
 legend:
   . transparent
