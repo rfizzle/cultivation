@@ -6,6 +6,8 @@ import net.fabricmc.fabric.api.event.EventFactory;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Fired server-side from the dietary-fatigue choke point after a food is
  * consumed and its fatigue recorded — both the generic {@code Player#eat} food
@@ -20,13 +22,25 @@ import net.minecraft.world.item.Item;
 @Stable
 @FunctionalInterface
 public interface CultivationFoodCallback {
+
+    /** One-shot gate so a listener that throws on every eat logs its stack trace once. */
+    AtomicBoolean LISTENER_FAILURE_LOGGED = new AtomicBoolean(false);
+
     Event<CultivationFoodCallback> EVENT = EventFactory.createArrayBacked(CultivationFoodCallback.class,
             listeners -> (player, food, effectiveness) -> {
                 for (CultivationFoodCallback listener : listeners) {
                     try {
                         listener.onFood(player, food, effectiveness);
+                    } catch (VirtualMachineError e) {
+                        throw e; // OOME/SOE: the JVM is gone, not the guest
                     } catch (Throwable t) {
-                        Cultivation.LOGGER.error("CultivationFoodCallback listener threw; skipping it", t);
+                        // Throwable, not Exception: a listener compiled against an older
+                        // signature throws Error (AbstractMethodError, NoClassDefFoundError),
+                        // which an Exception catch would let escape and kill the server tick.
+                        if (LISTENER_FAILURE_LOGGED.compareAndSet(false, true)) {
+                            Cultivation.LOGGER.warn("A CultivationFoodCallback listener {} threw; skipping",
+                                    listener.getClass().getName(), t);
+                        }
                     }
                 }
             });
