@@ -5,6 +5,8 @@
 # Blade: light-grey iron ramp with a bright cutting edge along the concave
 # underside and a dark socket at the heel. Wood: warm brown ramp, lit top-left.
 size: 16
+kind: sprite
+ships: src/main/resources/assets/cultivation/textures/item/iron_scythe.png
 
 legend:
   . transparent

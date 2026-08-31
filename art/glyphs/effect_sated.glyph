@@ -4,6 +4,8 @@
 # upper-left, semi-transparent bone steam (no outline — it reads as
 # vapor over the dark HUD), ink outline on the bowl silhouette.
 size: 18
+kind: sprite
+ships: src/main/resources/assets/cultivation/textures/mob_effect/sated.png
 
 legend:
   . transparent

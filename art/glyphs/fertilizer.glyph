@@ -4,6 +4,8 @@
 # pale-loam base with a top-left light and lower-right occlusion. Two granules
 # rest on the shoulder where they spilled from the opening.
 size: 16
+kind: sprite
+ships: src/main/resources/assets/cultivation/textures/item/fertilizer.png
 
 legend:
   . transparent

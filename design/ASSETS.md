@@ -14,8 +14,8 @@
 |---|---|---|
 | Full logo | Gemini (prompt in `DESIGN.md` §4, mirrored in `art/exploration/logo-prompt.md`) | `art/logo.png` (master, 3172×1344) → `site/assets/logo.png` (1600w web copy), README embed |
 | OG image | derived from `art/logo.png` (1200×630, centered on Ink) | `site/assets/og-image.png` |
-| Mod icon | `art/icon-128.glyph` (32px native, ×4 ladder) | `art/icon-128.png` (128 master; `fabric.mod.json` icon when the jar exists) |
-| Mod icon 512 | derived from `art/icon-128.glyph` (×16 ladder) | `art/icon-512.png` → `site/assets/icon.png` (512), `site/assets/apple-touch-icon.png` (180) |
+| Mod icon | `art/glyphs/icon-128.glyph` (32px native, ×4 ladder) | `art/icon-128.png` (128 master; `fabric.mod.json` icon when the jar exists) |
+| Mod icon 512 | derived from `art/glyphs/icon-128.glyph` (×16 ladder) | `art/icon-512.png` → `site/assets/icon.png` (512), `site/assets/apple-touch-icon.png` (180) |
 
 ## In-game pixel art
 

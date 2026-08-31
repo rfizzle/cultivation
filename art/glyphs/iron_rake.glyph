@@ -4,6 +4,8 @@
 # a rake HEAD at the top — a short horizontal iron crossbar with downward tines
 # (teeth), the tips catching a bright glint. Light from the top-left.
 size: 16
+kind: sprite
+ships: src/main/resources/assets/cultivation/textures/item/iron_rake.png
 
 legend:
   . transparent

@@ -5,6 +5,11 @@
 # base, a leaf sprig tucked at each foot. Harvest/Wheat-Amber ramps, rim
 # light upper-left, ink outline, faint warm glow around the heads.
 size: 32
+kind: icon
+ships: art/icon-128.png 128
+ships: src/main/resources/assets/cultivation/icon.png 128
+ships: art/icon-512.png 512
+ships: site/assets/icon.png 512
 
 legend:
   . transparent
