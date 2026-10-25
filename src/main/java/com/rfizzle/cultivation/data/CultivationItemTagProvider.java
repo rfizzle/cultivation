@@ -59,6 +59,12 @@ public class CultivationItemTagProvider extends FabricTagProvider.ItemTagProvide
                 .add(key(CultivationItems.IRON_SCYTHE))
                 .add(key(CultivationItems.DIAMOND_SCYTHE))
                 .add(key(CultivationItems.NETHERITE_SCYTHE));
+
+        // Fortune and Silk Touch support #minecraft:enchantable/mining_loot, not mining.
+        getOrCreateTagBuilder(ItemTags.MINING_LOOT_ENCHANTABLE)
+                .add(key(CultivationItems.IRON_SCYTHE))
+                .add(key(CultivationItems.DIAMOND_SCYTHE))
+                .add(key(CultivationItems.NETHERITE_SCYTHE));
     }
 
     /**
