@@ -1,6 +1,6 @@
 package com.rfizzle.cultivation.gametest;
 
-import com.rfizzle.cultivation.gametest.util.MockPlayers;
+import com.rfizzle.concord.gametest.MockPlayers;
 import com.rfizzle.cultivation.meal.BowlFoodStacking;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.component.DataComponents;

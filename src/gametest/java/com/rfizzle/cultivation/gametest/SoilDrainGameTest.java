@@ -2,7 +2,7 @@ package com.rfizzle.cultivation.gametest;
 
 import com.rfizzle.cultivation.attachment.SoilData;
 import com.rfizzle.cultivation.attachment.SoilStores;
-import com.rfizzle.cultivation.gametest.util.MockPlayers;
+import com.rfizzle.concord.gametest.MockPlayers;
 import com.rfizzle.cultivation.soil.SoilRecovery;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;

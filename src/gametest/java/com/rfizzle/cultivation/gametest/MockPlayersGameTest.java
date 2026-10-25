@@ -1,6 +1,6 @@
 package com.rfizzle.cultivation.gametest;
 
-import com.rfizzle.cultivation.gametest.util.MockPlayers;
+import com.rfizzle.concord.gametest.MockPlayers;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;

@@ -45,6 +45,13 @@ in the local workspace. Normative for this repo:
 ./gradlew test runGametest jacocoMergedReport   # merged coverage (the real number)
 ```
 
+Build wiring (version, repos, source sets, gametest/datagen runs, JaCoCo, packaging) and the
+shared `make` targets (`make help`, `make ci`) are hub-owned: `gradle/concord-common.gradle` and
+`concord.mk`, propagated from concord and never edited here. `build.gradle` keeps only the
+plugins, dependencies and member-only repositories. The shared guard tests
+(`com.rfizzle.concord.guard.*`) and the gametest `com.rfizzle.concord.gametest.MockPlayers`
+helper arrive the same way.
+
 Run a single JUnit test:
 `./gradlew test --tests "com.rfizzle.cultivation.SomeTest"`
 

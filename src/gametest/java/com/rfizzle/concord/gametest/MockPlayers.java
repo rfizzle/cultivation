@@ -1,7 +1,6 @@
-package com.rfizzle.cultivation.gametest.util;
+package com.rfizzle.concord.gametest;
 
 import com.mojang.authlib.GameProfile;
-import com.rfizzle.cultivation.Cultivation;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.Connection;
@@ -15,29 +14,32 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Connected mock-player factory for gametests — the faithful replica of the
- * deprecated {@code GameTestHelper.makeMockServerPlayerInLevel()} built from
- * public, non-deprecated APIs: a real {@link Connection} backed by an
- * {@link EmbeddedChannel} (which absorbs sent packets), fully registered in the
- * player list via {@code placeNewPlayer}. The channel is handed back so tests
- * can read the packets the server sent — Cultivation's soil-overlay band
- * payloads, for one. {@code MockPlayersGameTest} guards this faithfulness so a
- * later simplification fails loudly.
+ * Connected mock-player factory for gametests, shared by every Concord member. HUB-OWNED: this file
+ * is propagated verbatim from the concord hub into each member's gametest source set, so edit it in
+ * {@code rfizzle/concord} ({@code propagate/src/gametest/java/...}), never in a member.
  *
- * <p>This is the connected replica only. {@code GameTestHelper#makeMockPlayer}
- * returns a lightweight stub that is never added to the level or the player
- * list, so it accrues none of the cost {@link #retire} releases and keeps its
- * plain {@code discard()}.
+ * <p>It is the faithful replica of the deprecated {@code GameTestHelper.makeMockServerPlayerInLevel()}
+ * built from public, non-deprecated APIs: a real {@link Connection} backed by an
+ * {@link EmbeddedChannel} (which absorbs sent packets), fully registered in the player list via
+ * {@code placeNewPlayer}. The channel is handed back so tests can read the packets the server sent.
+ *
+ * <p>This is build/test-time code only. It lives in the gametest source set, which is never part of
+ * a shipped jar and never co-loaded with another member's, so a fixed package is safe here. Runtime
+ * classes must never be shared this way: every mod loads into one classloader in-game.
+ *
+ * <p>This is the connected replica only. {@code GameTestHelper#makeMockPlayer} returns a
+ * lightweight stub that is never added to the level or the player list, so it accrues none of the
+ * cost {@link #retire} releases and keeps its plain {@code discard()}.
  */
 public final class MockPlayers {
 
     /**
-     * The mock profile name, scoped to this mod. A bare {@code "test-mock-player"}
-     * is shared by every member's copy of this helper, so {@link #retireLeaked}
-     * in one mod would retire another mod's live mock when both are tested into
-     * the same level.
+     * The mock profile name, scoped to the mod under test. {@code concord-common.gradle} sets the
+     * {@code concord.modid} system property on {@code runGametest}. A bare
+     * {@code "test-mock-player"} is shared by every mod's helper, so {@link #retireLeaked} in one
+     * mod would retire another mod's live mock when both are tested into the same level.
      */
-    public static final String MOCK_NAME = Cultivation.MOD_ID + "-test-mock-player";
+    public static final String MOCK_NAME = System.getProperty("concord.modid", "concord") + "-test-mock-player";
 
     /** A connected player plus the embedded channel its outbound packets land in. */
     public record Connected(ServerPlayer player, EmbeddedChannel channel) {
@@ -76,10 +78,9 @@ public final class MockPlayers {
      *
      * <p>{@code discard()} alone releases the entity tick and the chunk ticket
      * but leaves the player-list entry, and that entry is not inert: its
-     * advancement listeners stay registered, so every criterion Cultivation
-     * fires — and it fires several per harvest — keeps evaluating against a
-     * player no test is watching. {@code PlayerList#remove} is the only path
-     * that clears it.
+     * advancement listeners stay registered, so every criterion the mod fires
+     * keeps evaluating against a player no test is watching.
+     * {@code PlayerList#remove} is the only path that clears it.
      *
      * <p><strong>Idempotent.</strong> {@code PlayerList#remove} calls
      * {@code save(player)} and awards {@code Stats.LEAVE_GAME} with no
@@ -105,16 +106,12 @@ public final class MockPlayers {
      * Retires any mock player a previously failed test left in the helper's
      * level, so player-count-sensitive tests start from a clean player list.
      *
-     * <p><strong>Unused in Cultivation today, and not safe to call from most of
-     * this suite.</strong> It reads the whole level, and same-batch gametests run
-     * concurrently in one level — {@code GameTestRunner.runBatch} spawns a whole
-     * batch's structures and then tickers them together. Cultivation declares 9
-     * named batches, but they cover only 16 of its 189 tests — the other 173
-     * share the default batch, so a sweep from any one of them would retire a
-     * sibling's live player out from under it. Give a test a {@code batch} of its
-     * own before calling this. It is provided so the API matches the rest of the
-     * suite and the next player-count-sensitive test has the safe form to reach
-     * for rather than hand-rolling a level walk.
+     * <p><strong>Not safe to call from a test in the default batch.</strong> It
+     * reads the whole level, and same-batch gametests run concurrently in one
+     * level — {@code GameTestRunner.runBatch} spawns a whole batch's structures
+     * and then ticks them together. A sweep from a test sharing the default batch
+     * would retire a sibling's live player out from under it. Give the test a
+     * {@code batch} of its own before calling this.
      */
     public static void retireLeaked(GameTestHelper helper) {
         for (ServerPlayer player : List.copyOf(helper.getLevel().players())) {

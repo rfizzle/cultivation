@@ -4,7 +4,7 @@ import com.rfizzle.cultivation.Cultivation;
 import com.rfizzle.cultivation.attachment.SoilStores;
 import com.rfizzle.cultivation.config.CultivationConfig;
 import com.rfizzle.cultivation.diet.DietHandler;
-import com.rfizzle.cultivation.gametest.util.MockPlayers;
+import com.rfizzle.concord.gametest.MockPlayers;
 import com.rfizzle.cultivation.harvest.HarvestHandler;
 import com.rfizzle.cultivation.item.CultivationItems;
 import com.rfizzle.cultivation.soil.Fertilizer;
