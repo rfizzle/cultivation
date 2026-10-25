@@ -27,10 +27,10 @@ This mod is a member of Concord, a modular collection of system overhauls. Suite
 the [concord repo](https://github.com/rfizzle/concord) — checked out at `../concord/`
 in the local workspace. Normative for this repo:
 
-- [API-STANDARD.md](https://github.com/rfizzle/concord/blob/master/API-STANDARD.md) — the `api` package conventions (Cultivation **conforms to the Concord API Standard**: `com.rfizzle.cultivation.api` is a read-only static facade plus array-backed Fabric callbacks, server-authoritative, with no soil mutators exposed)
+- [API-STANDARD.md](https://github.com/rfizzle/concord/blob/master/API-STANDARD.md) — the `api` package conventions (Cultivation's `com.rfizzle.cultivation.api` is a read-only static facade plus array-backed Fabric callbacks, server-authoritative, with no soil mutators exposed)
 - [HUD-STANDARD.md](https://github.com/rfizzle/concord/blob/master/HUD-STANDARD.md) — HUD slot, stacking, accessors (Cultivation holds **no slot, by design** — see `design/DESIGN.md` §2)
 - [DESIGN-SYSTEM.md](https://github.com/rfizzle/concord/blob/master/design/DESIGN-SYSTEM.md) — palette, typography, logo rules
-- [REPO-LAYOUT.md](https://github.com/rfizzle/concord/blob/master/REPO-LAYOUT.md) — where non-code files live (conforms)
+- [REPO-LAYOUT.md](https://github.com/rfizzle/concord/blob/master/REPO-LAYOUT.md) — where non-code files live
 
 ## Build commands
 
@@ -108,8 +108,8 @@ Fabric APIs must use gametests instead.
 
 ## Compat integrations
 
-The mod has optional integrations (`modCompileOnly` — not bundled — deferred to a
-later phase):
+The mod has optional integrations (`modCompileOnly` where there is a compile
+surface — never bundled), all declared under `suggests` in `fabric.mod.json`:
 
 - **Mod Menu** — config screen entry
 - **Cloth Config** — settings GUI builder
