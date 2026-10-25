@@ -30,7 +30,8 @@
         "wthit": "*",
         "emi": "*",
         "roughlyenoughitems": "*",
-        "jei": "*"
+        "jei": "*",
+        "appleskin": "*"
     },
     "mixins": [
         "cultivation.mixins.json"
