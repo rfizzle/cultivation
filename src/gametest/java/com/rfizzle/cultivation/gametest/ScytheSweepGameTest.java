@@ -6,6 +6,7 @@ import com.rfizzle.cultivation.item.CultivationItems;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
@@ -13,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -255,6 +257,62 @@ public class ScytheSweepGameTest implements FabricGameTest {
         } finally {
             MockPlayers.retire(player);
         }
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void scytheAcceptsFortuneAndSilkTouch(GameTestHelper helper) {
+        var enchantments = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        for (var scythe : java.util.List.of(CultivationItems.IRON_SCYTHE,
+                CultivationItems.DIAMOND_SCYTHE, CultivationItems.NETHERITE_SCYTHE)) {
+            ItemStack stack = new ItemStack(scythe);
+            for (var key : java.util.List.of(Enchantments.FORTUNE, Enchantments.SILK_TOUCH,
+                    Enchantments.EFFICIENCY, Enchantments.UNBREAKING)) {
+                helper.assertTrue(enchantments.getOrThrow(key).value().isSupportedItem(stack),
+                        key.location() + " must be supported on " + scythe);
+            }
+        }
+        helper.succeed();
+    }
+
+    @GameTest(template = TEMPLATE)
+    public void fortuneScytheYieldsMoreThanUnenchanted(GameTestHelper helper) {
+        var fortune = helper.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+                .getOrThrow(Enchantments.FORTUNE);
+        ServerPlayer player = MockPlayers.serverPlayerInLevel(helper);
+        try {
+            player.setGameMode(GameType.SURVIVAL);
+            int plain = 0;
+            int lucky = 0;
+            // Carrots drop 1 + Binomial(3 + fortune, 4/7) each: ~2.7 vs ~4.4 per block. Over
+            // 45 blocks the means sit ~8 standard deviations apart, so the bound cannot flake.
+            for (int round = 0; round < 5; round++) {
+                plain += carrotYield(helper, player, new ItemStack(CultivationItems.DIAMOND_SCYTHE));
+            }
+            ItemStack enchanted = new ItemStack(CultivationItems.DIAMOND_SCYTHE);
+            enchanted.enchant(fortune, 3);
+            for (int round = 0; round < 5; round++) {
+                lucky += carrotYield(helper, player, enchanted);
+            }
+            helper.assertTrue(lucky > plain + 30,
+                    "a Fortune III scythe must out-yield an unenchanted one per block (plain=" + plain
+                            + ", fortune=" + lucky + ")");
+            helper.succeed();
+        } finally {
+            MockPlayers.retire(player);
+        }
+    }
+
+    private static int carrotYield(GameTestHelper helper, ServerPlayer player, ItemStack scythe) {
+        fillField(helper, matureCarrots());
+        player.setItemInHand(InteractionHand.MAIN_HAND, scythe.copy());
+        breakCenter(helper, player);
+        int total = 0;
+        for (var item : helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+                new net.minecraft.world.phys.AABB(helper.absolutePos(CENTER)).inflate(4))) {
+            total += item.getItem().getCount();
+            item.discard();
+        }
+        return total;
     }
 
     // --- helpers ---

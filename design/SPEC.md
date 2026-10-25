@@ -482,7 +482,7 @@ Breaking an immature crop with a scythe is a plain vanilla break. The scythe has
 ### Implementation Notes
 
 - Intercept at `PlayerBlockBreakEvents.BEFORE` on the center block: cancel vanilla, run the unified sweep through §1's harvest helper per block (one code path for drops/drain/bonuses/callback), replant, apply durability.
-- Item tags: all three scythes join `#minecraft:enchantable/durability` and `#minecraft:enchantable/mining` (Fortune/Unbreaking/Mending availability, and the surface sibling enchantment mods key off), plus a `#cultivation:scythes` tag.
+- Item tags: all three scythes join `#minecraft:enchantable/durability`, `#minecraft:enchantable/mining`, and `#minecraft:enchantable/mining_loot` (Unbreaking/Mending/Efficiency; `mining_loot` is what gates Fortune and Silk Touch, and the surface sibling enchantment mods key off), plus a `#cultivation:scythes` tag.
 
 ### Right-Click Harvest
 
